@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores de Gestión Localidad de Santa Fé</title>
+    
+    <!-- Plotly.js para gráficas -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Colores principales */
+            --primary-yellow: #fab62d;    /* Amarillo principal */
+            --primary-red: #e4032e;       /* Rojo principal */
+            --white: #ffffff;             /* Blanco */
+            --dark-gray: #333333;         /* Gris oscuro */
+            --light-gray: #f5f5f5;        /* Gris claro */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--white);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--primary-red);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .controls {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 2px solid var(--light-gray);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 2px solid var(--light-gray);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: var(--primary-red);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            color: var(--primary-yellow);
+            margin-bottom: 1rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .chart-container {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--light-gray);
+        }
+
+        .chart-title {
+            color: var(--dark-gray);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 3px solid var(--primary-yellow);
+            padding-bottom: 0.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--dark-gray);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            color: var(--primary-yellow);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: var(--primary-red);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-red);
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .data-table {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-top: 2rem;
+            border: 2px solid var(--light-gray);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+            color: var(--white);
+            padding: 1.5rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 0.18rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+            background: var(--white);
+            font-size: 0.92rem;
+        }
+
+        th {
+            background: var(--light-gray);
+            font-weight: 600;
+            color: var(--dark-gray);
+            position: sticky;
+            top: 0;
+            z-index: 3;
+        }
+
+        thead tr {
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
+
+        tr:hover {
+            background: var(--light-gray);
+        }
+
+        /* Sticky primera columna */
+        th:first-child, td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: #fff;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.03);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        .menu-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 2rem;
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 260px;
+            height: 100vh;
+            background: var(--white);
+            box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+            transition: left 0.3s cubic-bezier(.4,0,.2,1);
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+            background: var(--primary-red);
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .close-menu {
+            background: transparent;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .side-menu li {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            color: var(--dark-gray);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .side-menu li:hover {
+            background: var(--light-gray);
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.2);
+            z-index: 1100;
+            display: none;
+        }
+        .menu-overlay.open {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .menu-btn {
+                top: 1rem;
+                left: 1rem;
+                font-size: 1.7rem;
+            }
+            .side-menu {
+                width: 80vw;
+                min-width: 180px;
+                max-width: 320px;
+            }
+        }
+        .filter-btn {
+            background: #fab62d;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            padding: 0.2rem 0.5rem;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .filter-btn:hover {
+            background: #e4032e;
+        }
+
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button id="menu-btn" class="menu-btn" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
+        <h1><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
+        <p>Gestión de datos del barrio San Bernardo</p>
+    </header>
+    <div class="container">
+
+
+        <!-- Dashboard del Barrio San Bernardo -->
+        <div id="dashboard-san-bernardo" class="dashboard-content">
+            <div style="display: flex; gap: 1rem; margin: 1.5rem 0 0.5rem 0; flex-wrap: wrap;">
+                <button id="refresh-btn" class="refresh-btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-sync-alt"></i> Actualizar datos
+                </button>
+
+            </div>
+            <div id="last-update-info" style="margin-bottom: 1.5rem; color: #333; font-size: 1rem; font-weight: 500;">
+                <i class="fas fa-clock"></i> Última actualización: <span id="last-update-text">Cargando...</span>
+            </div>
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card" id="personas-impactadas-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3 id="personas-impactadas">0</h3>
+                    <p>Cantidad de personas impactadas</p>
+                </div>
+                <div class="stat-card" id="actividades-realizadas-card">
+                    <div class="icon"><i class="fas fa-tasks"></i></div>
+                    <h3 id="actividades-realizadas">0</h3>
+                    <p>Número Aprox. de actividades realizadas</p>
+                </div>
+                <div class="stat-card" id="dias-sin-homicidios-card">
+                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3 id="dias-sin-homicidios">0</h3>
+                    <p id="dias-sin-homicidios-label">Días sin homicidio</p>
+                    <p id="fecha-base" style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">Desde: 12/03/2025</p>
+                    <div style="display: flex; justify-content: center; margin-top: 0.7rem;">
+                        <button id="reset-homicidios-btn" class="refresh-btn" style="font-size: 0.95rem; padding: 0.4rem 1rem; background: #e4032e;">Reiniciar contador</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <button id="test-daily-chart-btn" class="refresh-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; background: #17a2b8;">
+                    <i class="fas fa-bug"></i> Probar Gráfico Diario
+                </button>
+            </div>
+            <div id="participacion-diaria-chart" style="width: 100%; height: 400px; border: 1px solid #e9ecef; border-radius: 8px; background: white;"></div>
+            <div id="leyenda-meses" style="margin-top: 1rem; text-align: center; font-size: 0.9rem;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #FF6B6B; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Enero</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #4ECDC4; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Febrero</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #45B7D1; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Marzo</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #96CEB4; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Abril</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #FFEAA7; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Mayo</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #DDA0DD; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Junio</span>
+                    </span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #98D8C8; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Julio</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #F7DC6F; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Agosto</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #BB8FCE; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Septiembre</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #85C1E9; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Octubre</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #F8C471; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Noviembre</span>
+                    </span>
+                    <span style="display: inline-flex; align-items: center; margin-right: 1rem;">
+                        <span style="width: 12px; height: 12px; background: #EC7063; border-radius: 2px; margin-right: 5px;"></span>
+                        <span>Diciembre</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Fin gráfico de participación diaria -->
+        
+        <div class="chart-container" style="margin-bottom: 2rem;">
+            <div class="chart-title">
+                <i class="fas fa-chart-pie"></i> Participación de Entidades en Actividades
+            </div>
+            <div id="participacion-chart" style="width: 100%; height: 400px; margin-bottom: 1.5rem;"></div>
+            <div style="width: 100%; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
+                    <i class="fas fa-trophy"></i> Top 3 Entidades
+                </h4>
+                <div id="top-entidades" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+            </div>
+        </div>
+        <div id="detalle-entidad" style="display: none; margin-top: 2rem;">
+            <div class="chart-container">
+                <div class="chart-title">
+                    <i class="fas fa-info-circle"></i> <span id="titulo-entidad">Detalle de Entidad</span>
+                </div>
+                <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="flex: 1; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                        <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
+                            <i class="fas fa-list"></i> Actividades Desarrolladas
+                        </h4>
+                        <div id="actividades-resumen" style="max-height: 300px; overflow-y: auto;"></div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div id="grafica-mensual" style="width: 100%; height: 300px;"></div>
+                    </div>
+                </div>
+                <div id="actividades-mes" style="display: none; margin-top: 1.5rem;">
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                        <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #e4032e; padding-bottom: 0.5rem;">
+                            <i class="fas fa-calendar-alt"></i> <span id="titulo-actividades-mes">Actividades del Mes</span>
+                        </h4>
+                        <div id="actividades-mes-lista" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+                <div id="actividades-faltantes" style="display: none; margin-top: 1.5rem;">
+                    <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffeaa7;">
+                        <h4 style="color: #856404; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
+                            <i class="fas fa-exclamation-triangle"></i> Actividades con Fechas Faltantes
+                        </h4>
+                        <div id="actividades-faltantes-lista" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <nav id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <span>Menú</span>
+            <button id="close-menu" class="close-menu" aria-label="Cerrar menú"><i class="fas fa-times"></i></button>
+        </div>
+        <ul id="menu-options">
+            <!-- Opciones del menú se agregarán aquí -->
+        </ul>
+    </nav>
+    <div id="menu-overlay" class="menu-overlay"></div>
+
+    <div class="container">
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Cargando datos...</p>
+        </div>
+        <div id="error-container" style="display: none;"></div>
+        <div id="data-table-container" class="data-table" style="display: none;">
+            <div class="table-header">
+                <i class="fas fa-table"></i> Datos Detallados
+            </div>
+            <div class="table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr id="table-headers"></tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variable global para almacenar los datos
+        let datosGlobales = [];
+        
+        // Menú lateral (drawer)
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const closeMenu = document.getElementById('close-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        menuBtn.addEventListener('click', function() { sideMenu.classList.add('open'); menuOverlay.classList.add('open'); });
+        closeMenu.addEventListener('click', function() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('open'); });
+        menuOverlay.addEventListener('click', function() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('open'); });
+        
+        // Cargar datos y mostrar solo la tabla
+        async function loadData() {
+            console.log('🔄 Iniciando carga de datos...');
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                console.log('📊 Respuesta del servidor:', data);
+                
+                if (data.error) { 
+                    console.error('❌ Error en datos:', data.error);
+                    showError(data.error); 
+                    return; 
+                }
+                
+                datosGlobales = data.data; // Guardar datos globalmente
+                console.log('✅ Datos guardados globalmente:', datosGlobales.length, 'registros');
+                
+                updateDataTable(data.data);
+                updateVisualizadores(data.data); // Actualizar visualizadores
+                setLastUpdate(data.last_update);
+                hideLoading();
+                
+                console.log('✅ Carga de datos completada exitosamente');
+                return data; // Retornar los datos para que se pueda usar como promesa
+            } catch (error) { 
+                console.error('❌ Error al cargar datos:', error);
+                showError('Error al cargar los datos: ' + error.message); 
+                throw error; // Re-lanzar el error para que se pueda manejar
+            }
+        }
+        
+        // Función para actualizar todos los visualizadores
+        function updateVisualizadores(data) {
+            console.log('🎨 Iniciando actualización de visualizadores...');
+            console.log('📊 Datos recibidos en updateVisualizadores:', data);
+            
+            if (!data || data.length === 0) {
+                console.log('❌ No hay datos para actualizar visualizadores');
+                return;
+            }
+            
+            console.log('✅ Datos válidos, procediendo con actualizaciones...');
+            
+            // Mostrar información de debugging en la interfaz
+            mostrarInfoDebugging(data);
+            
+            // Actualizar indicadores
+            console.log('📊 Actualizando indicadores...');
+            updateIndicadores(data);
+            
+            // Actualizar gráfica de participación
+            console.log('📈 Actualizando gráfica de participación...');
+            updateParticipacionChart(data);
+            
+            // Actualizar gráfica de participación diaria
+            console.log('📅 Llamando a updateParticipacionDiariaChart...');
+            console.log('📊 Datos que se pasarán a updateParticipacionDiariaChart:', data.length, 'registros');
+            updateParticipacionDiariaChart(data);
+            console.log('✅ updateParticipacionDiariaChart llamada exitosamente');
+            
+            console.log('✅ Actualización de visualizadores completada');
+        }
+        
+        // Función para mostrar información de debugging
+        function mostrarInfoDebugging(data) {
+            console.log(`\n🔍 ANÁLISIS COMPLETO DE DATOS:`);
+            console.log(`   📊 Total de registros: ${data.length}`);
+            
+            if (data.length > 0) {
+                console.log(`   📋 Columnas disponibles: ${Object.keys(data[0]).join(', ')}`);
+                
+                // Analizar columna de fechas
+                const columnaFecha = 'Fecha final de ejecución';
+                if (columnaFecha in data[0]) {
+                    console.log(`   📅 Columna de fecha encontrada: "${columnaFecha}"`);
+                    
+                    // Mostrar algunas fechas de ejemplo
+                    const fechasEjemplo = data.slice(0, 5).map(row => row[columnaFecha]);
+                    console.log(`   📝 Primeras 5 fechas:`, fechasEjemplo);
+                } else {
+                    console.log(`   ❌ Columna de fecha no encontrada: "${columnaFecha}"`);
+                    console.log(`   🔍 Buscando columnas similares...`);
+                    const columnasSimilares = Object.keys(data[0]).filter(col => 
+                        col.toLowerCase().includes('fecha') || 
+                        col.toLowerCase().includes('date') ||
+                        col.toLowerCase().includes('ejecución')
+                    );
+                    console.log(`   📋 Columnas similares encontradas:`, columnasSimilares);
+                }
+            }
+        }
+        
+        // Función para actualizar indicadores
+        function updateIndicadores(data) {
+            // Calcular población impactada
+            let poblacionTotal = 0;
+            let fechasValidas = 0;
+            let fechasInvalidas = 0;
+            
+            data.forEach(row => {
+                const poblacion = parseFloat(row['Población impactada']) || 0;
+                poblacionTotal += poblacion;
+                
+                // Contar fechas válidas e inválidas
+                const fecha = row['Fecha final de ejecución'];
+                if (fecha && fecha !== 'None' && fecha !== '' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    try {
+                        const fechaObj = new Date(fecha);
+                        if (!isNaN(fechaObj.getTime())) {
+                            fechasValidas++;
+                        } else {
+                            fechasInvalidas++;
+                        }
+                    } catch (e) {
+                        fechasInvalidas++;
+                    }
+                } else {
+                    fechasInvalidas++;
+                }
+            });
+            
+            document.getElementById('personas-impactadas').textContent = poblacionTotal.toLocaleString('es-CO');
+            document.getElementById('actividades-realizadas').textContent = data.length.toString();
+            
+            // Mostrar información sobre fechas en consola
+            console.log(`📅 Procesamiento de fechas:`);
+            console.log(`   ✅ Fechas válidas: ${fechasValidas}`);
+            console.log(`   ❌ Fechas inválidas: ${fechasInvalidas}`);
+            console.log(`   📊 Total de registros: ${data.length}`);
+            
+            if (fechasInvalidas > 0) {
+                console.log(`   ⚠️ ${((fechasInvalidas / data.length) * 100).toFixed(1)}% de fechas necesitan corrección`);
+            }
+        }
+        
+        // Función para establecer última actualización
+        function setLastUpdate(timestamp) {
+            const lastUpdateText = document.getElementById('last-update-text');
+            if (timestamp) {
+                const date = new Date(timestamp);
+                lastUpdateText.textContent = date.toLocaleString('es-CO');
+            } else {
+                lastUpdateText.textContent = 'No disponible';
+            }
+        }
+        
+        // Botón de actualización manual
+        document.getElementById('refresh-btn').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+            try {
+                const res = await fetch('/api/refresh');
+                const json = await res.json();
+                if (json.success) {
+                    await new Promise(r => setTimeout(r, 500)); // pequeña pausa visual
+                    await fetch('/api/data').then(res => res.json()).then(json2 => {
+                        datosGlobales = json2.data; // Actualizar datos globales
+                        updateDataTable(json2.data);
+                        updateVisualizadores(json2.data); // Actualizar visualizadores
+                        setLastUpdate(json.last_update);
+                    });
+                } else {
+                    showError(json.message || 'Error al actualizar los datos');
+                }
+                setLastUpdate(json.last_update);
+            } catch (e) {
+                showError('Error al actualizar los datos: ' + e.message);
+            }
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar datos';
+        });
+        
+        // --- Contador de días sin homicidios ---
+        function initDiasSinHomicidios() {
+            const diasElement = document.getElementById('dias-sin-homicidios');
+            const fechaBaseElement = document.getElementById('fecha-base');
+            const resetBtn = document.getElementById('reset-homicidios-btn');
+            
+            // Obtener datos del localStorage
+            let baseDate = localStorage.getItem('diasSinHomicidiosBase');
+            let lastReset = localStorage.getItem('diasSinHomicidiosLastReset');
+            
+            // Si no hay fecha base, usar 12 de marzo de 2025
+            if (!baseDate) {
+                baseDate = '2025-03-12';
+                localStorage.setItem('diasSinHomicidiosBase', baseDate);
+            }
+            
+            // Si hay fecha de último reset, usar esa como base
+            if (lastReset) {
+                baseDate = lastReset;
+            }
+            
+            function updateCounter() {
+                const today = new Date();
+                const base = new Date(baseDate);
+                const diffTime = today - base;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                diasElement.textContent = diffDays;
+                
+                // Mostrar fecha base
+                const baseDateObj = new Date(baseDate);
+                fechaBaseElement.textContent = `Desde: ${baseDateObj.toLocaleDateString('es-CO')}`;
+            }
+            
+            // Actualizar contador cada día
+            updateCounter();
+            setInterval(updateCounter, 24 * 60 * 60 * 1000); // Actualizar cada 24 horas
+            
+            // Evento para resetear contador
+            resetBtn.addEventListener('click', function() {
+                const codigo = prompt('Ingrese el código de seguridad para reiniciar el contador:');
+                if (codigo === '1988') {
+                    const fechaInicio = prompt('Ingrese la fecha de inicio del ciclo (formato YYYY-MM-DD):');
+                    if (fechaInicio === null) return; // Cancelar
+                    
+                    // Validar formato de fecha YYYY-MM-DD
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(fechaInicio)) {
+                        const fechaObj = new Date(fechaInicio);
+                        if (!isNaN(fechaObj.getTime())) {
+                            // Calcular días desde la fecha ingresada hasta hoy
+                            const hoy = new Date();
+                            const diffTime = hoy - fechaObj;
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                            
+                            // Guardar la fecha de inicio en localStorage
+                            localStorage.setItem('diasSinHomicidiosReset', fechaInicio);
+                            
+                            // Actualizar el contador y la fecha base
+                            diasElement.textContent = diffDays;
+                            fechaBaseElement.textContent = `Desde: ${fechaObj.toLocaleDateString('es-CO')}`;
+                            
+                            alert('Contador reiniciado correctamente.');
+                        } else {
+                            alert('La fecha ingresada no es válida.');
+                        }
+                    } else {
+                        alert('Formato incorrecto. Use YYYY-MM-DD.');
+                    }
+                } else if (codigo !== null) {
+                    alert('Código de seguridad incorrecto. El contador no se reinició.');
+                }
+            });
+        }
+        function updateDataTable(data) {
+            if (!data || data.length === 0) return;
+            fetch('/api/data').then(res => res.json()).then(json => {
+                let headers = json.columns_order || Object.keys(data[0]);
+                // Mostrar todas las columnas sin filtrar
+                const tableHeaders = document.getElementById('table-headers');
+                const tableBody = document.getElementById('table-body');
+                tableHeaders.innerHTML = '';
+                tableBody.innerHTML = '';
+                headers.forEach((header, idx) => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    // Si la columna es 'Entidad', agrega botón de filtro
+                    if (header.trim().toLowerCase() === 'entidad') {
+                        th.style.position = 'relative';
+                        const filterBtn = document.createElement('button');
+                        filterBtn.innerHTML = '<i class="fas fa-filter"></i>';
+                        filterBtn.className = 'filter-btn';
+                        filterBtn.title = 'Filtrar Entidad';
+                        filterBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            showEntidadDropdown(th, data, headers);
+                        };
+                        th.appendChild(filterBtn);
+                    }
+                    tableHeaders.appendChild(th);
+                });
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    headers.forEach(header => {
+                        const td = document.createElement('td');
+                        td.textContent = row[header] || '';
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+                document.getElementById('data-table-container').style.display = 'block';
+            });
+        }
+        function showError(message) {
+            const errorContainer = document.getElementById('error-container');
+            errorContainer.innerHTML = `<div class="error"><i class="fas fa-exclamation-triangle"></i> ${message}</div>`;
+            errorContainer.style.display = 'block';
+            hideLoading();
+        }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+        
+        // Al cargar la página, inicializar todo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar contador de días sin homicidios
+            initDiasSinHomicidios();
+            
+            // Inicializar menú lateral
+            initMenu();
+            
+            // Cargar datos iniciales
+            loadData();
+        });
+
+        // Función para inicializar el menú lateral
+        function initMenu() {
+            const menuOptions = document.getElementById('menu-options');
+            
+            // Crear el botón de Inicio
+            const liInicio = document.createElement('li');
+            liInicio.innerHTML = '<i class="fas fa-home"></i> Inicio';
+            liInicio.addEventListener('click', () => {
+                sideMenu.classList.remove('open');
+                menuOverlay.classList.remove('open');
+                window.location.href = '/';
+            });
+            menuOptions.appendChild(liInicio);
+            
+            // Crear el botón del Barrio San Bernardo
+            const liSanBernardo = document.createElement('li');
+            liSanBernardo.innerHTML = '<i class="fas fa-map-marker-alt"></i> Barrio San Bernardo';
+            liSanBernardo.addEventListener('click', () => {
+                sideMenu.classList.remove('open');
+                menuOverlay.classList.remove('open');
+                console.log('Ya estás en el Dashboard del Barrio San Bernardo');
+            });
+            menuOptions.appendChild(liSanBernardo);
+            
+            // Crear el botón de Datos
+            const liDatos = document.createElement('li');
+            liDatos.innerHTML = '<i class="fas fa-database"></i> Datos';
+            liDatos.addEventListener('click', () => {
+                sideMenu.classList.remove('open');
+                menuOverlay.classList.remove('open');
+                window.location.href = '/datos';
+            });
+            menuOptions.appendChild(liDatos);
+        }
+
+
+
+        // Filtro de Entidad con dropdown de opciones únicas
+        function showEntidadDropdown(th, data, headers) {
+            // Elimina cualquier filtro anterior
+            const old = document.getElementById('entidad-filter-box');
+            if (old) old.remove();
+            // Obtener entidades únicas
+            const entidadesSet = new Set(data.map(row => (row['Entidad']||'').trim()).filter(e => e));
+            const entidades = Array.from(entidadesSet).sort((a, b) => a.localeCompare(b, 'es', {sensitivity:'base'}));
+            // Crear dropdown
+            const filterBox = document.createElement('div');
+            filterBox.id = 'entidad-filter-box';
+            filterBox.style.position = 'absolute';
+            filterBox.style.top = '100%';
+            filterBox.style.left = '0';
+            filterBox.style.background = '#fff';
+            filterBox.style.border = '1px solid #ccc';
+            filterBox.style.padding = '0.5rem';
+            filterBox.style.zIndex = '10';
+            filterBox.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+            filterBox.style.minWidth = '200px';
+            filterBox.innerHTML = `
+                <select id="entidad-filter-select" style="width: 100%; padding: 0.3rem; margin-bottom: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                    <option value="">-- Todas las entidades --</option>
+                    ${entidades.map(e => `<option value="${e}">${e}</option>`).join('')}
+                </select>
+                <button id="entidad-filter-clear" style="width: 100%; padding: 0.3rem; background: #e4032e; color: #fff; border: none; border-radius: 6px; cursor: pointer;">Limpiar filtro</button>
+            `;
+            th.appendChild(filterBox);
+            // Filtrar al seleccionar
+            document.getElementById('entidad-filter-select').onchange = function() {
+                const val = this.value.trim();
+                if (val === '') {
+                    renderFilteredTable(data, headers);
+                } else {
+                    const filtered = data.filter(row => (row['Entidad']||'').trim() === val);
+                    renderFilteredTable(filtered, headers);
+                }
+            };
+            // Limpiar filtro
+            document.getElementById('entidad-filter-clear').onclick = function() {
+                renderFilteredTable(data, headers);
+                filterBox.remove();
+            };
+            // Cerrar al hacer click fuera
+            document.addEventListener('mousedown', function handler(e) {
+                if (!filterBox.contains(e.target)) {
+                    filterBox.remove();
+                    document.removeEventListener('mousedown', handler);
+                }
+            });
+        }
+        function renderFilteredTable(filtered, headers) {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            filtered.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header] || '';
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // --- Visualizador: Cantidad de personas impactadas ---
+        function updatePersonasImpactadas(data) {
+            let total = 0;
+            if (!data || data.length === 0) {
+                document.getElementById('personas-impactadas').textContent = '0';
+                return;
+            }
+            // Detectar el nombre real de la columna de población impactada
+            const firstRow = data[0];
+            let colName = null;
+            for (let key in firstRow) {
+                if (key && key.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes('poblacion impactada')) {
+                    colName = key;
+                    break;
+                }
+            }
+            if (!colName) {
+                document.getElementById('personas-impactadas').textContent = '0';
+                console.warn('No se encontró la columna de población impactada.');
+                return;
+            }
+            for (let i = 0; i < Math.min(500, data.length); i++) {
+                let row = data[i];
+                let val = row[colName];
+                if (typeof val === 'string') val = val.replace(/[^\d]/g, '');
+                val = parseInt(val);
+                if (!isNaN(val)) total += val;
+            }
+            document.getElementById('personas-impactadas').textContent = total.toLocaleString('es-CO');
+        }
+        // --- Visualizador: Número de actividades realizadas ---
+        function updateActividadesRealizadas(data) {
+            const total = data ? data.length : 0;
+            document.getElementById('actividades-realizadas').textContent = total.toLocaleString('es-CO');
+        }
+        // --- Visualizador: Días sin homicidios ---
+        function getDiasSinHomicidios() {
+            const lastReset = localStorage.getItem('diasSinHomicidiosReset');
+            if (lastReset) {
+                // Si se ha reiniciado, contar desde la fecha de reinicio
+                const last = new Date(lastReset);
+                const now = new Date();
+                const diff = Math.floor((now - last) / (1000*60*60*24));
+                return diff;
+            }
+            // Si nunca se ha reiniciado, contar desde el 12 de marzo de 2025
+            const baseDate = new Date('2025-03-12');
+            const now = new Date();
+            const diff = Math.floor((now - baseDate) / (1000*60*60*24));
+            return diff;
+        }
+        function setDiasSinHomicidios(dias) {
+            document.getElementById('dias-sin-homicidios').textContent = dias;
+        }
+        function getFechaBase() {
+            const lastReset = localStorage.getItem('diasSinHomicidiosReset');
+            if (lastReset) {
+                // Si se ha reiniciado, mostrar fecha de reinicio
+                const fecha = new Date(lastReset);
+                return fecha.toLocaleDateString('es-CO');
+            }
+            // Si nunca se ha reiniciado, mostrar 12 de marzo de 2025
+            return '12/03/2025';
+        }
+        function updateFechaBase() {
+            document.getElementById('fecha-base').textContent = 'Desde: ' + getFechaBase();
+        }
+        function resetDiasSinHomicidios() {
+            const codigo = prompt('Ingrese el código de seguridad para reiniciar el contador:');
+            if (codigo === '1988') {
+                const fechaInicio = prompt('Ingrese la fecha de inicio del ciclo (formato YYYY-MM-DD):');
+                if (fechaInicio === null) return; // Cancelar
+                
+                // Validar formato de fecha YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaInicio)) {
+                    const fechaObj = new Date(fechaInicio);
+                    if (!isNaN(fechaObj.getTime())) {
+                        // Calcular días desde la fecha ingresada hasta hoy
+                        const hoy = new Date();
+                        const diffTime = hoy - fechaObj;
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        // Guardar la fecha de inicio en localStorage
+                        localStorage.setItem('diasSinHomicidiosReset', fechaInicio);
+                        
+                        // Actualizar el contador y la fecha base
+                        setDiasSinHomicidios(diffDays);
+                        document.getElementById('fecha-base').textContent = `Desde: ${fechaObj.toLocaleDateString('es-CO')}`;
+                        
+                        alert('Contador reiniciado correctamente.');
+                    } else {
+                        alert('La fecha ingresada no es válida.');
+                    }
+                } else {
+                    alert('Formato incorrecto. Use YYYY-MM-DD.');
+                }
+            } else if (codigo !== null) {
+                alert('Código de seguridad incorrecto. El contador no se reinició.');
+            }
+        }
+        // Actualizar visualizadores al cargar datos
+        function updateVisualizadores(data) {
+            updatePersonasImpactadas(data);
+            updateActividadesRealizadas(data);
+            setDiasSinHomicidios(getDiasSinHomicidios());
+            updateFechaBase();
+            updateParticipacionChart(data);
+            // Agregar la llamada al gráfico diario
+            updateParticipacionDiariaChart(data);
+        }
+        // Event listener para reset de homicidios ya está en initDiasSinHomicidios()
+        // Modificar updateDataTable para actualizar visualizadores
+        function updateDataTable(data) {
+            if (!data || data.length === 0) return;
+            fetch('/api/data').then(res => res.json()).then(json => {
+                let headers = json.columns_order || Object.keys(data[0]);
+                const tableHeaders = document.getElementById('table-headers');
+                const tableBody = document.getElementById('table-body');
+                tableHeaders.innerHTML = '';
+                tableBody.innerHTML = '';
+                headers.forEach((header, idx) => {
+                    const th = document.createElement('th');
+                    th.textContent = header;
+                    if (header.trim().toLowerCase() === 'entidad') {
+                        th.style.position = 'relative';
+                        const filterBtn = document.createElement('button');
+                        filterBtn.innerHTML = '<i class="fas fa-filter"></i>';
+                        filterBtn.className = 'filter-btn';
+                        filterBtn.title = 'Filtrar Entidad';
+                        filterBtn.onclick = function(e) {
+                            e.stopPropagation();
+                            showEntidadDropdown(th, data, headers);
+                        };
+                        th.appendChild(filterBtn);
+                    }
+                    tableHeaders.appendChild(th);
+                });
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    headers.forEach(header => {
+                        const td = document.createElement('td');
+                        td.textContent = row[header] || '';
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+                document.getElementById('data-table-container').style.display = 'block';
+                // Actualizar visualizadores
+                updateVisualizadores(data);
+            });
+        }
+
+        // --- Gráfica de participación de entidades ---
+        function updateParticipacionChart(data) {
+            if (!data || data.length === 0) return;
+            
+            // Contar participación de cada entidad
+            const entidadesCount = {};
+            data.forEach(row => {
+                const entidad = row['Entidad'] || 'Sin especificar';
+                entidadesCount[entidad] = (entidadesCount[entidad] || 0) + 1;
+            });
+            
+            // Preparar datos para la gráfica
+            const labels = Object.keys(entidadesCount);
+            const values = Object.values(entidadesCount);
+            const total = values.reduce((sum, val) => sum + val, 0);
+            
+            // Calcular porcentajes
+            const percentages = values.map(val => ((val / total) * 100).toFixed(1));
+            
+            // Solo mostrar porcentajes en el texto
+            const text = percentages.map(pct => `${pct}%`);
+            
+            const trace = {
+                values: values,
+                labels: labels,
+                type: 'pie',
+                text: text,
+                textinfo: 'text',
+                textposition: 'outside',
+                hole: 0.3,
+                hovertemplate: '<b>%{label}</b><br>Participación: %{percent:.1%}<br>Actividades: %{value}<extra></extra>',
+                marker: {
+                    colors: [
+                        '#fab62d', '#e4032e', '#ff6b35', '#4ecdc4', '#45b7d1',
+                        '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd',
+                        '#00d2d3', '#ff9f43', '#10ac84', '#ee5a24', '#2f3542'
+                    ]
+                }
+            };
+            
+            const layout = {
+                showlegend: false,
+                margin: { t: 50, b: 50, l: 50, r: 50 }
+            };
+            
+            Plotly.newPlot('participacion-chart', [trace], layout, {responsive: true})
+                .then(() => {
+                    // Agregar evento de clic a la gráfica
+                    document.getElementById('participacion-chart').on('plotly_click', function(plotData) {
+                        const entidad = plotData.points[0].label;
+                        mostrarDetalleEntidad(entidad, data);
+                    });
+                });
+            
+            // Actualizar top 3 entidades
+            updateTopEntidades(entidadesCount);
+        }
+        
+        // --- Actualizar top 3 entidades ---
+        function updateTopEntidades(entidadesCount) {
+            // Ordenar entidades por número de actividades (descendente)
+            // Si hay empates, la Alcaldía tiene prioridad
+            const sortedEntidades = Object.entries(entidadesCount)
+                .sort(([entidadA, actividadesA], [entidadB, actividadesB]) => {
+                    // Si tienen el mismo número de actividades
+                    if (actividadesA === actividadesB) {
+                        // La Alcaldía tiene prioridad
+                        if (entidadA.toLowerCase().includes('alcaldía') || entidadA.toLowerCase().includes('alcaldia')) {
+                            return -1; // Alcaldía va primero
+                        }
+                        if (entidadB.toLowerCase().includes('alcaldía') || entidadB.toLowerCase().includes('alcaldia')) {
+                            return 1; // Alcaldía va primero
+                        }
+                        // Si ninguna es Alcaldía, ordenar alfabéticamente
+                        return entidadA.localeCompare(entidadB);
+                    }
+                    // Si tienen diferente número de actividades, ordenar por cantidad
+                    return actividadesB - actividadesA;
+                })
+                .slice(0, 3);
+            
+            const topContainer = document.getElementById('top-entidades');
+            topContainer.innerHTML = '';
+            
+            const medals = ['🥇', '🥈', '🥉'];
+            
+            sortedEntidades.forEach(([entidad, actividades], index) => {
+                const porcentaje = ((actividades / Object.values(entidadesCount).reduce((sum, val) => sum + val, 0)) * 100).toFixed(1);
+                
+                const entidadDiv = document.createElement('div');
+                entidadDiv.style.cssText = `
+                    background: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    border-left: 4px solid ${index === 0 ? '#fab62d' : index === 1 ? '#e4032e' : '#ff6b35'};
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                `;
+                
+                entidadDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.2rem;">${medals[index]}</span>
+                        <strong style="color: #333; font-size: 0.95rem;">${entidad}</strong>
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem;">
+                        <div>Actividades: <strong>${actividades}</strong></div>
+                        <div>Participación: <strong>${porcentaje}%</strong></div>
+                    </div>
+                `;
+                
+                topContainer.appendChild(entidadDiv);
+            });
+        }
+        
+        // --- Mostrar detalle de entidad ---
+        function mostrarDetalleEntidad(entidad, datosCompletos) {
+            // Filtrar datos de la entidad seleccionada
+            const datosEntidad = datosCompletos.filter(row => row['Entidad'] === entidad);
+            
+            // Actualizar título
+            document.getElementById('titulo-entidad').textContent = `Detalle de ${entidad}`;
+            
+            // Mostrar resumen de actividades
+            mostrarResumenActividades(datosEntidad);
+            
+            // Mostrar gráfica mensual
+            mostrarGraficaMensual(datosEntidad);
+            
+            // Mostrar el contenedor
+            document.getElementById('detalle-entidad').style.display = 'block';
+        }
+        
+        // --- Mostrar resumen de actividades ---
+        function mostrarResumenActividades(datosEntidad) {
+            const container = document.getElementById('actividades-resumen');
+            container.innerHTML = '';
+            
+            datosEntidad.forEach((row, index) => {
+                const actividad = row['Resultados ( Resumen del resultado obtenido de la intervención)'] || 'Sin descripción';
+                const fecha = row['Fecha final de ejecución'] || 'Sin fecha';
+                
+                const actividadDiv = document.createElement('div');
+                actividadDiv.style.cssText = `
+                    background: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin-bottom: 0.8rem;
+                    border-left: 4px solid #fab62d;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                `;
+                
+                actividadDiv.innerHTML = `
+                    <div style="font-weight: 600; color: #333; margin-bottom: 0.5rem;">
+                        Actividad ${index + 1}
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        <strong>Descripción:</strong> ${actividad}
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem;">
+                        <strong>Fecha final:</strong> ${fecha}
+                    </div>
+                `;
+                
+                container.appendChild(actividadDiv);
+            });
+        }
+        
+        // --- Mostrar gráfica mensual ---
+        function mostrarGraficaMensual(datosEntidad) {
+            // Contar actividades por mes
+            const actividadesPorMes = {};
+            let fechasInvalidas = 0;
+            let fechasValidas = 0;
+            let fechasVacias = 0;
+            const actividadesFaltantes = [];
+            
+            console.log(`🔍 Analizando ${datosEntidad.length} registros para gráfica mensual...`);
+            
+            datosEntidad.forEach((row, index) => {
+                const fecha = row['Fecha final de ejecución'];
+                console.log(`📅 Registro ${index + 1}: "${fecha}" (tipo: ${typeof fecha})`);
+                
+                if (fecha && fecha !== 'None' && fecha !== '' && fecha !== null) {
+                    try {
+                        // Verificar si es una fecha ISO válida
+                        if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            const fechaObj = new Date(fecha);
+                            if (!isNaN(fechaObj.getTime())) {
+                                const mes = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+                                actividadesPorMes[mes] = (actividadesPorMes[mes] || 0) + 1;
+                                fechasValidas++;
+                                console.log(`   ✅ Fecha válida: ${fecha} → ${mes}`);
+                            } else {
+                                fechasInvalidas++;
+                                console.log(`   ❌ Fecha inválida (NaN): ${fecha}`);
+                            }
+                        } else {
+                            fechasInvalidas++;
+                            console.log(`   ❌ Formato no ISO: ${fecha}`);
+                        }
+                    } catch (e) {
+                        fechasInvalidas++;
+                        console.log(`   ❌ Error procesando: ${fecha} - ${e.message}`);
+                    }
+                } else {
+                    fechasVacias++;
+                    console.log(`   ⚪ Fecha vacía: "${fecha}"`);
+                    // Agregar a la lista de actividades faltantes
+                    actividadesFaltantes.push({
+                        index: index + 1,
+                        row: row
+                    });
+                }
+            });
+            
+            // Mostrar información detallada sobre fechas procesadas
+            console.log(`\n📊 Resumen de fechas para gráfica mensual:`);
+            console.log(`   ✅ Fechas válidas: ${fechasValidas}`);
+            console.log(`   ❌ Fechas inválidas: ${fechasInvalidas}`);
+            console.log(`   ⚪ Fechas vacías: ${fechasVacias}`);
+            console.log(`   📈 Total de registros: ${datosEntidad.length}`);
+            
+            const meses = Object.keys(actividadesPorMes);
+            const cantidades = Object.values(actividadesPorMes);
+            
+            console.log(`   📅 Meses encontrados: ${meses.join(', ')}`);
+            
+            // Mostrar actividades con fechas faltantes
+            mostrarActividadesFaltantes(actividadesFaltantes);
+            
+            if (meses.length === 0) {
+                // Si no hay fechas válidas, mostrar mensaje más informativo
+                document.getElementById('grafica-mensual').innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; text-align: center;">
+                        <div>
+                            <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; color: #fab62d;"></i>
+                            <p><strong>No hay fechas válidas para mostrar la gráfica mensual</strong></p>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                                Fechas válidas: ${fechasValidas} | 
+                                Fechas inválidas: ${fechasInvalidas} | 
+                                Fechas vacías: ${fechasVacias}
+                            </p>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: #999;">
+                                Revisa la consola para más detalles sobre el procesamiento de fechas
+                            </p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const trace = {
+                x: meses,
+                y: cantidades,
+                type: 'bar',
+                marker: {
+                    color: '#fab62d',
+                    line: {
+                        color: '#e4032e',
+                        width: 1
+                    }
+                },
+                text: cantidades,
+                textposition: 'auto',
+                hovertemplate: '<b>%{x}</b><br>Actividades: %{y}<br><extra>Haz clic para ver detalles</extra>'
+            };
+            
+            const layout = {
+                title: {
+                    text: 'Actividades por Mes',
+                    font: { size: 16, color: '#333' }
+                },
+                xaxis: {
+                    title: 'Mes',
+                    tickangle: -45
+                },
+                yaxis: {
+                    title: 'Número de Actividades'
+                },
+                margin: { t: 50, b: 80, l: 60, r: 30 }
+            };
+            
+            Plotly.newPlot('grafica-mensual', [trace], layout, {responsive: true})
+                .then(() => {
+                    // Agregar evento de clic a la gráfica de barras
+                    document.getElementById('grafica-mensual').on('plotly_click', function(plotData) {
+                        const mesSeleccionado = plotData.points[0].x;
+                        mostrarActividadesMes(mesSeleccionado, datosEntidad);
+                    });
+                });
+        }
+        
+        // --- Mostrar actividades con fechas faltantes ---
+        function mostrarActividadesFaltantes(actividadesFaltantes) {
+            const container = document.getElementById('actividades-faltantes-lista');
+            container.innerHTML = '';
+            
+            if (actividadesFaltantes.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #856404;">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 1rem; color: #28a745;"></i>
+                        <p><strong>¡Excelente!</strong></p>
+                        <p>Todas las actividades tienen fechas válidas</p>
+                    </div>
+                `;
+            } else {
+                // Identificar específicamente la columna "Descripción de los compromisos"
+                const columnas = Object.keys(actividadesFaltantes[0].row);
+                console.log(`📋 Todas las columnas disponibles:`, columnas);
+                
+                // Buscar la columna "Descripción de los compromisos"
+                const columnaDescripcion = columnas.find(col => 
+                    col.toLowerCase().includes('descripción') && 
+                    col.toLowerCase().includes('compromisos')
+                );
+                
+                const nombreColumnaDescripcion = columnaDescripcion || 'Descripción de los compromisos no encontrada';
+                
+                console.log(`📝 Columna "Descripción de los compromisos" identificada: "${nombreColumnaDescripcion}"`);
+                console.log(`📊 Total de columnas: ${columnas.length}`);
+                
+                // Mostrar las columnas que contienen "descripción" para debugging
+                const columnasDescripcion = columnas.filter(col => col.toLowerCase().includes('descripción'));
+                console.log(`🔍 Columnas que contienen "descripción":`, columnasDescripcion);
+                
+                // Crear tabla de actividades faltantes
+                const table = document.createElement('table');
+                table.style.cssText = `
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 0.9rem;
+                `;
+                
+                // Crear encabezado
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr style="background: #fab62d; color: white; font-weight: 600;">
+                        <th style="padding: 0.8rem; text-align: left; border-bottom: 2px solid #e4032e;">#</th>
+                        <th style="padding: 0.8rem; text-align: left; border-bottom: 2px solid #e4032e;">Descripción de los Compromisos</th>
+                        <th style="padding: 0.8rem; text-align: left; border-bottom: 2px solid #e4032e;">Entidad</th>
+                        <th style="padding: 0.8rem; text-align: left; border-bottom: 2px solid #e4032e;">Población Impactada</th>
+                    </tr>
+                `;
+                table.appendChild(thead);
+                
+                // Crear cuerpo de la tabla
+                const tbody = document.createElement('tbody');
+                actividadesFaltantes.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.style.cssText = `
+                        border-bottom: 1px solid #ffeaa7;
+                        background: ${index % 2 === 0 ? '#fff' : '#fefefe'};
+                    `;
+                    
+                    // Obtener información específica de la columna "Descripción de los compromisos"
+                    const infoDescripcion = item.row[nombreColumnaDescripcion] || 'Sin descripción de compromisos';
+                    const entidad = item.row['Entidad'] || 'Sin especificar';
+                    const poblacion = item.row['Población impactada'] || '0';
+                    
+                    console.log(`📅 Actividad ${item.index} - Descripción: "${infoDescripcion}"`);
+                    
+                    // Truncar texto largo para mejor visualización
+                    const infoTruncada = infoDescripcion.length > 200 ? 
+                        infoDescripcion.substring(0, 200) + '...' : infoDescripcion;
+                    
+                    tr.innerHTML = `
+                        <td style="padding: 0.8rem; font-weight: 600; color: #856404;">${item.index}</td>
+                        <td style="padding: 0.8rem; color: #333; line-height: 1.4;" title="${infoDescripcion}">${infoTruncada}</td>
+                        <td style="padding: 0.8rem; color: #666; font-style: italic;">${entidad}</td>
+                        <td style="padding: 0.8rem; color: #666;">${parseInt(poblacion).toLocaleString('es-CO')}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                container.appendChild(table);
+                
+                // Agregar resumen
+                const resumen = document.createElement('div');
+                resumen.style.cssText = `
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    background: #e4032e;
+                    color: white;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-weight: 600;
+                `;
+                resumen.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    ${actividadesFaltantes.length} actividad${actividadesFaltantes.length > 1 ? 'es' : ''} sin fecha de ejecución
+                `;
+                container.appendChild(resumen);
+                
+                // Agregar nota informativa
+                const nota = document.createElement('div');
+                nota.style.cssText = `
+                    margin-top: 1rem;
+                    padding: 1rem;
+                    background: #d1ecf1;
+                    color: #0c5460;
+                    border-radius: 8px;
+                    border-left: 4px solid #17a2b8;
+                    font-size: 0.9rem;
+                `;
+                nota.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Nota:</strong> Estas actividades requieren que se complete la fecha de ejecución final para poder ser incluidas en la gráfica mensual. 
+                    La información mostrada corresponde a la <strong>Descripción de los Compromisos</strong> de cada registro.
+                `;
+                container.appendChild(nota);
+            }
+            
+            // Mostrar el contenedor
+            document.getElementById('actividades-faltantes').style.display = 'block';
+        }
+        
+        // --- Mostrar actividades de un mes específico ---
+        function mostrarActividadesMes(mesSeleccionado, datosEntidad) {
+            // Filtrar actividades del mes seleccionado
+            const actividadesDelMes = datosEntidad.filter(row => {
+                const fecha = row['Fecha final de ejecución'];
+                if (fecha && fecha !== 'None' && fecha !== '') {
+                    try {
+                        // Verificar si es una fecha ISO válida
+                        if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            const fechaObj = new Date(fecha);
+                            if (!isNaN(fechaObj.getTime())) {
+                                const mes = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+                                return mes === mesSeleccionado;
+                            }
+                        }
+                    } catch (e) {
+                        // Ignorar fechas inválidas
+                    }
+                }
+                return false;
+            });
+            
+            // Actualizar título
+            document.getElementById('titulo-actividades-mes').textContent = `Actividades de ${mesSeleccionado}`;
+            
+            // Mostrar actividades del mes
+            const container = document.getElementById('actividades-mes-lista');
+            container.innerHTML = '';
+            
+            if (actividadesDelMes.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No hay actividades registradas para este mes.</p>';
+            } else {
+                actividadesDelMes.forEach((row, index) => {
+                    const actividad = row['Resultados ( Resumen del resultado obtenido de la intervención)'] || 'Sin descripción';
+                    const fecha = row['Fecha final de ejecución'] || 'Sin fecha';
+                    const poblacion = row['Población impactada'] || '0';
+                    
+                    // Formatear fecha para mostrar
+                    let fechaFormateada = fecha;
+                    if (fecha && fecha !== 'None' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        try {
+                            const fechaObj = new Date(fecha);
+                            fechaFormateada = fechaObj.toLocaleDateString('es-CO', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            });
+                        } catch (e) {
+                            fechaFormateada = fecha;
+                        }
+                    }
+                    
+                    const actividadDiv = document.createElement('div');
+                    actividadDiv.style.cssText = `
+                        background: white;
+                        padding: 1.2rem;
+                        border-radius: 8px;
+                        margin-bottom: 1rem;
+                        border-left: 4px solid #e4032e;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    `;
+                    
+                    actividadDiv.innerHTML = `
+                        <div style="font-weight: 600; color: #333; margin-bottom: 0.8rem; font-size: 1.1rem;">
+                            <i class="fas fa-check-circle" style="color: #fab62d; margin-right: 0.5rem;"></i>
+                            Actividad ${index + 1}
+                        </div>
+                        <div style="color: #666; font-size: 0.95rem; margin-bottom: 0.8rem; line-height: 1.4;">
+                            <strong>Descripción:</strong><br>
+                            ${actividad}
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.9rem;">
+                            <div><strong>Fecha final:</strong> ${fechaFormateada}</div>
+                            <div><strong>Población impactada:</strong> ${parseInt(poblacion).toLocaleString('es-CO')}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(actividadDiv);
+                });
+            }
+            
+            // Mostrar el contenedor
+            document.getElementById('actividades-mes').style.display = 'block';
+            
+            // Hacer scroll suave hacia el contenedor
+            document.getElementById('actividades-mes').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        // --- Gráfica de participación diaria de entidades ---
+        function updateParticipacionDiariaChart(data) {
+            console.log(`\n🔍 INICIO: updateParticipacionDiariaChart`);
+            console.log(`📊 Datos recibidos:`, data);
+            console.log(`📊 Tipo de datos:`, typeof data);
+            console.log(`📊 Es array:`, Array.isArray(data));
+            
+            if (!data || data.length === 0) {
+                console.log(`❌ No hay datos para generar gráfica de participación diaria`);
+                return;
+            }
+            
+            console.log(`📊 Generando gráfica de participación diaria...`);
+            console.log(`📋 Datos recibidos: ${data.length} registros`);
+            
+            // Verificar que el contenedor existe
+            const container = document.getElementById('participacion-diaria-chart');
+            if (!container) {
+                console.log(`❌ Contenedor 'participacion-diaria-chart' no encontrado`);
+                return;
+            }
+            
+            console.log(`✅ Contenedor encontrado:`, container);
+            console.log(`📏 Dimensiones del contenedor:`, container.offsetWidth, 'x', container.offsetHeight);
+            
+            // Verificar que existe la columna de fecha
+            if (!data[0] || !data[0]['Fecha final de ejecución']) {
+                console.log(`❌ No se encontró la columna 'Fecha final de ejecución'`);
+                console.log(`📋 Columnas disponibles:`, Object.keys(data[0] || {}));
+                return;
+            }
+            
+            console.log(`✅ Columna de fecha encontrada`);
+            
+            // Filtrar actividades con fechas válidas y procesar
+            const actividadesConFecha = data.filter(item => {
+                const fecha = item['Fecha final de ejecución'];
+                return fecha && fecha !== '' && fecha !== 'null' && fecha !== 'None';
+            });
+            
+            console.log(`📅 Actividades con fechas válidas: ${actividadesConFecha.length}`);
+            
+            if (actividadesConFecha.length === 0) {
+                console.log(`❌ No hay actividades con fechas válidas`);
+                return;
+            }
+            
+            // Agrupar por fecha y contar actividades
+            const actividadesPorDia = {};
+            actividadesConFecha.forEach(item => {
+                const fecha = item['Fecha final de ejecución'];
+                if (fecha) {
+                    actividadesPorDia[fecha] = (actividadesPorDia[fecha] || 0) + 1;
+                }
+            });
+            
+            console.log(`📊 Actividades por día:`, actividadesPorDia);
+            
+            // Función auxiliar para obtener timestamp de una fecha en varios formatos
+            function getTimestamp(fecha) {
+                if (fecha.includes('-')) {
+                    // YYYY-MM-DD
+                    const parts = fecha.split('-');
+                    if (parts.length === 3) {
+                        return new Date(parts[0], parseInt(parts[1], 10) - 1, parts[2]).getTime();
+                    }
+                } else if (fecha.includes('/')) {
+                    // DD/MM/YYYY
+                    const parts = fecha.split('/');
+                    if (parts.length === 3) {
+                        return new Date(parts[2], parseInt(parts[1], 10) - 1, parts[0]).getTime();
+                    }
+                }
+                // Intentar con Date normal
+                const d = new Date(fecha);
+                if (!isNaN(d.getTime())) {
+                    return d.getTime();
+                }
+                // Si no es válida, poner al final
+                return Infinity;
+            }
+
+            // Ordenar fechas cronológicamente (de más antiguo a más reciente)
+            const fechasOrdenadas = Object.keys(actividadesPorDia).sort((a, b) => getTimestamp(a) - getTimestamp(b));
+            console.log(`📅 Fechas ordenadas:`, fechasOrdenadas);
+            
+            // Definir colores por mes
+            const coloresPorMes = {
+                '01': '#FF6B6B', // Enero - Rojo claro
+                '02': '#4ECDC4', // Febrero - Turquesa
+                '03': '#45B7D1', // Marzo - Azul claro
+                '04': '#96CEB4', // Abril - Verde claro
+                '05': '#FFEAA7', // Mayo - Amarillo claro
+                '06': '#DDA0DD', // Junio - Ciruela
+                '07': '#98D8C8', // Julio - Verde azulado
+                '08': '#F7DC6F', // Agosto - Amarillo dorado
+                '09': '#BB8FCE', // Septiembre - Púrpura claro
+                '10': '#85C1E9', // Octubre - Azul cielo
+                '11': '#F8C471', // Noviembre - Naranja claro
+                '12': '#EC7063'  // Diciembre - Rojo coral
+            };
+            
+            // Preparar datos para el gráfico con colores por mes
+            const fechas = [];
+            const actividades = [];
+            const colores = [];
+            
+            fechasOrdenadas.forEach(fecha => {
+                fechas.push(fecha);
+                actividades.push(actividadesPorDia[fecha]);
+                
+                // Extraer mes de la fecha de forma robusta
+                let mes = '';
+                if (fecha.includes('-')) {
+                    // Formato YYYY-MM-DD o similar
+                    mes = fecha.split('-')[1];
+                } else if (fecha.includes('/')) {
+                    // Formato DD/MM/YYYY o similar
+                    mes = fecha.split('/')[1];
+                } else {
+                    // Intentar con objeto Date
+                    const fechaObj = new Date(fecha);
+                    if (!isNaN(fechaObj.getTime())) {
+                        mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+                    } else {
+                        mes = '00'; // Valor por defecto si no se puede extraer
+                    }
+                }
+                console.log('Fecha:', fecha, '→ Mes extraído:', mes); // LOG
+                const color = coloresPorMes[mes] || '#fab62d'; // Color por defecto si no se encuentra el mes
+                colores.push(color);
+            });
+            
+            console.log('Colores asignados:', colores); // LOG
+            
+            console.log(`📊 Datos preparados para gráfico:`);
+            console.log(`   Fechas:`, fechas);
+            console.log(`   Actividades:`, actividades);
+            console.log(`   Colores:`, colores);
+            
+            // Crear el gráfico con Plotly
+            const trace = {
+                x: fechas,
+                y: actividades,
+                type: 'bar',
+                marker: {
+                    color: colores,
+                    line: {
+                        color: '#333',
+                        width: 1
+                    }
+                },
+                text: actividades.map(val => val.toString()),
+                textposition: 'auto',
+                hovertemplate: '<b>Fecha:</b> %{x}<br><b>Actividades:</b> %{y}<extra></extra>'
+            };
+            
+            const layout = {
+                title: {
+                    text: 'Participación Diaria de Actividades',
+                    font: {
+                        size: 16,
+                        color: '#333'
+                    }
+                },
+                xaxis: {
+                    title: 'Fecha',
+                    tickangle: -45,
+                    tickfont: {
+                        size: 10
+                    }
+                },
+                yaxis: {
+                    title: 'Número de Actividades',
+                    tickfont: {
+                        size: 10
+                    }
+                },
+                margin: {
+                    l: 60,
+                    r: 30,
+                    t: 60,
+                    b: 80
+                },
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                showlegend: false
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: false
+            };
+            
+            console.log(`🎨 Configuración del gráfico:`);
+            console.log(`   Layout:`, layout);
+            console.log(`   Config:`, config);
+            
+            try {
+                Plotly.newPlot('participacion-diaria-chart', [trace], layout, config);
+                console.log(`✅ Gráfico de participación diaria generado exitosamente`);
+            } catch (error) {
+                console.error(`❌ Error al generar gráfico:`, error);
+            }
+        }
+
+        // Botón de prueba para el gráfico diario
+        document.addEventListener('DOMContentLoaded', function() {
+            const testBtn = document.getElementById('test-daily-chart-btn');
+            if (testBtn) {
+                testBtn.addEventListener('click', function() {
+                    console.log('🧪 Botón de prueba del gráfico diario clickeado');
+                    if (datosGlobales && datosGlobales.length > 0) {
+                        console.log('📊 Usando datos globales para prueba:', datosGlobales.length, 'registros');
+                        updateParticipacionDiariaChart(datosGlobales);
+                    } else {
+                        console.log('❌ No hay datos globales disponibles');
+                        alert('No hay datos disponibles para generar el gráfico');
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+</html> 
