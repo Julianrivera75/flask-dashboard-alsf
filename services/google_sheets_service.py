@@ -11,8 +11,9 @@ class GoogleSheetsConnector:
     Clase para manejar la conexión y obtención de datos de Google Sheets
     """
     
-    def __init__(self, credentials_file: str = None):
+    def __init__(self, credentials_file: str = None, credentials_env_var: str = None):
         self.credentials_file = credentials_file or DevelopmentConfig.GOOGLE_SHEETS_CREDENTIALS_FILE
+        self.credentials_env_var = credentials_env_var or "GOOGLE_CREDENTIALS_JSON"
         self.scopes = DevelopmentConfig.GOOGLE_SHEETS_SCOPES
         self.client = None
         self._cache = None
@@ -27,9 +28,9 @@ class GoogleSheetsConnector:
             print(f"Archivo de credenciales: {self.credentials_file}")
             print(f"Scopes: {self.scopes}")
             
-            credentials_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+            credentials_json = os.environ.get(self.credentials_env_var)
             if credentials_json:
-                print("Usando credenciales desde variable de entorno GOOGLE_CREDENTIALS_JSON")
+                print(f"Usando credenciales desde variable de entorno {self.credentials_env_var}")
                 creds_dict = json.loads(credentials_json)
                 creds = ServiceAccountCredentials.from_json_keyfile_dict(
                     creds_dict, self.scopes

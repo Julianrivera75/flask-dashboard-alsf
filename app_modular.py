@@ -87,7 +87,7 @@ def create_app(config_class=DevelopmentConfig):
             logger.info("Accediendo al dashboard de El Consuelo")
             sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
             credentials_file = 'credentials/credentials_consuelo.json'
-            sheets_connector = GoogleSheetsConnector(credentials_file=credentials_file)
+            sheets_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var="GOOGLE_CREDENTIALS_CONSUELO_JSON")
             raw_data = sheets_connector.get_data(sheet_id)
             num_encuestas = len(raw_data)
             # Extraer datos para las gráficas de torta
@@ -437,7 +437,7 @@ def create_app(config_class=DevelopmentConfig):
                     print('Primeros 10 valores de columna O:')
                     for row in raw_data[:10]:
                         print(row.get(col_o, ''))
-
+            
             # Procesar datos usando el servicio
             processed_data = data_service.process_raw_data(raw_data)
             
