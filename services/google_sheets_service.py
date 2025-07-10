@@ -4,6 +4,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from typing import Optional, Tuple, List, Dict
 from config.development import DevelopmentConfig
 from datetime import datetime
+import json  # <-- Agregado para parsear JSON desde variable de entorno
 
 class GoogleSheetsConnector:
     """
@@ -26,13 +27,20 @@ class GoogleSheetsConnector:
             print(f"Archivo de credenciales: {self.credentials_file}")
             print(f"Scopes: {self.scopes}")
             
-            if not os.path.exists(self.credentials_file):
-                print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
-                return False
-            
-            creds = ServiceAccountCredentials.from_json_keyfile_name(
-                self.credentials_file, self.scopes
-            )
+            credentials_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+            if credentials_json:
+                print("Usando credenciales desde variable de entorno GOOGLE_CREDENTIALS_JSON")
+                creds_dict = json.loads(credentials_json)
+                creds = ServiceAccountCredentials.from_json_keyfile_dict(
+                    creds_dict, self.scopes
+                )
+            else:
+                if not os.path.exists(self.credentials_file):
+                    print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
+                    return False
+                creds = ServiceAccountCredentials.from_json_keyfile_name(
+                    self.credentials_file, self.scopes
+                )
             self.client = gspread.authorize(creds)
             print(f"✅ Conexión exitosa a Google Sheets")
             return True
