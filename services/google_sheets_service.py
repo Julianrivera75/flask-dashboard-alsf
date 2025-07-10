@@ -28,20 +28,32 @@ class GoogleSheetsConnector:
             print(f"Archivo de credenciales: {self.credentials_file}")
             print(f"Scopes: {self.scopes}")
             
+            # Detectar si estamos en Railway
+            running_on_railway = os.environ.get("RAILWAY_STATIC_URL") or os.environ.get("RAILWAY_ENVIRONMENT")
             credentials_json = os.environ.get(self.credentials_env_var)
-            if credentials_json:
-                print(f"Usando credenciales desde variable de entorno {self.credentials_env_var}")
+            if running_on_railway:
+                if not credentials_json:
+                    print(f"❌ ERROR: No se encontró la variable de entorno {self.credentials_env_var} en Railway. Por favor, configúrala con el JSON de credenciales.")
+                    return False
+                print(f"Usando credenciales desde variable de entorno {self.credentials_env_var} (Railway)")
                 creds_dict = json.loads(credentials_json)
                 creds = ServiceAccountCredentials.from_json_keyfile_dict(
                     creds_dict, self.scopes
                 )
             else:
-                if not os.path.exists(self.credentials_file):
-                    print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
-                    return False
-                creds = ServiceAccountCredentials.from_json_keyfile_name(
-                    self.credentials_file, self.scopes
-                )
+                if credentials_json:
+                    print(f"Usando credenciales desde variable de entorno {self.credentials_env_var}")
+                    creds_dict = json.loads(credentials_json)
+                    creds = ServiceAccountCredentials.from_json_keyfile_dict(
+                        creds_dict, self.scopes
+                    )
+                else:
+                    if not os.path.exists(self.credentials_file):
+                        print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
+                        return False
+                    creds = ServiceAccountCredentials.from_json_keyfile_name(
+                        self.credentials_file, self.scopes
+                    )
             self.client = gspread.authorize(creds)
             print(f"✅ Conexión exitosa a Google Sheets")
             return True
