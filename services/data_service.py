@@ -80,12 +80,6 @@ class DataService:
     def _process_record(self, record: Dict) -> Dict:
         """
         Procesa un registro individual
-        
-        Args:
-            record: Registro individual
-            
-        Returns:
-            Dict con registro procesado
         """
         processed = {
             'original': record,
@@ -94,21 +88,22 @@ class DataService:
             'population_impacted': 0,
             'errors': []
         }
-        
+        # Normalizar claves del registro
+        record_keys = {k.strip(): k for k in record.keys()}
         # Procesar población impactada
-        population = record.get('Población impactada', 0)
+        pop_key = record_keys.get('Población impactada', None)
+        population = record.get(pop_key, 0) if pop_key else 0
         processed['population_impacted'] = clean_numeric_value(population)
-        
         # Procesar fecha
-        date_str = record.get('Fecha final de ejecución', '')
+        date_key = record_keys.get('Fecha final de ejecución', None)
+        date_str = record.get(date_key, '') if date_key else ''
         processed['has_valid_date'] = is_valid_date(date_str)
-        
         # Validar campos requeridos
         for field in self.required_fields:
-            if field not in record or not record[field]:
+            key = record_keys.get(field, None)
+            if not key or not record.get(key):
                 processed['errors'].append(f"Campo faltante: {field}")
                 processed['is_valid'] = False
-        
         return processed
     
     def get_entity_statistics(self, data: List[Dict]) -> Dict[str, Any]:

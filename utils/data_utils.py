@@ -53,14 +53,7 @@ def clean_text_value(value: Any) -> str:
 
 def validate_required_fields(data: List[Dict], required_fields: List[str]) -> Dict[str, Any]:
     """
-    Valida que los datos tengan los campos requeridos
-    
-    Args:
-        data: Lista de diccionarios con datos
-        required_fields: Lista de campos requeridos
-        
-    Returns:
-        Dict con información de validación
+    Valida que los datos tengan los campos requeridos, ignorando espacios extra en los nombres de columnas
     """
     validation_result = {
         'valid': True,
@@ -74,26 +67,26 @@ def validate_required_fields(data: List[Dict], required_fields: List[str]) -> Di
         validation_result['missing_fields'] = required_fields
         return validation_result
     
-    # Verificar que todos los campos requeridos estén presentes
+    # Normalizar nombres de columnas del registro de muestra
     sample_record = data[0]
+    normalized_keys = {k.strip(): k for k in sample_record.keys()}
     for field in required_fields:
-        if field not in sample_record:
+        if field not in normalized_keys:
             validation_result['missing_fields'].append(field)
             validation_result['valid'] = False
     
     # Verificar registros individuales
     for i, record in enumerate(data):
+        record_keys = {k.strip(): k for k in record.keys()}
         missing_in_record = []
         for field in required_fields:
-            if field not in record or record[field] is None or record[field] == '':
+            if field not in record_keys or record[record_keys.get(field, '')] in [None, '']:
                 missing_in_record.append(field)
-        
         if missing_in_record:
             validation_result['invalid_records'].append({
                 'index': i,
                 'missing_fields': missing_in_record
             })
-    
     return validation_result
 
 def aggregate_data_by_field(data: List[Dict], field: str, value_field: Optional[str] = None) -> Dict[str, Any]:
