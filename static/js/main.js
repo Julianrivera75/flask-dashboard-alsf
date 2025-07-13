@@ -1,44 +1,7 @@
 // Variables globales
 let datosGlobales = [];
 
-// Menú lateral (drawer)
-const menuBtn = document.getElementById('menu-btn');
-const sideMenu = document.getElementById('side-menu');
-const closeMenu = document.getElementById('close-menu');
-const menuOverlay = document.getElementById('menu-overlay');
-
-// Event listeners del menú
-menuBtn.addEventListener('click', function() { 
-    sideMenu.classList.add('open'); 
-    menuOverlay.classList.add('open'); 
-});
-
-closeMenu.addEventListener('click', function() { 
-    sideMenu.classList.remove('open'); 
-    menuOverlay.classList.remove('open'); 
-});
-
-menuOverlay.addEventListener('click', function() { 
-    sideMenu.classList.remove('open'); 
-    menuOverlay.classList.remove('open'); 
-});
-
-// Función para inicializar el menú lateral
-function initMenu() {
-    const menuOptions = document.getElementById('menu-options');
-    
-    // Crear el botón del Barrio San Bernardo
-    const li = document.createElement('li');
-    li.innerHTML = '<i class="fas fa-map-marker-alt"></i> Barrio San Bernardo';
-    li.addEventListener('click', () => {
-        // Cerrar menú después de hacer clic
-        sideMenu.classList.remove('open');
-        menuOverlay.classList.remove('open');
-        
-        console.log('Mostrando Dashboard del Barrio San Bernardo');
-    });
-    menuOptions.appendChild(li);
-}
+// --- Eliminado código de menú hamburguesa y overlay para evitar conflictos ---
 
 // Funciones de utilidad
 function showError(message) {
@@ -68,10 +31,10 @@ function setLastUpdate(timestamp) {
 }
 
 // Inicialización cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar menú lateral
-    initMenu();
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Inicializar menú lateral
+//     initMenu();
     
-    // Cargar datos iniciales
-    loadData();
-}); 
+//     // Cargar datos iniciales
+//     loadData();
+// }); 

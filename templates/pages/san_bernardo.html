@@ -401,9 +401,29 @@
 </head>
 <body>
     <header class="header">
-        <button id="menu-btn" class="menu-btn" aria-label="Abrir menú"><i class="fas fa-bars"></i></button>
-        <h1><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
-        <p>Gestión de datos del barrio San Bernardo</p>
+        <!-- Botón hamburguesa flotante -->
+        <button id="menu-btn" class="menu-btn" aria-label="Abrir menú">
+            <i class="fas fa-bars"></i>
+            <span class="menu-btn-text">Menú</span>
+        </button>
+        <!-- Overlay antes del menú lateral -->
+        <div id="menu-overlay" class="menu-overlay"></div>
+        <!-- Menú lateral -->
+        <nav id="side-menu" class="side-menu">
+            <div class="side-menu-header">
+                <!-- <span>Navegación</span> -->
+                <!-- Botón de cerrar eliminado -->
+            </div>
+            <ul id="menu-options">
+                <li><a href="/" class="active">Inicio</a></li>
+                <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
+                <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+            </ul>
+        </nav>
+        <div class="header-content">
+            <h1><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
+            <p>Gestión de datos del barrio San Bernardo</p>
+        </div>
     </header>
     <div class="container">
 
@@ -553,7 +573,7 @@
     </div>
     <nav id="side-menu" class="side-menu">
         <div class="side-menu-header">
-            <span>Menú</span>
+            <span>Navegación</span>
             <button id="close-menu" class="close-menu" aria-label="Cerrar menú"><i class="fas fa-times"></i></button>
         </div>
         <ul id="menu-options">
@@ -587,14 +607,28 @@
         // Variable global para almacenar los datos
         let datosGlobales = [];
         
-        // Menú lateral (drawer)
+        // Script robusto para menú hamburguesa flotante (idéntico al index)
         const menuBtn = document.getElementById('menu-btn');
         const sideMenu = document.getElementById('side-menu');
-        const closeMenu = document.getElementById('close-menu');
         const menuOverlay = document.getElementById('menu-overlay');
-        menuBtn.addEventListener('click', function() { sideMenu.classList.add('open'); menuOverlay.classList.add('open'); });
-        closeMenu.addEventListener('click', function() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('open'); });
-        menuOverlay.addEventListener('click', function() { sideMenu.classList.remove('open'); menuOverlay.classList.remove('open'); });
+        function openMenu() {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('open');
+        }
+        function closeMenu() {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('open');
+        }
+        menuBtn.addEventListener('click', function() {
+            if (sideMenu.classList.contains('open')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+        menuOverlay.addEventListener('click', function() {
+            closeMenu();
+        });
         
         // Cargar datos y mostrar solo la tabla
         async function loadData() {

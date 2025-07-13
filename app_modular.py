@@ -512,6 +512,18 @@ def create_app(config_class=DevelopmentConfig):
             logger.error(f"Error generando gráfico diario: {str(e)}")
             return jsonify({'error': str(e)}), 500
     
+    @app.route('/api/el-consuelo/data')
+    def api_el_consuelo_data():
+        """API para obtener datos de encuestas de El Consuelo"""
+        try:
+            sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
+            credentials_file = 'credentials/credentials_consuelo.json'
+            sheets_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var="GOOGLE_CREDENTIALS_CONSUELO_JSON")
+            raw_data = sheets_connector.get_data(sheet_id)
+            return jsonify({'data': raw_data, 'total': len(raw_data)})
+        except Exception as e:
+            return jsonify({'error': str(e), 'data': []}), 500
+    
     @app.errorhandler(404)
     def not_found(error):
         """Manejo de error 404"""

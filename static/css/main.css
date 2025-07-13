@@ -97,35 +97,57 @@ body {
 
 /* Menú lateral */
 .menu-btn {
-    position: absolute;
+    position: fixed;
     top: 1.5rem;
     left: 2rem;
-    background: transparent;
+    background: var(--primary-red);
     border: none;
     color: var(--white);
     font-size: 2rem;
     cursor: pointer;
-    z-index: 1001;
+    z-index: 1201;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s;
+    min-width: 120px;
 }
 
+.menu-btn-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.menu-btn:hover {
+    background: var(--primary-yellow);
+    color: var(--primary-red);
+}
 .side-menu {
     position: fixed;
     top: 0;
     left: -280px;
-    width: 260px;
+    width: 260px !important;
+    max-width: 90vw !important;
+    min-width: 180px !important;
+    box-sizing: border-box !important;
     height: 100vh;
-    background: var(--white);
+    background: #fff;
     box-shadow: 2px 0 12px rgba(0,0,0,0.12);
     transition: left 0.3s cubic-bezier(.4,0,.2,1);
     z-index: 1200;
     display: flex;
     flex-direction: column;
+    padding-top: 80px;
 }
-
 .side-menu.open {
     left: 0;
 }
-
 .side-menu-header {
     display: flex;
     justify-content: space-between;
@@ -136,7 +158,6 @@ body {
     font-weight: 700;
     font-size: 1.2rem;
 }
-
 .close-menu {
     background: transparent;
     border: none;
@@ -144,38 +165,102 @@ body {
     font-size: 1.5rem;
     cursor: pointer;
 }
-
 .side-menu ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: block;
 }
-
 .side-menu li {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid var(--light-gray);
     color: var(--dark-gray);
     cursor: pointer;
     transition: background 0.2s;
+    border: none;
+    background: none;
 }
-
 .side-menu li:hover {
     background: var(--light-gray);
 }
-
 .menu-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.2);
-    z-index: 1100;
+    background: rgba(0,0,0,0.4);
+    z-index: 1199;
     display: none;
 }
-
 .menu-overlay.open {
     display: block;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+.feature-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+    text-align: center;
+    transition: transform 0.18s, box-shadow 0.18s;
+    border: 2px solid #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 320px;
+}
+.feature-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    border-color: #fab62d;
+}
+.feature-icon {
+    font-size: 2.8rem;
+    color: #fab62d;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: #fff7e0;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(250,182,45,0.10);
+}
+.feature-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #e4032e;
+    margin-bottom: 0.7rem;
+    margin-top: 0;
+}
+.feature-card p {
+    color: #333;
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin: 0;
+}
+@media (max-width: 600px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+    .feature-card {
+        min-height: 220px;
+        padding: 1.2rem 0.7rem 1rem 0.7rem;
+    }
+    .feature-icon {
+        font-size: 2rem;
+        width: 44px;
+        height: 44px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -191,6 +276,15 @@ body {
         top: 1rem;
         left: 1rem;
         font-size: 1.7rem;
+        padding: 0.5rem 1rem;
+        min-width: auto;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+    }
+    
+    .menu-btn-text {
+        display: none;
     }
     
     .side-menu {

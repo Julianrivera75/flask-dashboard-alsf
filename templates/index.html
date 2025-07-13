@@ -10,170 +10,204 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Botón hamburguesa flotante -->
+    <button id="menu-btn" class="menu-btn" aria-label="Abrir menú">
+        <i class="fas fa-bars"></i>
+        <span class="menu-btn-text">Menú</span>
+    </button>
+    <!-- Overlay antes del menú lateral -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+    <!-- Menú lateral -->
+    <nav id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <!-- <span>Navegación</span> -->
+            <!-- Botón de cerrar eliminado -->
+        </div>
+        <ul id="menu-options">
+            <li><a href="/" class="active">Inicio</a></li>
+            <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
+            <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+            <!-- <li><a href="/datos">Datos</a></li> -->
+            <!-- <li><a href="/contacto">Contacto</a></li> -->
+        </ul>
+    </nav>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-city"></i>
-                <h1>Alcaldía Local de Santa Fe</h1>
+        <div class="header-content" style="display: flex; align-items: center; justify-content: center; gap: 1.5rem;">
+            <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; margin-right: 1.2rem; vertical-align: middle;">
+            <h1 style="font-size:1.5rem; margin:0; text-align:left; font-weight:600; color:#fff;">
+                Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe
+            </h1>
         </div>
-            <nav class="nav-menu">
-                <ul>
-                    <li><a href="/" class="active">Inicio</a></li>
-                    <li><a href="/san-bernardo">Barrio San Bernardo</a></li>
-                    <li><a href="/el-consuelo">Barrio El Consuelo</a></li>
-                    <li><a href="/datos">Datos</a></li>
-                    <li><a href="/contacto">Contacto</a></li>
-                </ul>
-            </nav>
-            </div>
     </header>
-
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="hero-title">Indicadores Estratégicos</h1>
-            <p class="hero-subtitle">Sistema de monitoreo y seguimiento de actividades comunitarias</p>
-            <div class="hero-buttons">
-                <a href="/san-bernardo" class="btn btn-primary">
-                    <i class="fas fa-chart-bar"></i>
-                    Ver Dashboard
-                </a>
-                <br>
-                <a href="/el-consuelo" class="btn btn-warning">
-                    <i class="fas fa-chart-pie"></i>
-                    Barrio El Consuelo
-                </a>
-                <a href="/datos" class="btn btn-secondary">
-                    <i class="fas fa-database"></i>
-                    Explorar Datos
-                </a>
-            </div>
-                </div>
-    </section>
-
     <!-- Features Section -->
     <section class="features">
         <div class="container">
-            <h2 class="section-title">¿Qué ofrecemos?</h2>
+            <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">¿Qué ofrece el Sistema de Monitoreo y Seguimiento?</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-chart-line"></i>
-            </div>
+                    </div>
                     <h3>Indicadores en Tiempo Real</h3>
-                    <p>Monitoreo continuo de actividades y proyectos comunitarios con datos actualizados.</p>
-        </div>
+                    <p>Monitoreo continuo de actividades y proyectos con datos actualizados.</p>
+                </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-users"></i>
-            </div>
+                    </div>
                     <h3>Participación Ciudadana</h3>
-                    <p>Seguimiento de la participación de entidades y organizaciones en actividades locales.</p>
-            </div>
+                    <p>Seguimiento de la participación de entidades distritales en actividades locales.</p>
+                </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-map-marked-alt"></i>
-                </div>
+                    </div>
                     <h3>Análisis Territorial</h3>
-                    <p>Visualización de datos por barrios y localidades para mejor toma de decisiones.</p>
+                    <p>Visualización de datos por barrios para optimizar la toma de decisiones.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-file-alt"></i>
-            </div>
+                    </div>
                     <h3>Reportes Detallados</h3>
                     <p>Generación de informes y estadísticas para la gestión administrativa.</p>
-        </div>
+                </div>
             </div>
-                    </div>
+        </div>
     </section>
 
     <!-- Stats Section -->
     <section class="stats">
         <div class="container">
             <h2 class="section-title">Estadísticas Generales</h2>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-activities">-</div>
-                    <div class="stat-label">Actividades Totales</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-entities">-</div>
-                    <div class="stat-label">Entidades Participantes</div>
-            </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="total-population">-</div>
-                    <div class="stat-label">Población Impactada</div>
-        </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="last-update">-</div>
-                    <div class="stat-label">Última Actualización</div>
-                </div>
-                        </div>
+            <div style="margin-bottom: 1.2rem; margin-top:2rem;">
+                <h3 style="color:#e4032e; font-size:1.25rem; margin-bottom:1rem;">Barrio San Bernardo</h3>
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card" id="personas-impactadas-card">
+                        <div class="icon"><i class="fas fa-users"></i></div>
+                        <h3 id="personas-impactadas">-</h3>
+                        <p>Cantidad de personas impactadas</p>
                     </div>
+                    <div class="stat-card" id="actividades-realizadas-card">
+                        <div class="icon"><i class="fas fa-tasks"></i></div>
+                        <h3 id="actividades-realizadas">-</h3>
+                        <p>Número aprox. de actividades realizadas</p>
+                    </div>
+                    <div class="stat-card" id="dias-sin-homicidios-card">
+                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3 id="dias-sin-homicidios">-</h3>
+                        <p id="dias-sin-homicidios-label">Días sin homicidio</p>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-bottom: 1.2rem;">
+                <h3 style="color:#e4032e; font-size:1.25rem; margin-bottom:1rem;">Barrio El Consuelo</h3>
+                <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card" id="encuestas-realizadas-card">
+                        <div class="icon"><i class="fas fa-poll"></i></div>
+                        <h3 id="encuestas-realizadas">-</h3>
+                        <p>Encuestas realizadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
     <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Alcaldía Local de Santa Fe</h3>
-                    <p>Sistema de Indicadores Estratégicos para la gestión local.</p>
-        </div>
-                <div class="footer-section">
-                    <h4>Enlaces Rápidos</h4>
-                    <ul>
-                        <li><a href="/san-bernardo">Barrio San Bernardo</a></li>
-                        <li><a href="/datos">Datos</a></li>
-                        <li><a href="/contacto">Contacto</a></li>
-                    </ul>
+                <!-- Bloque eliminado: Alcaldía, Sistema de Indicadores, Enlaces Rápidos y Contacto -->
             </div>
-                <div class="footer-section">
-                    <h4>Contacto</h4>
-                    <p><i class="fas fa-phone"></i> (57) 1 XXX-XXXX</p>
-                    <p><i class="fas fa-envelope"></i> info@santafe.gov.co</p>
-            </div>
-        </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Alcaldía Local de Santa Fe. Todos los derechos reservados.</p>
+            <div class="footer-bottom" style="text-align: center;">
+                <p>&copy; 2025 Alcaldía Local Santa Fe. Todos los derechos reservados.</p>
     </div>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
-        // Cargar estadísticas básicas
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/data')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.data) {
-                        document.getElementById('total-activities').textContent = data.data.length;
-                        
-                        // Contar entidades únicas
-                        const entities = new Set(data.data.map(item => item.Entidad));
-                        document.getElementById('total-entities').textContent = entities.size;
-                        
-                        // Sumar población impactada
-                        const totalPopulation = data.data.reduce((sum, item) => {
-                            const population = parseInt(item['Población impactada']) || 0;
-                            return sum + population;
-                        }, 0);
-                        document.getElementById('total-population').textContent = totalPopulation.toLocaleString();
-                        
-                        // Mostrar última actualización
-                        if (data.last_update) {
-                            const date = new Date(data.last_update);
-                            document.getElementById('last-update').textContent = date.toLocaleDateString('es-ES');
+        // Script robusto con logs para depuración
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+
+        function openMenu() {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('open');
+        }
+        function closeMenu() {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('open');
+        }
+        menuBtn.addEventListener('click', function() {
+            if (sideMenu.classList.contains('open')) {
+                closeMenu();
+                console.log('Menú cerrado por botón');
+            } else {
+                openMenu();
+                console.log('Menú abierto por botón');
+            }
+        });
+        menuOverlay.addEventListener('click', function() {
+            closeMenu();
+            console.log('Menú cerrado por overlay');
+        });
+
+        // --- Indicadores principales: San Bernardo y El Consuelo ---
+        async function cargarIndicadoresPrincipales() {
+            // San Bernardo
+            try {
+                const resSB = await fetch('/api/data');
+                const dataSB = await resSB.json();
+                if (dataSB && dataSB.data && Array.isArray(dataSB.data)) {
+                    // Personas impactadas
+                    let totalPersonas = 0;
+                    let colPoblacion = null;
+                    if (dataSB.data.length > 0) {
+                        for (let key in dataSB.data[0]) {
+                            if (key && key.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes('poblacion impactada')) {
+                                colPoblacion = key;
+                                break;
+                            }
                         }
                     }
-                })
-                .catch(error => {
-                    console.error('Error cargando datos:', error);
-                });
-        });
+                    if (colPoblacion) {
+                        for (let i = 0; i < dataSB.data.length; i++) {
+                            let val = dataSB.data[i][colPoblacion];
+                            if (typeof val === 'string') val = val.replace(/[^\d]/g, '');
+                            val = parseInt(val);
+                            if (!isNaN(val)) totalPersonas += val;
+                        }
+                    }
+                    document.getElementById('personas-impactadas').textContent = totalPersonas.toLocaleString('es-CO');
+                    // Actividades realizadas
+                    document.getElementById('actividades-realizadas').textContent = dataSB.data.length.toLocaleString('es-CO');
+                }
+            } catch (e) {
+                document.getElementById('personas-impactadas').textContent = '-';
+                document.getElementById('actividades-realizadas').textContent = '-';
+            }
+            // Días sin homicidio (San Bernardo)
+            try {
+                const dias = localStorage.getItem('diasSinHomicidios') || '-';
+                document.getElementById('dias-sin-homicidios').textContent = dias;
+            } catch (e) {
+                document.getElementById('dias-sin-homicidios').textContent = '-';
+            }
+            // El Consuelo
+            try {
+                const resEC = await fetch('/api/el-consuelo/data');
+                const dataEC = await resEC.json();
+                if (dataEC && dataEC.data && Array.isArray(dataEC.data)) {
+                    document.getElementById('encuestas-realizadas').textContent = dataEC.data.length.toLocaleString('es-CO');
+                }
+            } catch (e) {
+                document.getElementById('encuestas-realizadas').textContent = '-';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', cargarIndicadoresPrincipales);
     </script>
 </body>
 </html> 
