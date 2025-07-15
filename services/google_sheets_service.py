@@ -48,6 +48,7 @@ class GoogleSheetsConnector:
                         creds_dict, self.scopes
                     )
                 else:
+                    pass
                     if not os.path.exists(self.credentials_file):
                         print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
                         return False
