@@ -6,7 +6,7 @@
     <title>Indicadores de Gestión Localidad de Santa Fé</title>
     
     <!-- Plotly.js para gráficas -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -110,7 +110,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem; /* Aumenta el espacio debajo del grid */
         }
 
         .stat-card {
@@ -121,6 +121,7 @@
             text-align: center;
             border: 2px solid var(--light-gray);
             transition: transform 0.2s;
+            margin-bottom: 2rem; /* Aumenta el espacio entre tarjetas */
         }
 
         .stat-card:hover {
@@ -305,54 +306,7 @@
         .side-menu ul li:hover {
             background-color: var(--light-gray);
         }
-        /* Mejorar la visualización de la leyenda de Plotly en móvil */
-        @media (max-width: 600px) {
-            .stat-card .legend {
-                max-width: 100%;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
-        .custom-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem 1.2rem;
-            justify-content: center;
-            margin: 0.5rem 0 0.2rem 0;
-            font-size: 0.98rem;
-            flex-direction: row;
-            overflow-x: auto;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-right: 1.2rem;
-            white-space: nowrap;
-        }
-        .legend-color {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-            margin-right: 0.4em;
-            border: 1px solid #ccc;
-        }
-        .bar-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 1.5rem 1rem;
-            margin-bottom: 2rem;
-            border: 2px solid var(--light-gray);
-        }
-        .polygon-label {
-            color: #222;
-            font-size: 1.3rem;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px #fff, 0 0 2px #fff;
-            pointer-events: none;
-        }
-    </style>
+      </style>
 </head>
 <body>
     <header class="header">
@@ -412,6 +366,11 @@
             </label>
         </div>
 
+        <!-- Botón para resaltar polígonos intervenidos -->
+        <div style="text-align:center; margin-bottom: 1rem;">
+            <button id="btn-resaltar-poligonos" style="background: #ffe066; color: #333; border: 2px solid #fab62d; border-radius: 8px; padding: 0.7em 1.5em; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 0.5em;">Resaltar polígonos intervenidos</button>
+        </div>
+
         <!-- Mapa de El Consuelo -->
         <div id="map" style="width: 100%; height: 500px; margin: 2rem 0; border-radius: 12px; box-shadow: var(--shadow);"></div>
 
@@ -423,25 +382,11 @@
             <div class="stat-card">
                 <div class="chart-title" style="text-align:center; font-weight:600; margin-bottom:0.5rem;">Nivel educativo</div>
                 <div id="nivelPie" style="height: 220px;"></div>
-                <div class="custom-legend">
-                    {% set colors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'] %}
-                    {% set labels = nivel_educativo_counts.keys()|list %}
-                    {% for i in range(labels|length) %}
-                        <span class="legend-item"><span class="legend-color" style="background:{{ colors[i % colors|length] }};"></span>{{ labels[i] }}</span>
-                    {% endfor %}
-                </div>
                 <div style="text-align:center; font-weight:600; margin-top:0.5rem;"></div>
             </div>
             <div class="stat-card">
                 <div class="chart-title" style="text-align:center; font-weight:600; margin-bottom:0.5rem;">Tiempo en el barrio</div>
                 <div id="tiempoPie" style="height: 220px;"></div>
-                <div class="custom-legend">
-                    {% set colors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'] %}
-                    {% set labels = tiempo_reside_counts.keys()|list %}
-                    {% for i in range(labels|length) %}
-                        <span class="legend-item"><span class="legend-color" style="background:{{ colors[i % colors|length] }};"></span>{{ labels[i] }}</span>
-                    {% endfor %}
-                </div>
                 <div style="text-align:center; font-weight:600; margin-top:0.5rem;"></div>
             </div>
         </div>
@@ -565,1171 +510,308 @@
     </div>
 
     <script>
-        function loadData() {
-            // Simular carga de datos
-            setTimeout(() => {
-                // No hay estadísticas que actualizar
-            }, 1000);
-        }
-
-        // Cargar datos al iniciar la página
-        document.addEventListener('DOMContentLoaded', loadData);
-
-        // Script robusto para menú hamburguesa flotante (idéntico al index)
-        const menuBtn = document.getElementById('menu-btn');
-        const sideMenu = document.getElementById('side-menu');
-        const menuOverlay = document.getElementById('menu-overlay');
-        function openMenu() {
-            sideMenu.classList.add('open');
-            menuOverlay.classList.add('open');
-        }
-        function closeMenu() {
-            sideMenu.classList.remove('open');
-            menuOverlay.classList.remove('open');
-        }
-        menuBtn.addEventListener('click', function() {
-            if (sideMenu.classList.contains('open')) {
-                closeMenu();
-            } else {
-                openMenu();
-            }
-        });
-        menuOverlay.addEventListener('click', function() {
-            closeMenu();
-        });
-
-        // Función para inicializar el menú lateral
-        function initMenu() {
-            const menuOptions = document.getElementById('menu-options');
-            menuOptions.innerHTML = '';
-            // Botón de Inicio
-            const liInicio = document.createElement('li');
-            liInicio.innerHTML = '<i class="fas fa-home"></i> Inicio';
-            liInicio.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                window.location.href = '/';
-            });
-            menuOptions.appendChild(liInicio);
-            // Botón Barrio San Bernardo
-            const liSanBernardo = document.createElement('li');
-            liSanBernardo.innerHTML = '<i class="fas fa-map-marker-alt"></i> Barrio San Bernardo';
-            liSanBernardo.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                window.location.href = '/san-bernardo';
-            });
-            menuOptions.appendChild(liSanBernardo);
-            // Botón Barrio El Consuelo
-            const liElConsuelo = document.createElement('li');
-            liElConsuelo.innerHTML = '<i class="fas fa-map-marker-alt"></i> Barrio El Consuelo';
-            liElConsuelo.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                console.log('Ya estás en el Dashboard del Barrio El Consuelo');
-            });
-            menuOptions.appendChild(liElConsuelo);
-            // Botón de Datos
-            const liDatos = document.createElement('li');
-            liDatos.innerHTML = '<i class="fas fa-database"></i> Datos';
-            liDatos.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                window.location.href = '/datos';
-            });
-            menuOptions.appendChild(liDatos);
-        }
-        document.addEventListener('DOMContentLoaded', function() {
-            initMenu();
-            loadData();
-        });
-
-        // Inicializar el mapa centrado en Bogotá (ajusta si lo deseas)
-        var map = L.map('map').setView([4.60971, -74.08175], 15);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-        // Cargar el archivo KML de El Consuelo
-        var kmlLayer = omnivore.kml('/static/data/ELCONSUELO.kml')
-            .on('ready', function() {
-                map.fitBounds(this.getBounds());
-            })
-            .addTo(map);
-        // Variables para guardar los centros de los polígonos 6 y 19
-        let center6 = null;
-        let center19 = null;
-        // Extraer y mostrar el número de cuadrante como label
-        kmlLayer.on('layeradd', function(e) {
-            if (e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.description) {
-                var desc = e.layer.feature.properties.description;
-                var match = desc.match(/<td>\s*Número Cuadrante\s*<\/td>\s*<td>(\d+)<\/td>/);
-                if (match && match[1]) {
-                    var num = match[1];
-                    var center = e.layer.getBounds().getCenter();
-                    // Guardar los centros de los polígonos 6 y 19
-                    if (num === '6') center6 = center;
-                    if (num === '19') center19 = center;
-                    // Ajuste personalizado para los números 5 y 18
-                    if (num === '5' && center6) {
-                        center = L.latLng(center6.lat - 0.0003, center6.lng); // Debajo del 6
-                    } else if (num === '18' && center19) {
-                        center = L.latLng(center19.lat, center19.lng + 0.0004); // Más a la derecha del 19
-                    } else if (num === '18') {
-                        center = L.latLng(4.58085, -74.0687); // Aproximado a 'calle 2 D Bis'
-                    }
-                    L.marker(center, {
-                        icon: L.divIcon({
-                            className: 'polygon-label',
-                            html: '<b>' + num + '</b>',
-                            iconSize: [30, 30]
-                        })
-                    }).addTo(map);
+    // --- Inicialización del mapa ---
+    var map = L.map('map').setView([4.60971, -74.08175], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+    // Cargar el archivo KML de El Consuelo
+    var kmlLayer = omnivore.kml('/static/data/ELCONSUELO.kml')
+        .on('ready', function() {
+            map.fitBounds(this.getBounds());
+        })
+        .addTo(map);
+    // Mostrar números en los polígonos
+    let center6 = null;
+    let center19 = null;
+    var poligonosResaltados = false;
+    var poligonosIntervenidos = ['1','2','3','4','5','6','7','8','17','22'];
+    var poligonoLayers = [];
+    kmlLayer.on('layeradd', function(e) {
+        if (e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.description) {
+            var desc = e.layer.feature.properties.description;
+            var match = desc.match(/<td>\s*Número Cuadrante\s*<\/td>\s*<td>(\d+)<\/td>/);
+            if (match && match[1]) {
+                var num = match[1];
+                // Guardar referencia a cada polígono por número
+                e.layer._cuadranteNum = num;
+                poligonoLayers.push(e.layer);
+                var center = e.layer.getBounds().getCenter();
+                if (num === '6') center6 = center;
+                if (num === '19') center19 = center;
+                if (num === '5' && center6) {
+                    center = L.latLng(center6.lat - 0.0003, center6.lng);
+                } else if (num === '18' && center19) {
+                    center = L.latLng(center19.lat, center19.lng + 0.0004);
+                } else if (num === '18') {
+                    center = L.latLng(4.58085, -74.0687);
                 }
+                L.marker(center, {
+                    icon: L.divIcon({
+                        className: 'polygon-label',
+                        html: '<b>' + num + '</b>',
+                        iconSize: [30, 30]
+                    })
+                }).addTo(map);
             }
-        });
-
-        // --- Capa de puntos críticos (toggle) ---
-        var puntosCriticosLayer = null;
-        var puntosIntervenidosLayer = null;
-
-        function crearMarcadorNumerado(latlng, numero, color) {
-            var iconUrl = color === 'yellow'
-                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png'
-                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
-            return L.marker(latlng, {
-                icon: L.divIcon({
-                    className: 'custom-marker-' + color,
-                    html: '<div style="position:relative; width:30px; height:41px;">' +
-                          '<img src="' + iconUrl + '" style="position:absolute; left:0; top:0; width:30px; height:41px;">' +
-                          '<span style="position:absolute; top:7px; left:0; width:30px; text-align:center; color:black; font-weight:bold; font-size:16px; text-shadow:1px 1px 2px #fff;">' + numero + '</span>' +
-                          '</div>',
-                    iconSize: [30, 41],
-                    iconAnchor: [15, 41],
-                    popupAnchor: [1, -34],
-                    shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png',
-                    shadowSize: [41, 41]
-                })
-            });
         }
-
-        function cargarPuntosCriticos(callback, intervenidosSolo) {
-            fetch('/static/data/Puntos_Criticos.kml')
-                .then(response => response.text())
-                .then(kmlText => {
-                    var parser = new DOMParser();
-                    var kml = parser.parseFromString(kmlText, 'text/xml');
-                    var placemarks = kml.getElementsByTagName('Placemark');
-                    var markers = [];
-                    for (var i = 0; i < placemarks.length; i++) {
-                        var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
-                        var lat = parseFloat(coords[1]);
-                        var lng = parseFloat(coords[0]);
-                        var color = (intervenidosSolo && i < 5) ? 'yellow' : (!intervenidosSolo ? 'red' : null);
-                        if (color) {
-                            markers.push(crearMarcadorNumerado([lat, lng], i + 1, color));
-                        }
-                    }
-                    callback(markers);
-                });
-        }
-
-        document.getElementById('toggle-puntos-criticos').addEventListener('change', function(e) {
-            if (e.target.checked) {
-                if (!puntosCriticosLayer) {
-                    cargarPuntosCriticos(function(markers) {
-                        puntosCriticosLayer = L.layerGroup(markers);
-                        puntosCriticosLayer.addTo(map);
-                    }, false);
+    });
+    document.getElementById('btn-resaltar-poligonos').addEventListener('click', function() {
+        poligonosResaltados = !poligonosResaltados;
+        this.textContent = poligonosResaltados ? 'Quitar resaltado de polígonos' : 'Resaltar polígonos intervenidos';
+        poligonoLayers.forEach(function(layer) {
+            if (poligonosIntervenidos.includes(layer._cuadranteNum)) {
+                if (poligonosResaltados) {
+                    layer.setStyle({fillColor: '#ffe066', color: '#fab62d', weight: 3, fillOpacity: 0.7});
                 } else {
-                    puntosCriticosLayer.addTo(map);
-                }
-            } else {
-                if (puntosCriticosLayer) {
-                    map.removeLayer(puntosCriticosLayer);
+                    layer.setStyle({fillColor: '#3388ff', color: '#3388ff', weight: 2, fillOpacity: 0.2});
                 }
             }
         });
+    });
+    // --- Puntos críticos y puntos críticos intervenidos ---
+    var puntosCriticosLayer = null;
+    var puntosIntervenidosLayer = null;
+    function crearMarcadorNumerado(latlng, numero, color) {
+        var iconUrl;
+        if (color === 'aquamarine') {
+            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'; // Usamos azul como base
+        } else if (color === 'yellow') {
+            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png';
+        } else {
+            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+        }
+        return L.marker(latlng, {
+            icon: L.divIcon({
+                className: 'custom-marker-' + color,
+                html: '<div style="position:relative; width:30px; height:41px;">' +
+                      '<img src="' + iconUrl + '" style="position:absolute; left:0; top:0; width:30px; height:41px; filter:' + (color === 'aquamarine' ? 'hue-rotate(120deg) saturate(2)' : 'none') + ';">' +
+                      '<span style="position:absolute; top:7px; left:0; width:30px; text-align:center; color:black; font-weight:bold; font-size:24px; text-shadow:1px 1px 2px #fff;">' + numero + '</span>' +
+                      '</div>',
+                iconSize: [30, 41],
+                iconAnchor: [15, 41],
+                popupAnchor: [1, -34],
+                shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png',
+                shadowSize: [41, 41]
+            })
+        });
+    }
+    function cargarPuntosCriticos(callback, intervenidosSolo) {
+        fetch('/static/data/Puntos_Criticos.kml')
+            .then(response => response.text())
+            .then(kmlText => {
+                var parser = new DOMParser();
+                var kml = parser.parseFromString(kmlText, 'text/xml');
+                var placemarks = kml.getElementsByTagName('Placemark');
+                var markers = [];
+                for (var i = 0; i < placemarks.length; i++) {
+                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                    var lat = parseFloat(coords[1]);
+                    var lng = parseFloat(coords[0]);
+                    var color = null;
+                    if (intervenidosSolo && i < 5) {
+                        color = 'aquamarine';
+                    } else if (!intervenidosSolo) {
+                        color = 'red';
+                    }
+                    if (color) {
+                        markers.push(crearMarcadorNumerado([lat, lng], i + 1, color));
+                    }
+                }
+                callback(markers);
+            });
+    }
+    document.getElementById('toggle-puntos-criticos').addEventListener('change', function(e) {
+        if (e.target.checked) {
+            if (!puntosCriticosLayer) {
+                cargarPuntosCriticos(function(markers) {
+                    puntosCriticosLayer = L.layerGroup(markers);
+                    puntosCriticosLayer.addTo(map);
+                }, false);
+            } else {
+                puntosCriticosLayer.addTo(map);
+            }
+        } else {
+            if (puntosCriticosLayer) {
+                map.removeLayer(puntosCriticosLayer);
+            }
+        }
+    });
+    document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
+        if (e.target.checked) {
+            if (!puntosIntervenidosLayer) {
+                cargarPuntosCriticos(function(markers) {
+                    puntosIntervenidosLayer = L.layerGroup(markers);
+                    puntosIntervenidosLayer.addTo(map);
+                }, true);
+            } else {
+                puntosIntervenidosLayer.addTo(map);
+            }
+        } else {
+            if (puntosIntervenidosLayer) {
+                map.removeLayer(puntosIntervenidosLayer);
+            }
+        }
+    });
 
+    // --- Agrupador genérico ---
+    function agruparPorCampo(data, campo) {
+        if (data && data.length > 0) {
+            console.log('Campos disponibles:', Object.keys(data[0]));
+        }
+        const counts = {};
+        data.forEach(row => {
+            const valor = (row[campo] || '').trim();
+            if (valor) counts[valor] = (counts[valor] || 0) + 1;
+        });
+        return counts;
+    }
+
+    // --- Buscar campo flexible por nombre ---
+    function buscarCampo(data, posiblesNombres) {
+        if (!data || data.length === 0) return null;
+        const keys = Object.keys(data[0]);
+        for (const nombre of posiblesNombres) {
+            const key = keys.find(k => k.trim().toLowerCase() === nombre.trim().toLowerCase());
+            if (key) return key;
+        }
+        return null;
+    }
+
+    // --- Renderizador de gráficas ---
+    function renderGraficasResultados(data) {
+        // 1. Nivel educativo
+        const nivelCounts = agruparPorCampo(data, 'Nivel educativo');
+        Plotly.newPlot('nivelPie', [{
+            values: Object.values(nivelCounts),
+            labels: Object.keys(nivelCounts),
+            type: 'pie',
+            marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
+            textinfo: 'percent',
+            insidetextorientation: 'radial'
+        }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+
+        // 2. Tiempo en el barrio
+        const tiempoCounts = agruparPorCampo(data, '¿Hace cuanto tiempo reside en el barrio?');
+        Plotly.newPlot('tiempoPie', [{
+            values: Object.values(tiempoCounts),
+            labels: Object.keys(tiempoCounts),
+            type: 'pie',
+            marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
+            textinfo: 'percent',
+            insidetextorientation: 'radial'
+        }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+
+        // Helper para barras horizontales
+        function renderBar(id, counts, colors, xTitle, yTitle, marginL=150) {
+            const labels = Object.keys(counts);
+            const values = Object.values(counts);
+            const sorted = labels.map((label, i) => ({label, value: values[i], color: colors[i % colors.length]})).sort((a, b) => b.value - a.value);
+            Plotly.newPlot(id, [{
+                x: sorted.map(x => x.value),
+                y: sorted.map(x => x.label),
+                type: 'bar',
+                orientation: 'h',
+                marker: {color: sorted.map(x => x.color), line: {color: '#333', width: 1}},
+                text: sorted.map(x => String(x.value)),
+                textposition: 'auto',
+                textfont: {size: 14, color: '#333'}
+            }], {
+                margin: {l: marginL, r: 50, t: 30, b: 50},
+                height: 300,
+                showlegend: false,
+                xaxis: {title: xTitle, tickfont: {size: 12, color: '#333'}, gridcolor: '#e0e0e0', zeroline: false},
+                yaxis: {title: yTitle, tickfont: {size: 12, color: '#333'}, gridcolor: '#e0e0e0'},
+                plot_bgcolor: '#fff', paper_bgcolor: '#fff'
+            }, {responsive: true});
+        }
+        const colores = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
+
+        // 3. Limpieza general
+        renderBar('limpiezaBar', agruparPorCampo(data, 'Como calificaria la limpieza general del barrio'), colores, 'Número de respuestas', 'Calificación', 80);
+        // 4. Frecuencia residuos
+        renderBar('residuosBar', agruparPorCampo(data, '¿Con qué frecuencia observa residuos en las calles o zonas comunes?'), colores, 'Número de respuestas', 'Frecuencia');
+        // 5. Afecta imagen del barrio
+        renderBar('tiempoBar', agruparPorCampo(data, '¿Considera que la acumulación de residuos afecta la imagen del barrio?'), colores, 'Número de respuestas', 'Respuesta');
+        // 6. Residuos y seguridad
+        renderBar('seguridadBar', agruparPorCampo(data, '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?'), colores, 'Número de respuestas', 'Respuesta', 200);
+        // 7. Calidad de vida
+        renderBar('calidadVidaBar', agruparPorCampo(data, '¿Considera que la acumulación de residuos afecta su calidad de vida?'), colores, 'Número de respuestas', 'Respuesta', 200);
+        // 8. Separación de residuos
+        renderBar('separacionBar', agruparPorCampo(data, '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?'), colores, 'Número de respuestas', 'Respuesta', 200);
+        // 9. Conoce horario recolección
+        renderBar('horarioBar', agruparPorCampo(data, '¿Conoce el horario de recolección de residuos en el barrio?'), colores, 'Número de respuestas', 'Respuesta', 200);
+        // 10. Saca residuos en horarios
+        renderBar('sacaHorariosBar', agruparPorCampo(data, '¿Saca los residuos en los horarios establecidos?'), colores, 'Número de respuestas', 'Respuesta', 200);
+        // 11. Entrega a recuperador
+        renderBar('recuperadorBar', agruparPorCampo(data, '¿Entrega sus residuos aprovechables a un recuperador de oficio?'), colores, 'Cantidad de respuestas', '', 150);
+        // 12. Lugar de disposición
+        const campoLugar = buscarCampo(data, [
+            '¿En qué lugar dispone los residuos?',
+            'En qué lugar dispone los residuos',
+            '¿En que lugar dispone los residuos?', // <-- nombre exacto del Sheets
+            'En que lugar dispone los residuos',
+        ]);
+        if (campoLugar) renderBar('lugarBar', agruparPorCampo(data, campoLugar), colores, 'Cantidad de respuestas', '', 150);
+        // 13. Calificación del servicio
+        renderBar('servicioBar', agruparPorCampo(data, '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito S.A.S?'), colores, 'Cantidad de respuestas', '', 150);
+        // 14. Frecuencia camión recolector
+        renderBar('frecuenciaCamionBar', agruparPorCampo(data, '¿Con qué frecuencia pasa el camión recolector de residuos?'), colores, 'Cantidad de respuestas', '', 150);
+        // 15. Participación en campañas
+        renderBar('participacionBar', agruparPorCampo(data, '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?'), colores, 'Cantidad de respuestas', '', 150);
+        // 16. Iniciativas comunitarias
+        const campoIniciativas = buscarCampo(data, [
+            '¿Le gustaría participar en iniciativas comunitarias de limpieza?',
+            'Le gustaría participar en iniciativas comunitarias de limpieza',
+            '¿Le gustaria participar en iniciativas comunitarias de limpieza?',
+            'Le gustaria participar en iniciativas comunitarias de limpieza',
+        ]);
+        if (campoIniciativas) renderBar('iniciativasBar', agruparPorCampo(data, campoIniciativas), colores, 'Cantidad de respuestas', '', 150);
+        // 17. Educación ambiental
+        renderBar('educacionBar', agruparPorCampo(data, '¿Considera que hace falta más educación ambiental en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
+        // 18. Sabe punto crítico
+        const campoPuntoCritico = buscarCampo(data, [
+            '¿Sabe que es un punto crítico?',
+            'Sabe que es un punto crítico',
+            '¿Sabe que es un punto critico?',
+            'Sabe que es un punto critico',
+        ]);
+        if (campoPuntoCritico) renderBar('puntoCriticoBar', agruparPorCampo(data, campoPuntoCritico), colores, 'Cantidad de respuestas', '', 150);
+        // 19. Identifica puntos críticos
+        renderBar('identificaBar', agruparPorCampo(data, '¿Identifica puntos críticos en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
+        // 20. Tiempo puntos críticos
+        renderBar('tiempoPuntosBar', agruparPorCampo(data, '¿Cada cuanto tiempo ve estos puntos en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
+    }
+
+    // --- Listener para el checkbox y carga de datos ---
+    let datosGenerales = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/el-consuelo/data')
+            .then(res => res.json())
+            .then(json => {
+                if (json.data) {
+                    datosGenerales = json.data;
+                    renderGraficasResultados(datosGenerales);
+                }
+            });
+        // Listener para el checkbox de puntos intervenidos
         document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
             if (e.target.checked) {
-                if (!puntosIntervenidosLayer) {
-                    cargarPuntosCriticos(function(markers) {
-                        puntosIntervenidosLayer = L.layerGroup(markers);
-                        puntosIntervenidosLayer.addTo(map);
-                    }, true);
+                // Filtrar por columna 'Cuadrante o zona' con valores 1,2,3,4,5,6,7,8,17,22
+                const valoresValidos = ['1','2','3','4','5','6','7','8','17','22'];
+                const campoCuadrante = buscarCampo(datosGenerales, ['Cuadrante o zona', 'N', 'Cuadrante']);
+                if (campoCuadrante) {
+                    const filtrados = datosGenerales.filter(row => valoresValidos.includes(String(row[campoCuadrante]).trim()));
+                    renderGraficasResultados(filtrados);
                 } else {
-                    puntosIntervenidosLayer.addTo(map);
+                    renderGraficasResultados([]); // Si no existe el campo, mostrar vacío
                 }
             } else {
-                if (puntosIntervenidosLayer) {
-                    map.removeLayer(puntosIntervenidosLayer);
-                }
+                renderGraficasResultados(datosGenerales);
             }
         });
-
-        // Graficas de torta con Plotly
-        window.addEventListener('DOMContentLoaded', function() {
-            // Nivel educativo
-            var nivelLabels = {{ nivel_educativo_counts.keys()|list|tojson }};
-            var nivelValues = {{ nivel_educativo_counts.values()|list|tojson }};
-            Plotly.newPlot('nivelPie', [{
-                values: nivelValues,
-                labels: nivelLabels,
-                type: 'pie',
-                marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-                textinfo: 'percent',
-                insidetextorientation: 'radial'
-            }], {
-                margin: {t: 0, b: 0, l: 0, r: 0},
-                showlegend: false,
-                height: 320
-            }, {responsive: true});
-
-            // Tiempo de residencia
-            var tiempoLabels = {{ tiempo_reside_counts.keys()|list|tojson }};
-            var tiempoValues = {{ tiempo_reside_counts.values()|list|tojson }};
-            Plotly.newPlot('tiempoPie', [{
-                values: tiempoValues,
-                labels: tiempoLabels,
-                type: 'pie',
-                marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-                textinfo: 'percent',
-                insidetextorientation: 'radial'
-            }], {
-                margin: {t: 0, b: 0, l: 0, r: 0},
-                showlegend: false,
-                height: 320
-            }, {responsive: true});
-
-            // Gráfica de barras de limpieza
-            var limpiezaLabels = Object.keys({{ limpieza_counts|tojson }});
-            var limpiezaValues = Object.values({{ limpieza_counts|tojson }});
-            var limpiezaColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedData = limpiezaLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: limpiezaValues[index],
-                    color: limpiezaColors[index % limpiezaColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedLabels = sortedData.map(function(item) { return item.label; });
-            var sortedValues = sortedData.map(function(item) { return item.value; });
-            var sortedColors = sortedData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('limpiezaBar', [{
-                x: sortedValues,
-                y: sortedLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 80, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Calificación',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de frecuencia de residuos
-            var residuosLabels = Object.keys({{ residuos_counts|tojson }});
-            var residuosValues = Object.values({{ residuos_counts|tojson }});
-            var residuosColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedResiduosData = residuosLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: residuosValues[index],
-                    color: residuosColors[index % residuosColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedResiduosLabels = sortedResiduosData.map(function(item) { return item.label; });
-            var sortedResiduosValues = sortedResiduosData.map(function(item) { return item.value; });
-            var sortedResiduosColors = sortedResiduosData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('residuosBar', [{
-                x: sortedResiduosValues,
-                y: sortedResiduosLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedResiduosColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedResiduosValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 150, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Frecuencia',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de tiempo de residencia
-            var tiempoLabels = Object.keys({{ tiempo_counts|tojson }});
-            var tiempoValues = Object.values({{ tiempo_counts|tojson }});
-            var tiempoColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedTiempoData = tiempoLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: tiempoValues[index],
-                    color: tiempoColors[index % tiempoColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedTiempoLabels = sortedTiempoData.map(function(item) { return item.label; });
-            var sortedTiempoValues = sortedTiempoData.map(function(item) { return item.value; });
-            var sortedTiempoColors = sortedTiempoData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('tiempoBar', [{
-                x: sortedTiempoValues,
-                y: sortedTiempoLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedTiempoColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedTiempoValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 150, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de residuos y seguridad
-            var seguridadLabels = Object.keys({{ seguridad_counts|tojson }});
-            var seguridadValues = Object.values({{ seguridad_counts|tojson }});
-            var seguridadColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedSeguridadData = seguridadLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: seguridadValues[index],
-                    color: seguridadColors[index % seguridadColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedSeguridadLabels = sortedSeguridadData.map(function(item) { return item.label; });
-            var sortedSeguridadValues = sortedSeguridadData.map(function(item) { return item.value; });
-            var sortedSeguridadColors = sortedSeguridadData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('seguridadBar', [{
-                x: sortedSeguridadValues,
-                y: sortedSeguridadLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedSeguridadColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedSeguridadValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 200, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de calidad de vida
-            var calidadVidaLabels = Object.keys({{ calidad_vida_counts|tojson }});
-            var calidadVidaValues = Object.values({{ calidad_vida_counts|tojson }});
-            var calidadVidaColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedCalidadVidaData = calidadVidaLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: calidadVidaValues[index],
-                    color: calidadVidaColors[index % calidadVidaColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedCalidadVidaLabels = sortedCalidadVidaData.map(function(item) { return item.label; });
-            var sortedCalidadVidaValues = sortedCalidadVidaData.map(function(item) { return item.value; });
-            var sortedCalidadVidaColors = sortedCalidadVidaData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('calidadVidaBar', [{
-                x: sortedCalidadVidaValues,
-                y: sortedCalidadVidaLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedCalidadVidaColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedCalidadVidaValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 200, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de separación de residuos
-            var separacionLabels = Object.keys({{ separacion_counts|tojson }});
-            var separacionValues = Object.values({{ separacion_counts|tojson }});
-            var separacionColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedSeparacionData = separacionLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: separacionValues[index],
-                    color: separacionColors[index % separacionColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedSeparacionLabels = sortedSeparacionData.map(function(item) { return item.label; });
-            var sortedSeparacionValues = sortedSeparacionData.map(function(item) { return item.value; });
-            var sortedSeparacionColors = sortedSeparacionData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('separacionBar', [{
-                x: sortedSeparacionValues,
-                y: sortedSeparacionLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedSeparacionColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedSeparacionValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 200, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de conoce horario recolección
-            var horarioLabels = Object.keys({{ horario_counts|tojson }});
-            var horarioValues = Object.values({{ horario_counts|tojson }});
-            var horarioColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedHorarioData = horarioLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: horarioValues[index],
-                    color: horarioColors[index % horarioColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedHorarioLabels = sortedHorarioData.map(function(item) { return item.label; });
-            var sortedHorarioValues = sortedHorarioData.map(function(item) { return item.value; });
-            var sortedHorarioColors = sortedHorarioData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('horarioBar', [{
-                x: sortedHorarioValues,
-                y: sortedHorarioLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedHorarioColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedHorarioValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 200, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de saca residuos en horarios
-            var sacaHorariosLabels = Object.keys({{ saca_horarios_counts|tojson }});
-            var sacaHorariosValues = Object.values({{ saca_horarios_counts|tojson }});
-            var sacaHorariosColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedSacaHorariosData = sacaHorariosLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: sacaHorariosValues[index],
-                    color: sacaHorariosColors[index % sacaHorariosColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedSacaHorariosLabels = sortedSacaHorariosData.map(function(item) { return item.label; });
-            var sortedSacaHorariosValues = sortedSacaHorariosData.map(function(item) { return item.value; });
-            var sortedSacaHorariosColors = sortedSacaHorariosData.map(function(item) { return item.color; });
-            
-            Plotly.newPlot('sacaHorariosBar', [{
-                x: sortedSacaHorariosValues,
-                y: sortedSacaHorariosLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedSacaHorariosColors,
-                    line: {
-                        color: '#333333',
-                        width: 1
-                    }
-                },
-                text: sortedSacaHorariosValues.map(String),
-                textposition: 'auto',
-                textfont: {
-                    size: 14,
-                    color: '#333333'
-                },
-                hoverinfo: 'x+y',
-                hoverlabel: {
-                    bgcolor: '#ffffff',
-                    bordercolor: '#333333',
-                    font: {size: 14}
-                }
-            }], {
-                margin: {l: 200, r: 50, t: 30, b: 50},
-                height: 300,
-                showlegend: false,
-                xaxis: {
-                    title: 'Número de respuestas',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0',
-                    zeroline: false
-                },
-                yaxis: {
-                    title: 'Respuesta',
-                    titlefont: {size: 14, color: '#333333'},
-                    tickfont: {size: 12, color: '#333333'},
-                    gridcolor: '#e0e0e0'
-                },
-                plot_bgcolor: '#ffffff',
-                paper_bgcolor: '#ffffff'
-            }, {responsive: true});
-            
-            // Gráfica de barras de entrega a recuperador
-            var recuperadorLabels = Object.keys({{ recuperador_counts|tojson }});
-            var recuperadorValues = Object.values({{ recuperador_counts|tojson }});
-            var recuperadorColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedRecuperadorData = recuperadorLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: recuperadorValues[index],
-                    color: recuperadorColors[index % recuperadorColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedRecuperadorLabels = sortedRecuperadorData.map(function(item) { return item.label; });
-            var sortedRecuperadorValues = sortedRecuperadorData.map(function(item) { return item.value; });
-            var sortedRecuperadorColors = sortedRecuperadorData.map(function(item) { return item.color; });
-            
-            var recuperadorTrace = {
-                x: sortedRecuperadorValues,
-                y: sortedRecuperadorLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedRecuperadorColors
-                }
-            };
-            
-            var recuperadorLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('recuperadorBar', [recuperadorTrace], recuperadorLayout, {responsive: true});
-            
-            // Gráfica de barras de lugar de disposición
-            var lugarLabels = Object.keys({{ lugar_counts|tojson }});
-            var lugarValues = Object.values({{ lugar_counts|tojson }});
-            var lugarColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedLugarData = lugarLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: lugarValues[index],
-                    color: lugarColors[index % lugarColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedLugarLabels = sortedLugarData.map(function(item) { return item.label; });
-            var sortedLugarValues = sortedLugarData.map(function(item) { return item.value; });
-            var sortedLugarColors = sortedLugarData.map(function(item) { return item.color; });
-            
-            var lugarTrace = {
-                x: sortedLugarValues,
-                y: sortedLugarLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedLugarColors
-                }
-            };
-            
-            var lugarLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('lugarBar', [lugarTrace], lugarLayout, {responsive: true});
-            
-            // Gráfica de barras de calificación del servicio
-            var servicioLabels = Object.keys({{ servicio_counts|tojson }});
-            var servicioValues = Object.values({{ servicio_counts|tojson }});
-            var servicioColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedServicioData = servicioLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: servicioValues[index],
-                    color: servicioColors[index % servicioColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedServicioLabels = sortedServicioData.map(function(item) { return item.label; });
-            var sortedServicioValues = sortedServicioData.map(function(item) { return item.value; });
-            var sortedServicioColors = sortedServicioData.map(function(item) { return item.color; });
-            
-            var servicioTrace = {
-                x: sortedServicioValues,
-                y: sortedServicioLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedServicioColors
-                }
-            };
-            
-            var servicioLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('servicioBar', [servicioTrace], servicioLayout, {responsive: true});
-            
-            // Gráfica de barras de frecuencia camión recolector
-            var frecuenciaCamionLabels = Object.keys({{ frecuencia_camion_counts|tojson }});
-            var frecuenciaCamionValues = Object.values({{ frecuencia_camion_counts|tojson }});
-            var frecuenciaCamionColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedFrecuenciaCamionData = frecuenciaCamionLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: frecuenciaCamionValues[index],
-                    color: frecuenciaCamionColors[index % frecuenciaCamionColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedFrecuenciaCamionLabels = sortedFrecuenciaCamionData.map(function(item) { return item.label; });
-            var sortedFrecuenciaCamionValues = sortedFrecuenciaCamionData.map(function(item) { return item.value; });
-            var sortedFrecuenciaCamionColors = sortedFrecuenciaCamionData.map(function(item) { return item.color; });
-            
-            var frecuenciaCamionTrace = {
-                x: sortedFrecuenciaCamionValues,
-                y: sortedFrecuenciaCamionLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedFrecuenciaCamionColors
-                }
-            };
-            
-            var frecuenciaCamionLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('frecuenciaCamionBar', [frecuenciaCamionTrace], frecuenciaCamionLayout, {responsive: true});
-            
-            // Gráfica de barras de participación en campañas
-            var participacionLabels = Object.keys({{ participacion_counts|tojson }});
-            var participacionValues = Object.values({{ participacion_counts|tojson }});
-            var participacionColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedParticipacionData = participacionLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: participacionValues[index],
-                    color: participacionColors[index % participacionColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedParticipacionLabels = sortedParticipacionData.map(function(item) { return item.label; });
-            var sortedParticipacionValues = sortedParticipacionData.map(function(item) { return item.value; });
-            var sortedParticipacionColors = sortedParticipacionData.map(function(item) { return item.color; });
-            
-            var participacionTrace = {
-                x: sortedParticipacionValues,
-                y: sortedParticipacionLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedParticipacionColors
-                }
-            };
-            
-            var participacionLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('participacionBar', [participacionTrace], participacionLayout, {responsive: true});
-            
-            // Gráfica de barras de iniciativas comunitarias
-            var iniciativasLabels = Object.keys({{ iniciativas_counts|tojson }});
-            var iniciativasValues = Object.values({{ iniciativas_counts|tojson }});
-            var iniciativasColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedIniciativasData = iniciativasLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: iniciativasValues[index],
-                    color: iniciativasColors[index % iniciativasColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedIniciativasLabels = sortedIniciativasData.map(function(item) { return item.label; });
-            var sortedIniciativasValues = sortedIniciativasData.map(function(item) { return item.value; });
-            var sortedIniciativasColors = sortedIniciativasData.map(function(item) { return item.color; });
-            
-            var iniciativasTrace = {
-                x: sortedIniciativasValues,
-                y: sortedIniciativasLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedIniciativasColors
-                }
-            };
-            
-            var iniciativasLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('iniciativasBar', [iniciativasTrace], iniciativasLayout, {responsive: true});
-            
-            // Gráfica de barras de educación ambiental
-            var educacionLabels = Object.keys({{ educacion_counts|tojson }});
-            var educacionValues = Object.values({{ educacion_counts|tojson }});
-            var educacionColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedEducacionData = educacionLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: educacionValues[index],
-                    color: educacionColors[index % educacionColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedEducacionLabels = sortedEducacionData.map(function(item) { return item.label; });
-            var sortedEducacionValues = sortedEducacionData.map(function(item) { return item.value; });
-            var sortedEducacionColors = sortedEducacionData.map(function(item) { return item.color; });
-            
-            var educacionTrace = {
-                x: sortedEducacionValues,
-                y: sortedEducacionLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedEducacionColors
-                }
-            };
-            
-            var educacionLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('educacionBar', [educacionTrace], educacionLayout, {responsive: true});
-            
-            // Gráfica de barras de sabe punto crítico
-            var puntoCriticoLabels = Object.keys({{ punto_critico_counts|tojson }});
-            var puntoCriticoValues = Object.values({{ punto_critico_counts|tojson }});
-            var puntoCriticoColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedPuntoCriticoData = puntoCriticoLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: puntoCriticoValues[index],
-                    color: puntoCriticoColors[index % puntoCriticoColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedPuntoCriticoLabels = sortedPuntoCriticoData.map(function(item) { return item.label; });
-            var sortedPuntoCriticoValues = sortedPuntoCriticoData.map(function(item) { return item.value; });
-            var sortedPuntoCriticoColors = sortedPuntoCriticoData.map(function(item) { return item.color; });
-            
-            var puntoCriticoTrace = {
-                x: sortedPuntoCriticoValues,
-                y: sortedPuntoCriticoLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedPuntoCriticoColors
-                }
-            };
-            
-            var puntoCriticoLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('puntoCriticoBar', [puntoCriticoTrace], puntoCriticoLayout, {responsive: true});
-            
-            // Gráfica de barras de identifica puntos críticos
-            var identificaLabels = Object.keys({{ identifica_counts|tojson }});
-            var identificaValues = Object.values({{ identifica_counts|tojson }});
-            var identificaColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedIdentificaData = identificaLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: identificaValues[index],
-                    color: identificaColors[index % identificaColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedIdentificaLabels = sortedIdentificaData.map(function(item) { return item.label; });
-            var sortedIdentificaValues = sortedIdentificaData.map(function(item) { return item.value; });
-            var sortedIdentificaColors = sortedIdentificaData.map(function(item) { return item.color; });
-            
-            var identificaTrace = {
-                x: sortedIdentificaValues,
-                y: sortedIdentificaLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedIdentificaColors
-                }
-            };
-            
-            var identificaLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('identificaBar', [identificaTrace], identificaLayout, {responsive: true});
-            
-            // Gráfica de barras de tiempo puntos críticos
-            var tiempoPuntosLabels = Object.keys({{ tiempo_puntos_counts|tojson }});
-            var tiempoPuntosValues = Object.values({{ tiempo_puntos_counts|tojson }});
-            var tiempoPuntosColors = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
-            
-            // Ordenar los datos por valor (de mayor a menor)
-            var sortedTiempoPuntosData = tiempoPuntosLabels.map(function(label, index) {
-                return {
-                    label: label,
-                    value: tiempoPuntosValues[index],
-                    color: tiempoPuntosColors[index % tiempoPuntosColors.length]
-                };
-            }).sort(function(a, b) {
-                return b.value - a.value;
-            });
-            
-            var sortedTiempoPuntosLabels = sortedTiempoPuntosData.map(function(item) { return item.label; });
-            var sortedTiempoPuntosValues = sortedTiempoPuntosData.map(function(item) { return item.value; });
-            var sortedTiempoPuntosColors = sortedTiempoPuntosData.map(function(item) { return item.color; });
-            
-            var tiempoPuntosTrace = {
-                x: sortedTiempoPuntosValues,
-                y: sortedTiempoPuntosLabels,
-                type: 'bar',
-                orientation: 'h',
-                marker: {
-                    color: sortedTiempoPuntosColors
-                }
-            };
-            
-            var tiempoPuntosLayout = {
-                margin: {l: 150, r: 50, t: 50, b: 50},
-                xaxis: {title: 'Cantidad de respuestas'},
-                yaxis: {title: ''}
-            };
-            
-            Plotly.newPlot('tiempoPuntosBar', [tiempoPuntosTrace], tiempoPuntosLayout, {responsive: true});
-            
-
-        });
-
-        // Eliminar JS de gráficas de barras dinámicas
-        //
-        // var colores = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE', '#F7DC6F', '#BB8FCE', '#85C1E9'];
-        // var idx = 0;
-        // for (var pregunta in graficas) {
-        //     var labels = Object.keys(graficas[pregunta]);
-        //     var values = Object.values(graficas[pregunta]);
-        //     var trace = {
-        //         x: values,
-        //         y: labels,
-        //         type: 'bar',
-        //         orientation: 'h',
-        //         marker: {color: colores.slice(0, labels.length)},
-        //         text: values.map(String),
-        //         textposition: 'auto',
-        //         hoverinfo: 'x+y'
-        //     };
-        //     Plotly.newPlot('bar-' + idx, [trace], {
-        //         margin: {l: 120, r: 20, t: 10, b: 40},
-        //         height: 40 + 40 * labels.length,
-        //         showlegend: false
-        //     }, {responsive: true});
-        //     idx++;
-        // }
-        //
+    });
     </script>
 </body>
 </html> 
