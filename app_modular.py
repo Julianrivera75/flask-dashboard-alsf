@@ -243,7 +243,7 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Recuperador counts values: {list(recuperador_counts.values())}")
             print(f"Total de filas procesadas para recuperador: {len(raw_data[0:442])}")
             
-            # Procesar columna X (lugar disposición) para gráfica de barras
+            # Procesar columna X (lugar de disposición) para gráfica de barras
             lugar_col = '¿En que lugar dispone los residuos?'
             lugar_counts = {}
             # Procesar solo filas X2 a X440 (registros 1 a 439 en raw_data)
@@ -257,11 +257,11 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Lugar counts values: {list(lugar_counts.values())}")
             print(f"Total de filas procesadas para lugar: {len(raw_data[0:442])}")
             
-            # Procesar columna Z (calificación servicio) para gráfica de barras
+            # Procesar columna Y (calificación del servicio) para gráfica de barras
             servicio_col = '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito S.A.S?'
             servicio_counts = {}
-            # Procesar solo filas Z2 a Z440 (registros 1 a 439 en raw_data)
-            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila Z2) hasta 442 (incluye 441)
+            # Procesar solo filas Y2 a Y440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila Y2) hasta 442 (incluye 441)
                 valor = row.get(servicio_col, '').strip()
                 if valor:
                     servicio_counts[valor] = servicio_counts.get(valor, 0) + 1
@@ -271,12 +271,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Servicio counts values: {list(servicio_counts.values())}")
             print(f"Total de filas procesadas para servicio: {len(raw_data[0:442])}")
             
-            # Procesar columna AA (frecuencia camión) para gráfica de barras
+            # Procesar columna Z (frecuencia camión recolector) para gráfica de barras
             frecuencia_camion_col = '¿Con qué frecuencia pasa el camión recolector de residuos?'
             frecuencia_camion_counts = {}
-            for row in raw_data[0:442]:
-                if frecuencia_camion_col in row:
-                    valor = row[frecuencia_camion_col].strip() if row[frecuencia_camion_col] else 'No responde'
+            # Procesar solo filas Z2 a Z440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila Z2) hasta 442 (incluye 441)
+                valor = row.get(frecuencia_camion_col, '').strip()
+                if valor:
                     frecuencia_camion_counts[valor] = frecuencia_camion_counts.get(valor, 0) + 1
             
             print(f"Frecuencia camión counts: {frecuencia_camion_counts}")
@@ -284,12 +285,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Frecuencia camión counts values: {list(frecuencia_camion_counts.values())}")
             print(f"Total de filas procesadas para frecuencia camión: {len(raw_data[0:442])}")
             
-            # Procesar columna AB (participación campañas) para gráfica de barras
+            # Procesar columna AA (participación en campañas) para gráfica de barras
             participacion_col = '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?'
             participacion_counts = {}
-            for row in raw_data[0:442]:
-                if participacion_col in row:
-                    valor = row[participacion_col].strip() if row[participacion_col] else 'No responde'
+            # Procesar solo filas AA2 a AA440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AA2) hasta 442 (incluye 441)
+                valor = row.get(participacion_col, '').strip()
+                if valor:
                     participacion_counts[valor] = participacion_counts.get(valor, 0) + 1
             
             print(f"Participación counts: {participacion_counts}")
@@ -297,12 +299,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Participación counts values: {list(participacion_counts.values())}")
             print(f"Total de filas procesadas para participación: {len(raw_data[0:442])}")
             
-            # Procesar columna AC (iniciativas comunitarias) para gráfica de barras
-            iniciativas_col = '\xa0¿Le gustaría participar en iniciativas comunitarias de limpieza?'
+            # Procesar columna AB (iniciativas comunitarias) para gráfica de barras
+            iniciativas_col = ' ¿Le gustaría participar en iniciativas comunitarias de limpieza?'
             iniciativas_counts = {}
-            for row in raw_data[0:442]:
-                if iniciativas_col in row:
-                    valor = row[iniciativas_col].strip() if row[iniciativas_col] else 'No responde'
+            # Procesar solo filas AB2 a AB440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AB2) hasta 442 (incluye 441)
+                valor = row.get(iniciativas_col, '').strip()
+                if valor:
                     iniciativas_counts[valor] = iniciativas_counts.get(valor, 0) + 1
             
             print(f"Iniciativas counts: {iniciativas_counts}")
@@ -310,12 +313,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Iniciativas counts values: {list(iniciativas_counts.values())}")
             print(f"Total de filas procesadas para iniciativas: {len(raw_data[0:442])}")
             
-            # Procesar columna AD (educación ambiental) para gráfica de barras
+            # Procesar columna AC (educación ambiental) para gráfica de barras
             educacion_col = '¿Considera que hace falta más educación ambiental en el barrio?'
             educacion_counts = {}
-            for row in raw_data[0:442]:
-                if educacion_col in row:
-                    valor = row[educacion_col].strip() if row[educacion_col] else 'No responde'
+            # Procesar solo filas AC2 a AC440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AC2) hasta 442 (incluye 441)
+                valor = row.get(educacion_col, '').strip()
+                if valor:
                     educacion_counts[valor] = educacion_counts.get(valor, 0) + 1
             
             print(f"Educación counts: {educacion_counts}")
@@ -323,12 +327,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Educación counts values: {list(educacion_counts.values())}")
             print(f"Total de filas procesadas para educación: {len(raw_data[0:442])}")
             
-            # Procesar columna AE (sabe punto crítico) para gráfica de barras
+            # Procesar columna AD (sabe punto crítico) para gráfica de barras
             punto_critico_col = '¿Sabe que es un punto critico?'
             punto_critico_counts = {}
-            for row in raw_data[0:442]:
-                if punto_critico_col in row:
-                    valor = row[punto_critico_col].strip() if row[punto_critico_col] else 'No responde'
+            # Procesar solo filas AD2 a AD440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AD2) hasta 442 (incluye 441)
+                valor = row.get(punto_critico_col, '').strip()
+                if valor:
                     punto_critico_counts[valor] = punto_critico_counts.get(valor, 0) + 1
             
             print(f"Punto crítico counts: {punto_critico_counts}")
@@ -336,12 +341,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Punto crítico counts values: {list(punto_critico_counts.values())}")
             print(f"Total de filas procesadas para punto crítico: {len(raw_data[0:442])}")
             
-            # Procesar columna AF (identifica puntos críticos) para gráfica de barras
+            # Procesar columna AE (identifica puntos críticos) para gráfica de barras
             identifica_col = '¿Identifica puntos críticos en el barrio?'
             identifica_counts = {}
-            for row in raw_data[0:442]:
-                if identifica_col in row:
-                    valor = row[identifica_col].strip() if row[identifica_col] else 'No responde'
+            # Procesar solo filas AE2 a AE440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AE2) hasta 442 (incluye 441)
+                valor = row.get(identifica_col, '').strip()
+                if valor:
                     identifica_counts[valor] = identifica_counts.get(valor, 0) + 1
             
             print(f"Identifica counts: {identifica_counts}")
@@ -349,12 +355,13 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Identifica counts values: {list(identifica_counts.values())}")
             print(f"Total de filas procesadas para identifica: {len(raw_data[0:442])}")
             
-            # Procesar columna AG (tiempo puntos críticos) para gráfica de barras
+            # Procesar columna AF (tiempo puntos críticos) para gráfica de barras
             tiempo_puntos_col = '¿Cada cuanto tiempo ve estos puntos en el barrio?'
             tiempo_puntos_counts = {}
-            for row in raw_data[0:442]:
-                if tiempo_puntos_col in row:
-                    valor = row[tiempo_puntos_col].strip() if row[tiempo_puntos_col] else 'No responde'
+            # Procesar solo filas AF2 a AF440 (registros 1 a 439 en raw_data)
+            for i, row in enumerate(raw_data[0:442], start=2):  # Empezar desde índice 0 (fila AF2) hasta 442 (incluye 441)
+                valor = row.get(tiempo_puntos_col, '').strip()
+                if valor:
                     tiempo_puntos_counts[valor] = tiempo_puntos_counts.get(valor, 0) + 1
             
             print(f"Tiempo puntos counts: {tiempo_puntos_counts}")
@@ -362,60 +369,41 @@ def create_app(config_class=DevelopmentConfig):
             print(f"Tiempo puntos counts values: {list(tiempo_puntos_counts.values())}")
             print(f"Total de filas procesadas para tiempo puntos: {len(raw_data[0:442])}")
             
-            # Procesar columna AH (horario saca residuos) para gráfica de barras
-
-            
-            # Debug: mostrar primeros valores de columna P
-            if raw_data and len(raw_data) > 1:
-                headers = list(raw_data[0].keys()) if raw_data else []
-                col_p = headers[15] if len(headers) > 15 else None
-                print(f'Columna P (índice 15): {repr(col_p)}')
-                print('Primeros 10 valores de columna P:')
-                for row in raw_data[1:11]:  # Filas 2 a 11
-                    print(row.get(col_p, '') if col_p else 'Columna no encontrada')
-
-            print("Entrando a la ruta /el-consuelo y ejecutando depuración de headers...")
-            # Depuración: imprimir headers y primeros valores de la columna O
-            if raw_data:
-                headers = list(raw_data[0].keys())
-                print('Headers:')
-                for idx, h in enumerate(headers):
-                    print(f'{idx}: {repr(h)}')
-                if len(headers) > 14:
-                    col_o = headers[14]
-                    print(f'Columna O (índice 14): {repr(col_o)}')
-                    print('Primeros 10 valores de columna O:')
-                    for row in raw_data[:10]:
-                        print(row.get(col_o, ''))
-
-            return render_template(
-                'pages/el_consuelo.html',
-                num_encuestas=num_encuestas,
-                sexo_counts=sexo_counts,
-                nivel_educativo_counts=nivel_educativo_counts,
-                tiempo_reside_counts=tiempo_reside_counts,
-                limpieza_counts=limpieza_counts,
-                residuos_counts=residuos_counts,
-                tiempo_counts=tiempo_counts,
-                seguridad_counts=seguridad_counts,
-                calidad_vida_counts=calidad_vida_counts,
-                separacion_counts=separacion_counts,
-                horario_counts=horario_counts,
-                saca_horarios_counts=saca_horarios_counts,
-                recuperador_counts=recuperador_counts,
-                lugar_counts=lugar_counts,
-                servicio_counts=servicio_counts,
-                frecuencia_camion_counts=frecuencia_camion_counts,
-                participacion_counts=participacion_counts,
-                iniciativas_counts=iniciativas_counts,
-                educacion_counts=educacion_counts,
-                punto_critico_counts=punto_critico_counts,
-                identifica_counts=identifica_counts,
-                tiempo_puntos_counts=tiempo_puntos_counts,
-                consuelo_data=raw_data
-            )
+            return render_template('pages/el_consuelo.html', 
+                                num_encuestas=num_encuestas,
+                                sexo_counts=sexo_counts,
+                                nivel_educativo_counts=nivel_educativo_counts,
+                                tiempo_reside_counts=tiempo_reside_counts,
+                                limpieza_counts=limpieza_counts,
+                                residuos_counts=residuos_counts,
+                                tiempo_counts=tiempo_counts,
+                                seguridad_counts=seguridad_counts,
+                                calidad_vida_counts=calidad_vida_counts,
+                                separacion_counts=separacion_counts,
+                                horario_counts=horario_counts,
+                                saca_horarios_counts=saca_horarios_counts,
+                                recuperador_counts=recuperador_counts,
+                                lugar_counts=lugar_counts,
+                                servicio_counts=servicio_counts,
+                                frecuencia_camion_counts=frecuencia_camion_counts,
+                                participacion_counts=participacion_counts,
+                                iniciativas_counts=iniciativas_counts,
+                                educacion_counts=educacion_counts,
+                                punto_critico_counts=punto_critico_counts,
+                                identifica_counts=identifica_counts,
+                                tiempo_puntos_counts=tiempo_puntos_counts)
         except Exception as e:
             logger.error(f"Error en dashboard de El Consuelo: {str(e)}")
+            return render_template('error.html', error=str(e)), 500
+
+    @app.route('/convenio-interadministrativo-302')
+    def convenio_interadministrativo_302():
+        """Ruta para la página del Convenio Interadministrativo 302"""
+        try:
+            logger.info("Accediendo a la página del Convenio Interadministrativo 302")
+            return render_template('pages/convenio_interadministrativo_302.html')
+        except Exception as e:
+            logger.error(f"Error en página del convenio: {str(e)}")
             return render_template('error.html', error=str(e)), 500
     
     @app.route('/api/data')

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convenio Interadministrativo 302 - Alcaldía Local de Santa Fe</title>
+    
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Colores principales */
+            --primary-yellow: #fab62d;    /* Amarillo principal */
+            --primary-red: #e4032e;       /* Rojo principal */
+            --white: #ffffff;             /* Blanco */
+            --dark-gray: #333333;         /* Gris oscuro */
+            --light-gray: #f5f5f5;        /* Gris claro */
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--white);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: var(--primary-red);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .menu-btn {
+            position: fixed;
+            top: 1.5rem;
+            left: 2rem;
+            background: var(--primary-red);
+            border: none;
+            color: var(--white);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 2001;
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+        }
+
+        .menu-btn-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 260px;
+            height: 100vh;
+            background: var(--white);
+            box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+            transition: left 0.3s cubic-bezier(.4,0,.2,1);
+            z-index: 1200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+            background: var(--primary-red);
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .side-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .side-menu li {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+            color: var(--dark-gray);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .side-menu li:hover {
+            background: var(--light-gray);
+        }
+
+        .side-menu a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.2);
+            z-index: 1100;
+            display: none;
+        }
+
+        .menu-overlay.open {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .menu-btn {
+                top: 1rem;
+                left: 1rem;
+                font-size: 1.7rem;
+                padding: 0.5rem 1rem;
+                min-width: auto;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+            }
+            
+            .menu-btn-text {
+                display: none;
+            }
+            
+            .side-menu {
+                width: 80vw;
+                min-width: 180px;
+                max-width: 320px;
+            }
+        }
+
+        .content-section {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 2px solid var(--light-gray);
+        }
+
+        .content-section h2 {
+            color: var(--primary-red);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid var(--primary-yellow);
+            padding-bottom: 0.5rem;
+        }
+
+        .content-section h3 {
+            color: var(--dark-gray);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .content-section p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .content-section ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .content-section li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón hamburguesa flotante -->
+    <button id="menu-btn" class="menu-btn" aria-label="Abrir menú">
+        <i class="fas fa-bars"></i>
+        <span class="menu-btn-text">Menú</span>
+    </button>
+    
+    <!-- Overlay antes del menú lateral -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+    
+    <!-- Menú lateral -->
+    <nav id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <!-- <span>Navegación</span> -->
+            <!-- Botón de cerrar eliminado -->
+        </div>
+        <ul id="menu-options" style="margin-top: 70px;">
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
+            <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+            <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</a></li>
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</h1>
+            <p>Alcaldía Local de Santa Fe - Sistema de Monitoreo y Seguimiento</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content-section">
+            <h2><i class="fas fa-info-circle"></i> Información del Convenio</h2>
+            <p>Esta página contiene información detallada sobre el Convenio Interadministrativo 302 entre la Alcaldía Local de Santa Fe y las entidades distritales.</p>
+            
+            <h3>Objetivos del Convenio</h3>
+            <ul>
+                <li>Fortalecer la gestión local en materia de servicios públicos</li>
+                <li>Mejorar la calidad de vida de los habitantes de la localidad</li>
+                <li>Coordinar acciones entre entidades distritales y locales</li>
+                <li>Optimizar recursos y procesos administrativos</li>
+            </ul>
+
+            <h3>Entidades Participantes</h3>
+            <ul>
+                <li>Alcaldía Local de Santa Fe</li>
+                <li>Entidades Distritales de Servicios Públicos</li>
+                <li>Organismos de Control y Vigilancia</li>
+            </ul>
+
+            <h3>Áreas de Cooperación</h3>
+            <ul>
+                <li>Gestión de residuos sólidos</li>
+                <li>Mantenimiento de vías y espacios públicos</li>
+                <li>Programas sociales y comunitarios</li>
+                <li>Desarrollo urbano y territorial</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-chart-line"></i> Indicadores de Cumplimiento</h2>
+            <p>Aquí se mostrarán los indicadores de cumplimiento y seguimiento del convenio interadministrativo.</p>
+            
+            <h3>Métricas de Seguimiento</h3>
+            <ul>
+                <li>Porcentaje de cumplimiento de metas</li>
+                <li>Eficiencia en la ejecución de recursos</li>
+                <li>Satisfacción ciudadana</li>
+                <li>Impacto en la comunidad</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-calendar-alt"></i> Cronograma de Actividades</h2>
+            <p>Información sobre las actividades programadas y el cronograma de ejecución del convenio.</p>
+            
+            <h3>Fases de Implementación</h3>
+            <ul>
+                <li>Fase 1: Diagnóstico y planificación</li>
+                <li>Fase 2: Ejecución de actividades</li>
+                <li>Fase 3: Monitoreo y seguimiento</li>
+                <li>Fase 4: Evaluación y cierre</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+    // --- Interactividad del menú hamburguesa ---
+    const menuBtn = document.getElementById('menu-btn');
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    
+    function openMenu() {
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('open');
+    }
+    
+    function closeMenu() {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('open');
+    }
+    
+    menuBtn.addEventListener('click', function() {
+        if (sideMenu.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+    
+    menuOverlay.addEventListener('click', function() {
+        closeMenu();
+    });
+    </script>
+</body>
+</html> 

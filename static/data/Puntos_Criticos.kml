@@ -1,604 +1,269 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
-<Document id="Puntos Emergentes">
-  <name>Puntos Emergentes</name>
-  <snippet></snippet>
-  <description><![CDATA[]]></description>
-  <Folder id="FeatureLayer0">
-    <name>Puntos Emergentes</name>
-    <snippet></snippet>
-    <description><![CDATA[]]></description>
-    <Placemark id="ID_00000">
-      <name>1</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>1</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Transversal 9 Este 1A 25, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto1</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07176206499997,4.580172930849643,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00001">
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Puntos Críticos</name>
+    <!-- Punto 1 (nuevo) -->
+<Placemark>
+  <name>1</name>
+  <description><![CDATA[
+    <div>
+      <b>Punto crítico 1 </b><br>
+      <div style="margin: 10px 0 10px 0; font-size: 1.05em;">
+        <b>Resultados de bitácora:(Observación Desde 09 de junio de 2025 a 15 de junio de 2025)</b><br>
+        <b>Descripción de residuos evidenciados en el punto crítico número 1:</b> ordinarios, voluminosos (colchones, muebles pequeños) y llantas.<br><br>
+        <b>Características observadas:</b>
+        <ul style="margin-left: 18px;">
+          <li>Andenes en mal estado.</li>
+          <li>Hay letreros de prohibido arrojar basura.</li>
+          <li>El punto está a 200 metros del CAI Dorado y del salón comunal El Consuelo.</li>
+          <li>Está rodeado de zona verde, zona residencial y zona comercial.</li> 
+         <li>Se evidencia que la comunidad es quien deposita alli los residuos</li> 
+         <li>En 14 ocasiones se percibe olor.</li> 
+         <li>En 11 ocasiones se evidenciaron vectores.</li> 
+         <li>En 13 ocasiones se evidenció deficultad en la movilidad</li> 
+         <li>El promedio de m3 de residuos evidenciado es de 2.07 m3</li> 
+         <li>El promedio de m2 ocupados  es 4.74 metros </li> 
+         <li>El promedio de hora, en el cual pasa el operador de aseo es a las 10:12am</li> 
+         <li>Solamente en 2 ocasiones se evidenciaron recuperadores de oficio </li>  
+         <li>No se evidencian cazaregueros</li>  
+         <li>En 5 ocasiones se evidenció servicio de barrido y limpieza </li> 
+
+        </ul>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; max-width:800px; max-height:500px; overflow:auto;">
+        <a href="/static/images/puntos_criticos/1/foto1.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 1"><img src="/static/images/puntos_criticos/1/foto1.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto2.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 2"><img src="/static/images/puntos_criticos/1/foto2.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto3.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 3"><img src="/static/images/puntos_criticos/1/foto3.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto4.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 4"><img src="/static/images/puntos_criticos/1/foto4.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto5.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 5"><img src="/static/images/puntos_criticos/1/foto5.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto6.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 6"><img src="/static/images/puntos_criticos/1/foto6.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto7.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 7"><img src="/static/images/puntos_criticos/1/foto7.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto8.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 8"><img src="/static/images/puntos_criticos/1/foto8.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto9.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 9"><img src="/static/images/puntos_criticos/1/foto9.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto10.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 10"><img src="/static/images/puntos_criticos/1/foto10.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto11.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 11"><img src="/static/images/puntos_criticos/1/foto11.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto12.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 12"><img src="/static/images/puntos_criticos/1/foto12.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto13.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 13"><img src="/static/images/puntos_criticos/1/foto13.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto14.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 14"><img src="/static/images/puntos_criticos/1/foto14.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto15.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 15"><img src="/static/images/puntos_criticos/1/foto15.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto16.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 16"><img src="/static/images/puntos_criticos/1/foto16.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/1/foto17.jpg" data-lightbox="punto1" data-title="Punto crítico 1 - Foto 17"><img src="/static/images/puntos_criticos/1/foto17.jpg" width="180"></a>
+      </div>
+    </div>
+  ]]></description>
+  <Point>
+    <coordinates>-74.07175,4.58012,0</coordinates>
+  </Point>
+</Placemark>
+    <!-- Punto 2 -->
+    <Placemark>
       <name>2</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>2</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Calle 1A 11 Este 14, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto2</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
+      <description>Punto crítico 2</description>
       <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07111204899996,4.580350082849624,0</coordinates>
+        <coordinates>-74.07009,4.57981,0</coordinates>
       </Point>
-    </Placemark>
-    <Placemark id="ID_00002">
-      <name>3</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>3</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 11 Este 1A 52, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto3</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07134338899994,4.580468602849622,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00003">
-      <name>4</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>4</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 11 Este 1B 2, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto4</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07078842399994,4.580891008849595,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00004">
-      <name>5</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>5</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 11 Este 1B 79, El Rocio, Bogotá, Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto6</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07058915899995,4.581098881849613,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00005">
-      <name>6</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>6</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 11C Este 2 27, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto7</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.06870149699995,4.581215136849633,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00006">
-      <name>7</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>7</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 11C Este 2 2, El Rocio, Bogotá, Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto8</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.06843590899996,4.581371501849575,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00007">
-      <name>8</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>8</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Calle 2B 9 Este, El Rocio, Bogotá, Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto10</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.06966244099993,4.58352001384953,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00008">
-      <name>9</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>9</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Transversal 9BIS Este 1C 90, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto11</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.06952920999998,4.582050937849592,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00009">
-      <name>10</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>10</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 9 Este 1C, El Rocio, Bogotá, Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto12</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07034183599995,4.582134149849582,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00010">
-      <name>11</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>11</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Calle 2 8A Este, El Rocio, Bogotá, Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto13</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
-      <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07027033799994,4.582401657849553,0</coordinates>
-      </Point>
-    </Placemark>
-    <Placemark id="ID_00011">
+   <Placemark>
+  <name>3</name>
+  <description><![CDATA[
+    <div>
+      <b>Punto crítico 3</b><br>
+      <div style="max-height:120px; overflow-y:scroll; margin: 10px 0 10px 0; font-size: 1.05em; padding-right:8px;">
+        <b>Resultados de bitácora:</b><br>
+        <b>Descripción del punto crítico número 3:</b> ordinarios y escombro.<br><br>
+        <b>Características observadas:</b>
+        <ul style="margin-left: 18px;">
+          <li>Andenes en mal estado.</li>
+          <li>No hay letreros de prohibido arrojar basura.</li>
+          <li>Está rodeado de zona verde, zona residencial y zona comercial.</li>
+          <li>Andenes en mal estado.</li>
+          <li>Hay letreros de prohibido arrojar basura.</li>
+          <li>El punto está a 200 metros del Colegio Aulas Colombianas.</li>
+          <li>Está rodeado de zona verde, zona residencial y zona comercial.</li> 
+         <li>Se evidencia que la comunidad es quien deposita alli los residuos</li> 
+         <li>En 9 ocasiones se percibe olor.</li> 
+         <li>En 9 ocasiones se evidenciaron vectores.</li> 
+         <li>En 10 ocasiones se evidenció deficultad en la movilidad</li> 
+         <li>El promedio de m3 de residuos evidenciado es de 1.41 m3</li> 
+         <li>El promedio de m2 ocupados  es 1.8 metros </li> 
+         <li>El promedio de hora, en el cual pasa el operador de aseo es a las 09:46am</li> 
+         <li>Solamente en 1 ocasión se evidenciaron recuperadores de oficio </li>  
+         <li>No se evidencian cazaregueros</li>  
+         <li>En 4 ocasiones se evidenció servicio de barrido y limpieza </li> 
+        </ul>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; max-width:800px; max-height:500px; overflow:auto;">
+        <a href="/static/images/puntos_criticos/3/foto1.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 1"><img src="/static/images/puntos_criticos/3/foto1.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto2.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 2"><img src="/static/images/puntos_criticos/3/foto2.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto3.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 3"><img src="/static/images/puntos_criticos/3/foto3.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto4.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 4"><img src="/static/images/puntos_criticos/3/foto4.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto5.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 5"><img src="/static/images/puntos_criticos/3/foto5.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto6.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 6"><img src="/static/images/puntos_criticos/3/foto6.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto7.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 7"><img src="/static/images/puntos_criticos/3/foto7.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto8.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 8"><img src="/static/images/puntos_criticos/3/foto8.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto9.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 9"><img src="/static/images/puntos_criticos/3/foto9.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto10.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 10"><img src="/static/images/puntos_criticos/3/foto10.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto11.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 11"><img src="/static/images/puntos_criticos/3/foto11.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto12.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 12"><img src="/static/images/puntos_criticos/3/foto12.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/3/foto13.jpg" data-lightbox="punto3" data-title="Punto crítico 3 - Foto 13"><img src="/static/images/puntos_criticos/3/foto13.jpg" width="180"></a>
+      </div>
+    </div>
+  ]]></description>
+  <Point>
+    <coordinates>-74.07126,4.58061,0</coordinates>
+  </Point>
+<Placemark>
+  <name>6</name>
+  <description><![CDATA[
+    <div>
+      <b>Punto crítico 6</b><br>
+      <div style="max-height:120px; overflow-y:scroll; margin: 10px 0 10px 0; font-size: 1.05em; padding-right:8px;">
+        <b>Resultados de bitácora:(Observación Desde 09 de junio de 2025 a 15 de junio de 2025)</b><br>
+        <b>Descripción de residuos evidenciados en el punto crítico número 6:</b> ordinarios, escombros y llantas.<br><br>
+        <b>Características observadas:</b>
+        <ul style="margin-left: 18px;">
+          <li>Andenes en mal estado.</li>
+          <li> No hay letreros de prohibido arrojar basura.</li>
+          <li>El punto está a 200 metros del CAI Dorado y del salón comunal El Consuelo.</li>
+          <li>Está rodeado de zona verde, zona residencial y zona comercial.</li>
+          <li>Se evidencia que la comunidad es quien deposita alli los residuos</li>
+          <li>En 12 ocasiones se percibe olor.</li>
+          <li>En 8 ocasiones se evidenciaron vectores.</li>
+          <li>En 15 ocasiones se evidenció deficultad en la movilidad</li>
+          <li>El promedio de m3 de residuos evidenciado es de 2.18 m3</li>
+          <li>El promedio de m2 ocupados  es 4.26 metros </li>
+          <li>El promedio de hora, en el cual pasa el operador de aseo es a las 10:38am</li>
+          <li>Solamente en 2 ocasiones se evidenciaron recuperadores de oficio </li>
+          <li>No se evidencian cazaregueros</li>
+          <li>En 6 ocasiones se evidenció servicio de barrido y limpieza </li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; max-width:800px; max-height:500px; overflow:auto;">
+        <a href="/static/images/puntos_criticos/6/foto1.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 1"><img src="/static/images/puntos_criticos/6/foto1.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto2.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 2"><img src="/static/images/puntos_criticos/6/foto2.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto3.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 3"><img src="/static/images/puntos_criticos/6/foto3.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto4.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 4"><img src="/static/images/puntos_criticos/6/foto4.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto5.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 5"><img src="/static/images/puntos_criticos/6/foto5.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto6.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 6"><img src="/static/images/puntos_criticos/6/foto6.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto7.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 7"><img src="/static/images/puntos_criticos/6/foto7.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto8.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 8"><img src="/static/images/puntos_criticos/6/foto8.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto9.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 9"><img src="/static/images/puntos_criticos/6/foto9.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto10.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 10"><img src="/static/images/puntos_criticos/6/foto10.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto11.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 11"><img src="/static/images/puntos_criticos/6/foto11.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto12.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 12"><img src="/static/images/puntos_criticos/6/foto12.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/6/foto13.jpg" data-lightbox="punto6" data-title="Punto crítico 6 - Foto 13"><img src="/static/images/puntos_criticos/6/foto13.jpg" width="180"></a>
+      </div>
+    </div>
+  ]]></description>
+  <Point>
+    <coordinates>-74.07056,4.58111,0</coordinates>
+  </Point>
+</Placemark>
+
+<Placemark>
+  <name>15</name>
+  <description><![CDATA[
+    <div>
+      <b>Punto crítico 15</b><br>
+      <div style="max-height:120px; overflow-y:scroll; margin: 10px 0 10px 0; font-size: 1.05em; padding-right:8px;">
+        <b>Resultados de bitácora:(Observación Desde 09 de junio de 2025 a 15 de junio de 2025)</b><br>
+        <b>Descripción de residuos evidenciados en el punto crítico número 15:</b> ordinarios <br><br>
+        <b>Características observadas:</b>
+        <ul style="margin-left: 18px;">
+          <li>Andenes en mal estado.</li>
+          <li> No hay letreros de prohibido arrojar basura.</li>
+          <li>Está rodeado de zona residencial y zona comercial.</li>
+          <li>Se evidencia que la comunidad es quien deposita alli los residuos</li>
+          <li>En 7 ocasiones se percibe olor.</li>
+          <li>En 6 ocasiones se evidenciaron vectores.</li>
+          <li>En 7 ocasiones se evidenció deficultad en la movilidad</li>
+          <li>El promedio de m3 de residuos evidenciado es de 2 m3</li>
+          <li>El promedio de m2 ocupados  es 2.14 metros </li>
+          <li>El promedio de hora, en el cual pasa el operador de aseo es a las 10:26am</li>
+          <li>Solamente en 1 ocasión se evidenciaron recuperadores de oficio </li>
+          <li>No se evidencian cazaregueros</li>
+          <li>En 5 ocasiones se evidenció servicio de barrido y limpieza </li>
+        </ul>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:12px; max-width:800px; max-height:500px; overflow:auto;">
+        <a href="/static/images/puntos_criticos/15/foto1.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 1"><img src="/static/images/puntos_criticos/15/foto1.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto2.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 2"><img src="/static/images/puntos_criticos/15/foto2.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto3.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 3"><img src="/static/images/puntos_criticos/15/foto3.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto4.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 4"><img src="/static/images/puntos_criticos/15/foto4.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto5.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 5"><img src="/static/images/puntos_criticos/15/foto5.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto6.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 6"><img src="/static/images/puntos_criticos/15/foto6.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto7.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 7"><img src="/static/images/puntos_criticos/15/foto7.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto8.jpg" data-lightbox="punto15" data-title="Punto crítico 15 - Foto 8"><img src="/static/images/puntos_criticos/15/foto8.jpg" width="180"></a>
+        <a href="/static/images/puntos_criticos/15/foto9.jpg" data-lightbox="punto15" data-title="Punto crítico 
+      </div>
+    </div>
+  ]]></description>
+  <Point>
+    <coordinates>-74.07131,4.58163,0</coordinates>
+  </Point>
+</Placemark>
+    <!-- Punto 12 -->
+    <Placemark>
       <name>12</name>
-      <snippet></snippet>
-      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
-<head>
-<META http-equiv="Content-Type" content="text/html">
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-</head>
-<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
-<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
-<td>12</td>
-</tr>
-<tr>
-<td>
-<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
-<tr>
-<td>Match_addr</td>
-<td>Carrera 9 Este 1B 24, Bogotá, D.C., Distrito Capital</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Addr_type</td>
-<td>Punto15</td>
-</tr>
-<tr>
-<td>Status</td>
-<td>M</td>
-</tr>
-<tr bgcolor="#D4E4F3">
-<td>Score</td>
-<td>100</td>
-</tr>
-</table>
-</td>
-</tr>
-</table>
-</body><script type="text/javascript">
-				function changeImage(attElement, nameElement) {
-				document.getElementById('imageAttachment').src = attElement;
-				document.getElementById('imageName').innerHTML = nameElement;}
-			</script></html>
-]]></description>
-      <styleUrl>#IconStyle00</styleUrl>
+      <description>Punto crítico 12</description>
       <Point>
-        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
-        <coordinates> -74.07128496799999,4.581622999849578,0</coordinates>
+        <coordinates>-74.07041,4.58178,0</coordinates>
       </Point>
     </Placemark>
-  </Folder>
-  <Style id="IconStyle00">
-    <IconStyle>
-      <scale>2.125000</scale>
-      <Icon><href>Layer0_Symbol_c693cbc0_0.png</href></Icon>
-    </IconStyle>
-    <LabelStyle>
-      <color>00000000</color>
-      <scale>0.000000</scale>
-    </LabelStyle>
-    <PolyStyle>
-      <color>ff000000</color>
-      <outline>0</outline>
-    </PolyStyle>
-  </Style>
-</Document>
+    <!-- Punto 13 -->
+    <Placemark>
+      <name>13</name>
+      <description>Punto crítico 13</description>
+      <Point>
+        <coordinates>-74.07025,4.58255,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 10 -->
+    <Placemark>
+      <name>10</name>
+      <description>Punto crítico 10</description>
+      <Point>
+        <coordinates>-74.06994,4.58224,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 11 -->
+    <Placemark>
+      <name>11</name>
+      <description>Punto crítico 11</description>
+      <Point>
+        <coordinates>-74.06958,4.58213,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 9 -->
+    <Placemark>
+      <name>9</name>
+      <description>Punto crítico 9</description>
+      <Point>
+        <coordinates>-74.06815,4.58224,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 8 -->
+    <Placemark>
+      <name>8</name>
+      <description>Punto crítico 8</description>
+      <Point>
+        <coordinates>-74.0683,4.58131,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 7 -->
+    <Placemark>
+      <name>7</name>
+      <description>Punto crítico 7</description>
+      <Point>
+        <coordinates>-74.06871,4.58111,0</coordinates>
+      </Point>
+    </Placemark>
+    <!-- Punto 14 -->
+    <Placemark>
+      <name>14</name>
+      <description>Punto crítico 14</description>
+      <Point>
+        <coordinates>-74.06959,4.5836,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
 </kml>

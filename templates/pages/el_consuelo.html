@@ -21,6 +21,11 @@
     <!-- Leaflet Omnivore plugin para KML -->
     <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
     
+    <!-- Lightbox2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet" />
+    <!-- Lightbox2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+
     <style>
         :root {
             /* Colores principales */
@@ -109,10 +114,9 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem; /* Aumenta el espacio debajo del grid */
+            gap: 2.5rem; /* Más espacio entre gráficas */
+            margin-bottom: 2.5rem;
         }
-
         .stat-card {
             background: var(--white);
             padding: 2rem;
@@ -121,7 +125,11 @@
             text-align: center;
             border: 2px solid var(--light-gray);
             transition: transform 0.2s;
-            margin-bottom: 2rem; /* Aumenta el espacio entre tarjetas */
+            margin-bottom: 2.5rem; /* Más espacio entre tarjetas */
+        }
+        /* Espacio extra debajo de la fila de tortas */
+        .stats-grid + .stat-card {
+            margin-top: 2.5rem;
         }
 
         .stat-card:hover {
@@ -250,7 +258,7 @@
         }
 
         .menu-btn { 
-            position: absolute; 
+            position: fixed;
             top: 1.5rem; 
             left: 2rem; 
             background: var(--primary-red); 
@@ -258,7 +266,7 @@
             color: var(--white); 
             font-size: 2rem; 
             cursor: pointer; 
-            z-index: 1001; 
+            z-index: 2001;
             border-radius: 50px;
             padding: 0.75rem 1.5rem;
             display: flex;
@@ -266,6 +274,7 @@
             justify-content: center;
             gap: 0.5rem;
             min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.10);
         }
         
         .menu-btn-text {
@@ -306,7 +315,7 @@
         .side-menu ul li:hover {
             background-color: var(--light-gray);
         }
-      </style>
+    </style>
 </head>
 <body>
     <header class="header">
@@ -323,10 +332,11 @@
                 <!-- <span>Navegación</span> -->
                 <!-- Botón de cerrar eliminado -->
             </div>
-            <ul id="menu-options">
+            <ul id="menu-options" style="margin-top: 70px;">
                 <li><a href="/" class="active">Inicio</a></li>
                 <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
                 <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+                <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</a></li>
             </ul>
         </nav>
         <div class="header-content">
@@ -354,7 +364,51 @@
                 <h3>{{ num_encuestas }}</h3>
                 <p>Encuestas realizadas</p>
             </div>
+            <div class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff;">
+                <div class="icon"><i class="fas fa-map-marker-alt" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red);">4<span style="color:#888; font-size:1.2rem;">/13</span></h3>
+                <p style="font-size:1.1rem; color:#333;">Puntos críticos Intervenidos</p>
+            </div>
+            <!-- Nuevo indicador: Indicadores de gestión en residuos -->
+            <div id="btn-indicadores-gestion" class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; cursor:pointer;">
+                <div class="icon"><i class="fas fa-recycle" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">4</h3>
+                <p style="font-size:1.1rem; color:#333;">Hojas de vida de Indicadores de gestión de residuos</p>
+            </div>
+            <!-- Nuevo indicador: Ruta Metodológica -->
+            <div id="btn-ruta-metodologica" class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; cursor:pointer;">
+                <div class="icon"><i class="fas fa-route" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">1</h3>
+                <p style="font-size:1.1rem; color:#333;">Ruta Metodológica</p>
+            </div>
+            <!-- Nuevo indicador: Caja de Herramientas -->
+            <div class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff;">
+                <div class="icon"><i class="fas fa-toolbox" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">1</h3>
+                <p style="font-size:1.1rem; color:#333;">Caja de Herramientas</p>
+            </div>
+            <!-- Nuevo indicador: Plan de Trabajo -->
+            <div id="btn-plan-trabajo" class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; cursor:pointer;">
+                <div class="icon"><i class="fas fa-clipboard-list" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">1</h3>
+                <p style="font-size:1.1rem; color:#333;">Plan de Trabajo</p>
+            </div>
+            <!-- Nuevo indicador: Análisis del ejercicio -->
+            <div id="btn-analisis-ejercicio" class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; cursor:pointer;">
+                <div class="icon"><i class="fas fa-chart-bar" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">1</h3>
+                <p style="font-size:1.1rem; color:#333;">Análisis del ejercicio</p>
+            </div>
+            <!-- Nuevo indicador: 4 comportamientos de indicadores de gestión -->
+            <div id="btn-comportamientos-indicadores" class="stat-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; cursor:pointer; margin-left: 1.5rem;">
+                <div class="icon"><i class="fas fa-layer-group" style="color:var(--primary-red);"></i></div>
+                <h3 style="color:var(--primary-red); font-size:2.5rem; font-weight:700;">4</h3>
+                <p style="font-size:1.1rem; color:#333;">Comportamientos de indicadores de gestión</p>
+            </div>
         </div>
+
+        <!-- Título de georreferenciación -->
+        <h2 style="margin-top: 2rem; margin-bottom: 1rem; text-align:center; color: var(--primary-red); font-size: 1.6rem; font-weight: 700;">Georreferenciación de los puntos críticos</h2>
 
         <!-- Toggle para mostrar/ocultar puntos críticos -->
         <div style="text-align:center; margin-bottom: 1rem;">
@@ -375,7 +429,7 @@
         <div id="map" style="width: 100%; height: 500px; margin: 2rem 0; border-radius: 12px; box-shadow: var(--shadow);"></div>
 
         <!-- Título de información general -->
-        <h2 style="margin-top: 1.5rem; margin-bottom: 1rem; text-align:center; color: var(--primary-red); font-size: 1.6rem; font-weight: 700;">Resultados generales de las encuestas</h2>
+        <h2 id="titulo-resultados-encuestas" style="margin-top: 1.5rem; margin-bottom: 1rem; text-align:center; color: var(--primary-red); font-size: 1.6rem; font-weight: 700;">Resultados generales de las encuestas</h2>
 
         <!-- Gráficas de torta debajo del mapa -->
         <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
@@ -509,54 +563,308 @@
         </div>
     </div>
 
+    <!-- Modal para Hojas de vida de Indicadores de gestión de residuos -->
+    <div id="indicadoresModal" class="modal-indicadores" style="display:none;">
+      <div class="modal-content-indicadores">
+        <span class="close-modal-indicadores" id="closeIndicadoresModal">&times;</span>
+        <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Hojas de vida de Indicadores de gestión de residuos</h2>
+        <ul style="list-style:none; padding:0; font-size:1.2rem;">
+          <li style="margin-bottom:1rem;">
+  <button class="acordeon-indicador" id="btn-percepcion-limpieza" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+    <i class="fas fa-broom" style="color:var(--primary-yellow);"></i> Percepción sobre la limpieza del barrio
+    <span id="icono-acordeon-limpieza" style="margin-left:8px;">&#9660;</span>
+  </button>
+  <div id="contenido-percepcion-limpieza" style="display:none; margin-top:1rem; font-size:1rem; background:#f9f9f9; border-radius:8px; padding:1rem; border:1px solid #eee; max-height:320px; overflow-y:auto;">
+    ✅ <b>Nombre del indicador:</b><br>
+    Índice de Percepción Negativa sobre la Limpieza del Barrio (IPNLB)
+    <br><br>
+    🎯 <b>Objetivo:</b><br>
+    Medir el porcentaje de personas que tienen una percepción negativa sobre la limpieza del barrio, a partir de sus respuestas a las preguntas 11 a 15.
+    <br><br>
+    🧮 <b>Fórmula del indicador:</b><br>
+    <code>IPNLB (%) = (N° de personas con percepción negativa / Total de encuestados) × 100</code>
+    <br><br>
+    📌 <b>Criterios para considerar una percepción negativa (puntaje):</b><br>
+    <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+      <tr style="background:#eee;">
+        <th style="padding:4px; border:1px solid #ddd;">Pregunta</th>
+        <th style="padding:4px; border:1px solid #ddd;">Respuestas consideradas negativas</th>
+        <th style="padding:4px; border:1px solid #ddd;">Puntaje</th>
+      </tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">11</td><td style="padding:4px; border:1px solid #ddd;">Calificación 1 o 2</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">12</td><td style="padding:4px; border:1px solid #ddd;">Frecuentemente o Siempre</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">13</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">14</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">15</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+    </table>
+    📊 <b>Puntaje total posible:</b> 0 a 5<br>
+    <b>Umbral para percepción negativa:</b> Se considera percepción negativa cuando el puntaje es igual 3 o menor a este<br>
+    <code>IPNLB = (58 / 100) × 100 = 58%</code>
+    <br><br>
+    📋 <b>Ficha técnica resumida del indicador:</b><br>
+    <b>Nombre:</b> Índice de Percepción Negativa sobre la Limpieza del Barrio (IPNLB)<br>
+    <b>Tipo:</b> Percepción ciudadana<br>
+    <b>Unidad de medida:</b> Porcentaje (%)<br>
+    <b>Fuente de información:</b> Encuesta de percepción<br>
+    <b>Frecuencia de medición:</b> Trimestral / semestral / anual (según tu necesidad)<br>
+    <b>Interpretación:</b> Un valor menor indica una percepción más negativa de la limpieza del barrio.
+  </div>
+</li>
+<li style="margin-bottom:1rem;">
+  <button class="acordeon-indicador" id="btn-habitos-residuos" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+    <i class="fas fa-user-check" style="color:var(--primary-yellow);"></i> Hábitos personales de manejo de residuos
+    <span id="icono-acordeon-habitos" style="margin-left:8px;">&#9660;</span>
+  </button>
+  <div id="contenido-habitos-residuos" style="display:none; margin-top:1rem; font-size:1rem; background:#f9f9f9; border-radius:8px; padding:1rem; border:1px solid #eee; max-height:320px; overflow-y:auto;">
+    🧾 <b>Hoja de vida del indicador</b><br>
+    <b>Nombre del indicador:</b><br>
+    Índice de Buenas Prácticas en la Gestión de Residuos (IBPGR)
+    <br><br>
+    <b>Objetivo del indicador:</b><br>
+    Medir el nivel de adopción de buenas prácticas ciudadanas frente a la separación, disposición y entrega adecuada de residuos sólidos domiciliarios.
+    <br><br>
+    <b>Tipo de indicador:</b><br>
+    Comportamiento – Ambiental – Ciudadano
+    <br><br>
+    <b>Unidad de medida:</b><br>
+    Porcentaje (%)
+    <br><br>
+    <b>Fórmula:</b><br>
+    <code>IBPGR (%) = (N° de personas con prácticas adecuadas (puntaje ≥ 4) / Total de encuestados) × 100</code>
+    <br><br>
+    <b>Preguntas e interpretación de respuestas positivas (buenas prácticas):</b><br>
+    <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+      <tr style="background:#eee;">
+        <th style="padding:4px; border:1px solid #ddd;">Pregunta</th>
+        <th style="padding:4px; border:1px solid #ddd;">Respuesta considerada buena práctica</th>
+        <th style="padding:4px; border:1px solid #ddd;">Puntaje</th>
+      </tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">16. ¿Separa los residuos?</td><td style="padding:4px; border:1px solid #ddd;">Siempre</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">17. ¿Conoce el horario de recolección?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">18. ¿Saca los residuos en horarios?</td><td style="padding:4px; border:1px solid #ddd;">Siempre</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">19. ¿Entrega a recuperador de oficio?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">0. ¿Dónde los dispone?</td><td style="padding:4px; border:1px solid #ddd;">Frente de su casa</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">21. ¿Qué hace si no hay recolección?</td><td style="padding:4px; border:1px solid #ddd;">Espera hasta el día de recolección</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+    </table>
+    <b>Puntaje total posible:</b> 0 a 6<br>
+    <b>Se considera buenas prácticas si el encuestado obtiene 4 puntos o más.</b>
+    <br><br>
+    <b>Periodicidad de medición:</b><br>
+    Trimestral, semestral o anual (según disponibilidad de encuesta)
+    <br><br>
+    <b>Fuente de datos:</b><br>
+    Encuesta de percepción y comportamiento ciudadano
+    <br><br>
+    <b>Interpretación del indicador:</b><br>
+    0–40%: Bajo nivel de buenas prácticas<br>
+    41–70%: Nivel medio<br>
+    71–100%: Buen nivel de adopción de prácticas responsables
+    <br><br>
+    <b>Ejemplo de aplicación (con datos simulados):</b><br>
+    Total encuestados: 349<br>
+    Personas con 4 o más respuestas positivas: 197<br>
+    <code>IBPGR = (197 / 349) × 100 = 56.44%</code><br>
+    El 56.44% de los encuestados demuestra buenas prácticas en la gestión de residuos en su entorno.
+  </div>
+</li>
+<li style="margin-bottom:1rem;">
+  <button class="acordeon-indicador" id="btn-opinion-recoleccion" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+    <i class="fas fa-truck" style="color:var(--primary-yellow);"></i> Opinión sobre el servicio de recolección
+    <span id="icono-acordeon-recoleccion" style="margin-left:8px;">&#9660;</span>
+  </button>
+  <div id="contenido-opinion-recoleccion" style="display:none; margin-top:1rem; font-size:1rem; background:#f9f9f9; border-radius:8px; padding:1rem; border:1px solid #eee; max-height:320px; overflow-y:auto;">
+    <b>Nombre del indicador:</b><br>
+    Índice de Satisfacción con el Servicio de Recolección (ISSR)
+    <br><br>
+    <b>Objetivo del indicador:</b><br>
+    Medir el nivel de satisfacción de la comunidad con la operación del servicio de aseo prestado por Promoambiental Distrito S.A.S, en cuanto a calidad percibida y conocimiento de la frecuencia de recolección.
+    <br><br>
+    <b>Tipo de indicador:</b><br>
+    Percepción – Servicio público
+    <br><br>
+    <b>Unidad de medida:</b><br>
+    Porcentaje (%)
+    <br><br>
+    <b>Fórmula:</b><br>
+    <code>ISSR (%) = (N° de personas satisfechas (puntaje ≥ 2) / Total de encuestados) × 100</code>
+    <br><br>
+    <b>Preguntas e interpretación de respuestas positivas (satisfacción):</b><br>
+    <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+      <tr style="background:#eee;">
+        <th style="padding:4px; border:1px solid #ddd;">Pregunta</th>
+        <th style="padding:4px; border:1px solid #ddd;">Respuesta considerada satisfactoria</th>
+        <th style="padding:4px; border:1px solid #ddd;">Puntaje</th>
+      </tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">22. ¿Cómo califica la operación del servicio?</td><td style="padding:4px; border:1px solid #ddd;">Calificación 4 o 5</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">23. ¿Conoce la frecuencia del camión?</td><td style="padding:4px; border:1px solid #ddd;">martes, jueves y sabado</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+    </table>
+    <b>Puntaje total posible:</b> 0 a 2<br>
+    <b>Se considera satisfacción si el encuestado obtiene 2 puntos.</b>
+    <br><br>
+    <b>Periodicidad de medición:</b><br>
+    Trimestral, semestral o anual
+    <br><br>
+    <b>Fuente de datos:</b><br>
+    Encuesta de percepción ciudadana sobre servicios públicos
+    <br><br>
+    <b>Interpretación del indicador:</b><br>
+    0–40%: Bajo nivel de satisfacción<br>
+    41–70%: Nivel medio<br>
+    71–100%: Alto nivel de satisfacción
+    <br><br>
+    <b>Ejemplo de aplicación (con datos simulados):</b><br>
+    Total encuestados: 349<br>
+    Personas con 2 puntos: 248<br>
+    <code>ISSR = (248 / 349) × 100 = 71.06%</code><br>
+    El 71.06% de los encuestados está satisfecho con el servicio de recolección de residuos de Promoambiental Distrito S.A.S.
+  </div>
+</li>
+<li>
+  <button class="acordeon-indicador" id="btn-participacion-educacion" style="background:none; border:none; color:inherit; font:inherit; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+    <i class="fas fa-chalkboard-teacher" style="color:var(--primary-yellow);"></i> Participación y educación ambiental
+    <span id="icono-acordeon-participacion" style="margin-left:8px;">&#9660;</span>
+  </button>
+  <div id="contenido-participacion-educacion" style="display:none; margin-top:1rem; font-size:1rem; background:#f9f9f9; border-radius:8px; padding:1rem; border:1px solid #eee; max-height:320px; overflow-y:auto;">
+    <b>Hoja de vida del indicador</b><br>
+    <b>Nombre del indicador:</b><br>
+    Índice de Participación y Educación Ambiental (IPEA)
+    <br><br>
+    <b>Objetivo del indicador:</b><br>
+    Medir el nivel de participación, disposición e información de la ciudadanía frente a temas de educación ambiental y conocimiento de problemáticas locales como los puntos críticos de residuos.
+    <br><br>
+    <b>Tipo de indicador:</b><br>
+    Participación – Ambiental – Educativo
+    <br><br>
+    <b>Unidad de medida:</b><br>
+    Porcentaje (%)
+    <br><br>
+    <b>Fórmula del indicador:</b><br>
+    <code>IPEA (%) = (N° de personas con puntaje ≥ 4 / Total de encuestados) × 100</code>
+    <br><br>
+    <b>Preguntas y criterios de evaluación:</b><br>
+    <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+      <tr style="background:#eee;">
+        <th style="padding:4px; border:1px solid #ddd;">Pregunta</th>
+        <th style="padding:4px; border:1px solid #ddd;">Respuesta positiva o esperada</th>
+        <th style="padding:4px; border:1px solid #ddd;">Puntaje</th>
+      </tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">24. ¿Ha participado en campañas?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">25. ¿Le gustaría participar?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">26. ¿Hace falta más educación ambiental?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">27. ¿Sabe qué es un punto crítico?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">28. ¿Identifica puntos críticos en el barrio?</td><td style="padding:4px; border:1px solid #ddd;">Sí</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+      <tr><td style="padding:4px; border:1px solid #ddd;">29. ¿Cada cuánto los ve?</td><td style="padding:4px; border:1px solid #ddd;">Diario o Día de por medio</td><td style="padding:4px; border:1px solid #ddd;">1</td></tr>
+    </table>
+    <b>Puntaje total posible:</b> 0 a 6 puntos<br>
+    <b>Se considera alta participación e interés ambiental si el encuestado obtiene 4 puntos o más.</b>
+    <br><br>
+    <b>Periodicidad de medición:</b><br>
+    Anual o semestral
+    <br><br>
+    <b>Fuente de datos:</b><br>
+    Encuesta de percepción ambiental
+    <br><br>
+    <b>Interpretación del indicador:</b><br>
+    0–30%: Bajo nivel de participación y conciencia ambiental<br>
+    31–60%: Nivel medio<br>
+    61–100%: Alto nivel de compromiso e información ambiental
+    <br><br>
+    <b>Ejemplo de aplicación (con datos simulados):</b><br>
+    Total encuestados: 349<br>
+    Personas con puntaje ≥ 4: 204<br>
+    <code>IPEA = (204 / 349) × 100 = 58.45%</code>
+  </div>
+</li>
+        </ul>
+      </div>
+    </div>
+
+    <style>
+    .modal-indicadores {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.35);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content-indicadores {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 420px;
+      margin: auto;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      position: relative;
+      animation: fadeInModal .3s;
+    }
+    @keyframes fadeInModal {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .close-modal-indicadores {
+      position: absolute;
+      top: 1rem; right: 1.5rem;
+      font-size: 2rem;
+      color: var(--primary-red);
+      cursor: pointer;
+      font-weight: bold;
+      transition: color 0.2s;
+    }
+    .close-modal-indicadores:hover {
+      color: #e4032e;
+    }
+    </style>
+
     <script>
     // --- Inicialización del mapa ---
-    var map = L.map('map').setView([4.60971, -74.08175], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-    // Cargar el archivo KML de El Consuelo
-    var kmlLayer = omnivore.kml('/static/data/ELCONSUELO.kml')
-        .on('ready', function() {
-            map.fitBounds(this.getBounds());
-        })
-        .addTo(map);
+        var map = L.map('map').setView([4.60971, -74.08175], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+        // Cargar el archivo KML de El Consuelo
+        var kmlLayer = omnivore.kml('/static/data/ELCONSUELO.kml')
+            .on('ready', function() {
+                map.fitBounds(this.getBounds());
+            })
+            .addTo(map);
     // Mostrar números en los polígonos
-    let center6 = null;
-    let center19 = null;
+        let center6 = null;
+        let center19 = null;
     var poligonosResaltados = false;
     var poligonosIntervenidos = ['1','2','3','4','5','6','7','8','17','22'];
     var poligonoLayers = [];
-    kmlLayer.on('layeradd', function(e) {
-        if (e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.description) {
-            var desc = e.layer.feature.properties.description;
-            var match = desc.match(/<td>\s*Número Cuadrante\s*<\/td>\s*<td>(\d+)<\/td>/);
-            if (match && match[1]) {
-                var num = match[1];
+        kmlLayer.on('layeradd', function(e) {
+            if (e.layer.feature && e.layer.feature.properties && e.layer.feature.properties.description) {
+                var desc = e.layer.feature.properties.description;
+                var match = desc.match(/<td>\s*Número Cuadrante\s*<\/td>\s*<td>(\d+)<\/td>/);
+                if (match && match[1]) {
+                    var num = match[1];
                 // Guardar referencia a cada polígono por número
                 e.layer._cuadranteNum = num;
                 poligonoLayers.push(e.layer);
-                var center = e.layer.getBounds().getCenter();
-                if (num === '6') center6 = center;
-                if (num === '19') center19 = center;
-                if (num === '5' && center6) {
+                    var center = e.layer.getBounds().getCenter();
+                    if (num === '6') center6 = center;
+                    if (num === '19') center19 = center;
+                    if (num === '5' && center6) {
                     center = L.latLng(center6.lat - 0.0003, center6.lng);
-                } else if (num === '18' && center19) {
+                    } else if (num === '18' && center19) {
                     center = L.latLng(center19.lat, center19.lng + 0.0004);
-                } else if (num === '18') {
+                    } else if (num === '18') {
                     center = L.latLng(4.58085, -74.0687);
+                    }
+                    L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'polygon-label',
+                            html: '<b>' + num + '</b>',
+                            iconSize: [30, 30]
+                        })
+                    }).addTo(map);
                 }
-                L.marker(center, {
-                    icon: L.divIcon({
-                        className: 'polygon-label',
-                        html: '<b>' + num + '</b>',
-                        iconSize: [30, 30]
-                    })
-                }).addTo(map);
             }
-        }
-    });
+        });
     document.getElementById('btn-resaltar-poligonos').addEventListener('click', function() {
         poligonosResaltados = !poligonosResaltados;
         this.textContent = poligonosResaltados ? 'Quitar resaltado de polígonos' : 'Resaltar polígonos intervenidos';
@@ -571,66 +879,78 @@
         });
     });
     // --- Puntos críticos y puntos críticos intervenidos ---
-    var puntosCriticosLayer = null;
-    var puntosIntervenidosLayer = null;
-    function crearMarcadorNumerado(latlng, numero, color) {
-        var iconUrl;
-        if (color === 'aquamarine') {
-            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png'; // Usamos azul como base
-        } else if (color === 'yellow') {
-            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png';
-        } else {
-            iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+    // IDs de puntos intervenidos
+    const puntosIntervenidosIds = ['1', '3', '6', '15'];
+    let puntosCriticosMarkers = [];
+    let puntosCriticosLayer = null;
+    let puntosCriticosData = [];
+
+    function renderPuntosCriticosLayer(intervenidosActivos) {
+        if (puntosCriticosLayer) {
+            map.removeLayer(puntosCriticosLayer);
         }
-        return L.marker(latlng, {
-            icon: L.divIcon({
-                className: 'custom-marker-' + color,
-                html: '<div style="position:relative; width:30px; height:41px;">' +
-                      '<img src="' + iconUrl + '" style="position:absolute; left:0; top:0; width:30px; height:41px; filter:' + (color === 'aquamarine' ? 'hue-rotate(120deg) saturate(2)' : 'none') + ';">' +
-                      '<span style="position:absolute; top:7px; left:0; width:30px; text-align:center; color:black; font-weight:bold; font-size:24px; text-shadow:1px 1px 2px #fff;">' + numero + '</span>' +
-                      '</div>',
-                iconSize: [30, 41],
-                iconAnchor: [15, 41],
-                popupAnchor: [1, -34],
-                shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png',
-                shadowSize: [41, 41]
-            })
-        });
-    }
-    function cargarPuntosCriticos(callback, intervenidosSolo) {
-        fetch('/static/data/Puntos_Criticos.kml')
-            .then(response => response.text())
-            .then(kmlText => {
-                var parser = new DOMParser();
-                var kml = parser.parseFromString(kmlText, 'text/xml');
-                var placemarks = kml.getElementsByTagName('Placemark');
-                var markers = [];
-                for (var i = 0; i < placemarks.length; i++) {
-                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
-                    var lat = parseFloat(coords[1]);
-                    var lng = parseFloat(coords[0]);
-                    var color = null;
-                    if (intervenidosSolo && i < 5) {
-                        color = 'aquamarine';
-                    } else if (!intervenidosSolo) {
-                        color = 'red';
-                    }
-                    if (color) {
-                        markers.push(crearMarcadorNumerado([lat, lng], i + 1, color));
-                    }
-                }
-                callback(markers);
+        const markers = [];
+        const latlngs = [];
+        for (const punto of puntosCriticosData) {
+            const color = (intervenidosActivos && puntosIntervenidosIds.includes(punto.name)) ? 'green' : 'red';
+            const iconUrl = color === 'green'
+                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png'
+                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+            const marker = L.marker([punto.lat, punto.lng], {
+                icon: L.divIcon({
+                    className: 'custom-marker-' + color,
+                    html: '<div style="position:relative; width:30px; height:41px;">' +
+                          '<img src="' + iconUrl + '" style="position:absolute; left:0; top:0; width:30px; height:41px;">' +
+                          '<span style="position:absolute; top:7px; left:0; width:30px; text-align:center; color:black; font-weight:bold; font-size:24px; text-shadow:1px 1px 2px #fff;">' + punto.name + '</span>' +
+                          '</div>',
+                    iconSize: [30, 41],
+                    iconAnchor: [15, 41],
+                    popupAnchor: [1, -34],
+                    shadowUrl: 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/images/marker-shadow.png',
+                    shadowSize: [41, 41]
+                })
             });
+            // Asociar popup con la descripción del KML
+            if (punto.description) {
+                marker.bindPopup(punto.description);
+            } else {
+                marker.bindPopup('Punto crítico ' + punto.name);
+            }
+            markers.push(marker);
+            latlngs.push([punto.lat, punto.lng]);
+        }
+        puntosCriticosLayer = L.layerGroup(markers);
+        puntosCriticosLayer.addTo(map);
+        if (latlngs.length > 0) {
+            map.fitBounds(latlngs, {padding: [50, 50]});
+        }
     }
+
     document.getElementById('toggle-puntos-criticos').addEventListener('change', function(e) {
         if (e.target.checked) {
-            if (!puntosCriticosLayer) {
-                cargarPuntosCriticos(function(markers) {
-                    puntosCriticosLayer = L.layerGroup(markers);
-                    puntosCriticosLayer.addTo(map);
-                }, false);
+            if (puntosCriticosData.length === 0) {
+                fetch('/static/data/puntos_criticos.kml')
+                    .then(response => response.text())
+                    .then(kmlText => {
+                        var parser = new DOMParser();
+                        var kml = parser.parseFromString(kmlText, 'text/xml');
+                        var placemarks = kml.getElementsByTagName('Placemark');
+                        puntosCriticosData = [];
+                        for (var i = 0; i < placemarks.length; i++) {
+                            var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
+                            var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                            var lat = parseFloat(coords[1]);
+                            var lng = parseFloat(coords[0]);
+                            var description = '';
+                            if (placemarks[i].getElementsByTagName('description')[0]) {
+                                description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+                            }
+                            puntosCriticosData.push({name, lat, lng, description});
+                        }
+                        renderPuntosCriticosLayer(false);
+                    });
             } else {
-                puntosCriticosLayer.addTo(map);
+                renderPuntosCriticosLayer(false);
             }
         } else {
             if (puntosCriticosLayer) {
@@ -638,19 +958,15 @@
             }
         }
     });
+
     document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
         if (e.target.checked) {
-            if (!puntosIntervenidosLayer) {
-                cargarPuntosCriticos(function(markers) {
-                    puntosIntervenidosLayer = L.layerGroup(markers);
-                    puntosIntervenidosLayer.addTo(map);
-                }, true);
-            } else {
-                puntosIntervenidosLayer.addTo(map);
+            if (puntosCriticosData.length > 0) {
+                renderPuntosCriticosLayer(true);
             }
         } else {
-            if (puntosIntervenidosLayer) {
-                map.removeLayer(puntosIntervenidosLayer);
+            if (puntosCriticosData.length > 0) {
+                renderPuntosCriticosLayer(false);
             }
         }
     });
@@ -683,24 +999,24 @@
     function renderGraficasResultados(data) {
         // 1. Nivel educativo
         const nivelCounts = agruparPorCampo(data, 'Nivel educativo');
-        Plotly.newPlot('nivelPie', [{
+            Plotly.newPlot('nivelPie', [{
             values: Object.values(nivelCounts),
             labels: Object.keys(nivelCounts),
-            type: 'pie',
-            marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-            textinfo: 'percent',
-            insidetextorientation: 'radial'
+                type: 'pie',
+                marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
+                textinfo: 'percent',
+                insidetextorientation: 'radial'
         }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
 
         // 2. Tiempo en el barrio
         const tiempoCounts = agruparPorCampo(data, '¿Hace cuanto tiempo reside en el barrio?');
-        Plotly.newPlot('tiempoPie', [{
+            Plotly.newPlot('tiempoPie', [{
             values: Object.values(tiempoCounts),
             labels: Object.keys(tiempoCounts),
-            type: 'pie',
-            marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-            textinfo: 'percent',
-            insidetextorientation: 'radial'
+                type: 'pie',
+                marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
+                textinfo: 'percent',
+                insidetextorientation: 'radial'
         }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
 
         // Helper para barras horizontales
@@ -797,6 +1113,7 @@
             });
         // Listener para el checkbox de puntos intervenidos
         document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
+            const tituloResultados = document.getElementById('titulo-resultados-encuestas');
             if (e.target.checked) {
                 // Filtrar por columna 'Cuadrante o zona' con valores 1,2,3,4,5,6,7,8,17,22
                 const valoresValidos = ['1','2','3','4','5','6','7','8','17','22'];
@@ -807,11 +1124,459 @@
                 } else {
                     renderGraficasResultados([]); // Si no existe el campo, mostrar vacío
                 }
+                if (tituloResultados) tituloResultados.textContent = 'Resultados de los poligonos impactados';
             } else {
                 renderGraficasResultados(datosGenerales);
+                if (tituloResultados) tituloResultados.textContent = 'Resultados generales de las encuestas';
             }
         });
     });
     </script>
+    <script>
+    // --- Interactividad del menú hamburguesa ---
+    const menuBtn = document.getElementById('menu-btn');
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    function openMenu() {
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('open');
+    }
+    function closeMenu() {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('open');
+    }
+    menuBtn.addEventListener('click', function() {
+        if (sideMenu.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+    menuOverlay.addEventListener('click', function() {
+        closeMenu();
+    });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var btnIndicadores = document.getElementById('btn-indicadores-gestion');
+      var modalIndicadores = document.getElementById('indicadoresModal');
+      var closeIndicadores = document.getElementById('closeIndicadoresModal');
+      if(btnIndicadores && modalIndicadores && closeIndicadores) {
+        btnIndicadores.addEventListener('click', function() {
+          modalIndicadores.style.display = 'flex';
+        });
+        closeIndicadores.addEventListener('click', function() {
+          modalIndicadores.style.display = 'none';
+        });
+        modalIndicadores.addEventListener('click', function(e) {
+          if (e.target === this) this.style.display = 'none';
+        });
+      }
+    });
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnAcordeon = document.getElementById('btn-percepcion-limpieza');
+  var contenidoAcordeon = document.getElementById('contenido-percepcion-limpieza');
+  var iconoAcordeon = document.getElementById('icono-acordeon-limpieza');
+  if(btnAcordeon && contenidoAcordeon && iconoAcordeon) {
+    btnAcordeon.addEventListener('click', function() {
+      if (contenidoAcordeon.style.display === 'none' || contenidoAcordeon.style.display === '') {
+        contenidoAcordeon.style.display = 'block';
+        iconoAcordeon.innerHTML = '&#9650;';
+      } else {
+        contenidoAcordeon.style.display = 'none';
+        iconoAcordeon.innerHTML = '&#9660;';
+      }
+    });
+  }
+  // Acordeón para hábitos personales de manejo de residuos
+  var btnHabitos = document.getElementById('btn-habitos-residuos');
+  var contenidoHabitos = document.getElementById('contenido-habitos-residuos');
+  var iconoHabitos = document.getElementById('icono-acordeon-habitos');
+  if(btnHabitos && contenidoHabitos && iconoHabitos) {
+    btnHabitos.addEventListener('click', function() {
+      if (contenidoHabitos.style.display === 'none' || contenidoHabitos.style.display === '') {
+        contenidoHabitos.style.display = 'block';
+        iconoHabitos.innerHTML = '&#9650;';
+      } else {
+        contenidoHabitos.style.display = 'none';
+        iconoHabitos.innerHTML = '&#9660;';
+      }
+    });
+  }
+  // Acordeón para opinión sobre el servicio de recolección
+  var btnRecoleccion = document.getElementById('btn-opinion-recoleccion');
+  var contenidoRecoleccion = document.getElementById('contenido-opinion-recoleccion');
+  var iconoRecoleccion = document.getElementById('icono-acordeon-recoleccion');
+  if(btnRecoleccion && contenidoRecoleccion && iconoRecoleccion) {
+    btnRecoleccion.addEventListener('click', function() {
+      if (contenidoRecoleccion.style.display === 'none' || contenidoRecoleccion.style.display === '') {
+        contenidoRecoleccion.style.display = 'block';
+        iconoRecoleccion.innerHTML = '&#9650;';
+      } else {
+        contenidoRecoleccion.style.display = 'none';
+        iconoRecoleccion.innerHTML = '&#9660;';
+      }
+    });
+  }
+  // Acordeón para participación y educación ambiental
+  var btnParticipacion = document.getElementById('btn-participacion-educacion');
+  var contenidoParticipacion = document.getElementById('contenido-participacion-educacion');
+  var iconoParticipacion = document.getElementById('icono-acordeon-participacion');
+  if(btnParticipacion && contenidoParticipacion && iconoParticipacion) {
+    btnParticipacion.addEventListener('click', function() {
+      if (contenidoParticipacion.style.display === 'none' || contenidoParticipacion.style.display === '') {
+        contenidoParticipacion.style.display = 'block';
+        iconoParticipacion.innerHTML = '&#9650;';
+      } else {
+        contenidoParticipacion.style.display = 'none';
+        iconoParticipacion.innerHTML = '&#9660;';
+      }
+    });
+  }
+});
+</script>
+
+<!-- Modal para Ruta Metodológica -->
+<div id="modalRutaMetodologica" class="modal-indicadores" style="display:none;">
+  <div class="modal-content-indicadores" style="max-width:700px; max-height:80vh; overflow-y:auto;">
+    <span class="close-modal-indicadores" id="closeRutaMetodologica">&times;</span>
+    <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Ruta Metodológica</h2>
+    <div class="timeline-metodologia">
+      <div class="timeline-step">
+        <div class="timeline-circle">1</div>
+        <div class="timeline-content">
+          <b>Diagnóstico de identificación de puntos críticos</b><br>
+          <b>Recursos logísticos:</b> Mapa del sector, celular para el registro fotográfico con GPS.<br>
+          <b>Tiempo:</b> 1 día de disponibilidad.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 1 gestor ambiental (Alcaldía Local).
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">2</div>
+        <div class="timeline-content">
+          <b>Levantamiento de Bitácora para la verificación del comportamiento de los puntos</b><br>
+          <b>Recursos logísticos:</b> Bitácora, Celular con acceso a internet.<br>
+          <b>Tiempo:</b> 1 semana de lunes a domingo.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 4 gestores (Alcaldía Local) por día en un turno de 9 am a 4 pm.
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">3</div>
+        <div class="timeline-content">
+          <b>Levantamiento de encuestas de percepción</b><br>
+          <b>Recursos logísticos:</b> Encuesta impresa, tablas para apoyar, esferos, guion de ejecución de la encuesta.<br>
+          <b>Tiempo:</b> 1 semana de lunes a domingo (dependiendo el polígono identificado).<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 4 gestores (Alcaldía Local) por día en un turno de 9 am a 4 pm.
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">4</div>
+        <div class="timeline-content">
+          <b>Sistematización y análisis de información y georreferenciación</b><br>
+          <b>Recursos logísticos:</b> Tablas Excel.<br>
+          <b>Tiempo:</b> 4 días.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 4 gestores por día (Alcaldía Local).
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">5</div>
+        <div class="timeline-content">
+          <b>Proyección Plan de Trabajo</b><br>
+          <b>Recursos logísticos:</b> No aplica.<br>
+          <b>Tiempo:</b> 1 día.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental (Alcaldía Local) y entidades de orden local y distrital.
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">6</div>
+        <div class="timeline-content">
+          <b>Ejecución Plan de Trabajo</b><br>
+          <b>Recursos logísticos:</b> Depende de las actividades planteadas.<br>
+          <b>Tiempo:</b> 3 semanas.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental (Alcaldía Local) y entidades de orden local y distrital.
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">7</div>
+        <div class="timeline-content">
+          <b>Levantamiento de encuestas de percepción</b><br>
+          <b>Recursos logísticos:</b> Encuesta impresa, tablas para apoyar, esferos, guion de ejecución de la encuesta.<br>
+          <b>Tiempo:</b> 1 semana de lunes a domingo (dependiendo el polígono identificado).<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 4 gestores (Alcaldía Local) por día en un turno de 9 am a 4 pm.
+        </div>
+      </div>
+      <div class="timeline-step">
+        <div class="timeline-circle">8</div>
+        <div class="timeline-content">
+          <b>Evaluación de resultados (sistematización y comparación)</b><br>
+          <b>Recursos logísticos:</b> No aplica.<br>
+          <b>Tiempo:</b> 3 días.<br>
+          <b>Recurso humano:</b> 1 profesional ambiental, 1 gestor ambiental (Alcaldía Local).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.timeline-metodologia {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+}
+.timeline-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+.timeline-circle {
+  min-width: 38px;
+  min-height: 38px;
+  background: var(--primary-red);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-top: 2px;
+}
+.timeline-content {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  border-left: 4px solid var(--primary-yellow);
+  font-size: 1.05rem;
+  flex: 1;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnRuta = document.getElementById('btn-ruta-metodologica');
+  var modalRuta = document.getElementById('modalRutaMetodologica');
+  var closeRuta = document.getElementById('closeRutaMetodologica');
+  if(btnRuta && modalRuta && closeRuta) {
+    btnRuta.addEventListener('click', function() {
+      modalRuta.style.display = 'flex';
+    });
+    closeRuta.addEventListener('click', function() {
+      modalRuta.style.display = 'none';
+    });
+    modalRuta.addEventListener('click', function(e) {
+      if (e.target === this) this.style.display = 'none';
+    });
+  }
+});
+</script>
+
+<!-- Modal para Plan de Trabajo -->
+<div id="modalPlanTrabajo" class="modal-indicadores" style="display:none;">
+  <div class="modal-content-indicadores" style="max-width:500px;">
+    <span class="close-modal-indicadores" id="closePlanTrabajo">&times;</span>
+    <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Plan de Trabajo - Documentos</h2>
+    <ul style="font-size:1.15rem;">
+      <li><a href="/static/docs/PI%20Puntos%201%20Y%2015.xlsx" download>Descargar PI Puntos 1 Y 15.xlsx</a></li>
+      <li><a href="/static/docs/PI%20Puntos%203%20Y%206.xlsx" download>Descargar PI Puntos 3 Y 6.xlsx</a></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnPlan = document.getElementById('btn-plan-trabajo');
+  var modalPlan = document.getElementById('modalPlanTrabajo');
+  var closePlan = document.getElementById('closePlanTrabajo');
+  if(btnPlan && modalPlan && closePlan) {
+    btnPlan.addEventListener('click', function() {
+      modalPlan.style.display = 'flex';
+    });
+    closePlan.addEventListener('click', function() {
+      modalPlan.style.display = 'none';
+    });
+    modalPlan.addEventListener('click', function(e) {
+      if (e.target === this) this.style.display = 'none';
+    });
+  }
+});
+</script>
+
+<!-- Modal para Análisis del ejercicio -->
+<div id="modalAnalisisEjercicio" class="modal-indicadores" style="display:none;">
+  <div class="modal-content-indicadores" style="max-width:700px; max-height:80vh; overflow-y:auto;">
+    <span class="close-modal-indicadores" id="closeAnalisisEjercicio">&times;</span>
+    <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Análisis del ejercicio</h2>
+    <ol style="font-size:1.08rem; padding-left:1.2em;">
+      <li><b>Condiciones físicas deterioradas</b>
+        <ul><li>Todos los puntos presentan andenes en mal estado, lo cual no solo afecta la movilidad, sino que genera espacios propensos a ser usados como botaderos.</li></ul>
+      </li>
+      <li><b>Falta o inconsistencia en señalización</b>
+        <ul><li>En 3 de los 4 casos, no hay letreros visibles de prohibido arrojar basura o están en mal estado, lo cual reduce el efecto disuasivo en el comportamiento de los residentes.</li></ul>
+      </li>
+      <li><b>Entorno mixto (residencial y comercial)</b>
+        <ul>
+          <li>Los cuatro puntos están rodeados por zonas residenciales y comerciales, lo que incrementa la generación de residuos y dificulta su control si no hay cultura ciudadana o vigilancia.</li>
+          <li>En menos de 200 metros a la redonda de los puntos críticos, existe batería institucional (Colegio Aulas Colombianas, Parque, Salón Comunal y CAI El Dorado)</li>
+        </ul>
+      </li>
+      <li><b>Depósito comunitario de residuos</b>
+        <ul><li>En todos los puntos, se identifica a la comunidad como la principal responsable del depósito de residuos. Esto evidencia la falta de apropiación colectiva del espacio público.</li></ul>
+      </li>
+      <li><b>Problemas de salud y movilidad</b>
+        <ul>
+          <li>Se evidenciaron vectores (moscas, roedores) y olores desagradables en al menos 6 ocasiones en cada punto. Esto representa un riesgo para la salud pública.</li>
+          <li>Dificultad en la movilidad peatonal y vehicular en todos los casos, con obstrucción del espacio público.</li>
+          <li>En los días de servicio de barrido y limpieza se evidencia que se dejan bolsas del operador de aseo exactamente donde se encuentran los puntos críticos, siendo estos los primeros en incentivar una percepción de equivocada de horarios no establecidos y de lugares legítimos para la disposición de residuos.</li>
+        </ul>
+      </li>
+      <li><b>Bajo aprovechamiento de residuos</b>
+        <ul><li>Recuperadores de oficio fueron observados solo en 1 o 2 ocasiones por punto, lo cual refleja que los residuos reciclables no están siendo clasificados ni aprovechados de forma regular.</li></ul>
+      </li>
+      <li><b>Escasa presencia de estrategias de control</b>
+        <ul>
+          <li>En ningún punto se evidencian cazaregueros ni otras intervenciones comunitarias permanentes que eviten la consolidación del punto crítico.</li>
+          <li>El servicio de barrido y limpieza fue intermitente, reportado entre 4 y 6 veces por semana.</li>
+        </ul>
+      </li>
+      <li><b>Percepción de residuos en el barrio:</b>
+        <ul style="margin-bottom:0.7em;">
+          <li>Existe una percepción negativa de limpieza en el barrio, cerca de 150 de 222 encuestadas en estos puntos críticos opinan que la limpieza está entre los valores 1,2 y 3. Misma tendencia que se replica en todos los polígonos del barrio (381 de 349).</li>
+          <li>Del mismo modo, la ciudadanía observa siempre (160), frecuentemente (48) y a veces (10) residuos en la calle. Y está fuertemente relacionado con la percepción que tiene de la seguridad del barrio (184 de 222) y con la afectación en la calidad de vida (214 de 222). Misma tendencia en los demás polígonos del barrio (430 aproximadamente de 439).</li>
+          <li>158 de 222 personas encuestadas siempre separan los residuos de su casa, 41 nunca y 23 personas a veces lo hacen. Esta misma tendencia se replica en todos los polígonos del barrio (313 de 439 siempre lo hacen).</li>
+          <li>Hay 181 personas encuestadas de 222 personas, que conocen el horario de recolección. Sin embargo 32 personas no lo conocen. Adicionalmente, 203 personas de las 222 encuestadas sacan la basura en los horarios establecidos. Esta misma tendencia se ve reflejada en todos los demás polígonos del barrio. Es decir, la mayoría de las personas conocen los horarios de recolección, pero un porcentaje de 15% aproximadamente no conoce los horarios.</li>
+          <li>Por otro lado, 118 personas encuestadas sacan sus residuos al frente de su casa, 99 personas encuestadas la sacan a la esquina de la cuadra. Esta misma tendencia se replica en todos los polígonos del barrio (426 de 439).</li>
+          <li>El 58% de las personas encuestadas califican el servicio de Promoambiental Distrito S.A.S entre 1 y 3. Porcentaje cercano a la tendencia global del barrio en todos sus polígonos con un 53.5%, que también califica el servicio de aseo entre 1 y 3.</li>
+          <li>El 72% de las personas manifiesta no haber participado en ninguna campaña de limpieza o educación ambiental. En términos generales del barrio, el 74% argumenta no haber participado en ninguna campaña educativa.</li>
+        </ul>
+      </li>
+    </ol>
+    <div style="background:#f3f3f3; border-left:5px solid var(--primary-yellow); border-radius:8px; padding:1.2em 1.5em; margin-top:2em;">
+      <h3 style="color:var(--primary-red); font-size:1.2rem; margin-bottom:0.7em;">Conclusiones generales para la formulación del Plan de Trabajo</h3>
+      <ol style="font-size:1.08rem; padding-left:1.2em;">
+        <li>Los puntos críticos tienen una fuerte relación con el comportamiento comunitario: la falta de cultura ciudadana, sumada a la poca vigilancia, contribuye a que los residentes depositen residuos de forma continua.</li>
+        <li>La ausencia de infraestructura adecuada y mantenimiento del espacio público (andenes, señalización) refuerza el uso informal del área como botadero.</li>
+        <li>La cercanía a zonas comerciales y de alta circulación humana intensifica el problema, al aumentar el flujo de residuos y dificultar el control.</li>
+        <li>Los puntos críticos no están siendo abordados con estrategias sostenidas de recuperación: la limpieza es eventual, y no hay acompañamiento de educación ambiental, monitoreo ni control.</li>
+        <li>Existe una oportunidad de intervención social y técnica: fomentar campañas de educación ambiental, instalar señalización clara, mejorar la infraestructura y fortalecer la presencia de recuperadores o gestores comunitarios podría transformar estos espacios.</li>
+        <li>Es pertinente establecer medidas correctivas como operativos de IVC y sanciones de acuerdo a las Ley 1801 de 2016.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnAnalisis = document.getElementById('btn-analisis-ejercicio');
+  var modalAnalisis = document.getElementById('modalAnalisisEjercicio');
+  var closeAnalisis = document.getElementById('closeAnalisisEjercicio');
+  if(btnAnalisis && modalAnalisis && closeAnalisis) {
+    btnAnalisis.addEventListener('click', function() {
+      modalAnalisis.style.display = 'flex';
+    });
+    closeAnalisis.addEventListener('click', function() {
+      modalAnalisis.style.display = 'none';
+    });
+    modalAnalisis.addEventListener('click', function(e) {
+      if (e.target === this) this.style.display = 'none';
+    });
+  }
+});
+</script>
+
+<!-- Modal para 4 comportamientos de indicadores de gestión -->
+<div id="modalComportamientosIndicadores" class="modal-indicadores" style="display:none;">
+  <div class="modal-content-indicadores" style="max-width:700px; max-height:80vh; overflow-y:auto;">
+    <span class="close-modal-indicadores" id="closeComportamientosIndicadores">&times;</span>
+    <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">4 comportamientos de indicadores de gestión</h2>
+    <div id="barrasComportamientos" style="height:340px; margin-bottom:2rem;"></div>
+    <div style="font-size:1.08rem;">
+      <div style="margin-bottom:1.2em;">
+        <b>Indicador 1: Percepción sobre limpieza del barrio</b><br>
+        <span style="color:var(--primary-yellow); font-weight:600;">General:</span> 177/439 = 40%<br>
+        <span style="color:var(--primary-yellow); font-weight:600;">Específico:</span> 84/222 = 37%<br>
+        <span style="color:#333;">40% de toda la población encuestada en todos los polígonos del barrio manifiestan que la percepción del aseo es negativa.<br>37% de toda la población encuestada en los polígonos a intervenir manifiestan que la percepción del aseo es negativa.</span>
+      </div>
+      <div style="margin-bottom:1.2em;">
+        <b>Indicador 2: Hábitos personales de manejo de residuos</b><br>
+        <span style="color:var(--primary-yellow); font-weight:600;">General:</span> 358/439 = 81%<br>
+        <span style="color:var(--primary-yellow); font-weight:600;">Específico:</span> 185/222 = 83%<br>
+        <span style="color:#333;">Buen nivel de adopción de prácticas responsables.</span>
+      </div>
+      <div style="margin-bottom:1.2em;">
+        <b>Indicador 3: Opinión sobre el servicio de recolección</b><br>
+        <span style="color:var(--primary-yellow); font-weight:600;">General:</span> 92/439 = 21%<br>
+        <span style="color:var(--primary-yellow); font-weight:600;">Específico:</span> 92/222 = 41%<br>
+        <span style="color:#333;">En términos generales del barrio existe un bajo nivel de satisfacción con el servicio de recolección de residuos.<br>En los polígonos a intervenir existe un nivel medio de satisfacción con el servicio de recolección de residuos.</span>
+      </div>
+      <div style="margin-bottom:1.2em;">
+        <b>Indicador 4: Participación y Educación ambiental</b><br>
+        <span style="color:var(--primary-yellow); font-weight:600;">General:</span> 368/439 = 83%<br>
+        <span style="color:var(--primary-yellow); font-weight:600;">Específico:</span> 189/222 = 85.1%<br>
+        <span style="color:#333;">En términos generales del barrio existe un alto nivel de compromiso e información ambiental.<br>En los polígonos intervenidos existe un alto nivel de compromiso con la situación ambiental y de residuos.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var btnComportamientos = document.getElementById('btn-comportamientos-indicadores');
+  var modalComportamientos = document.getElementById('modalComportamientosIndicadores');
+  var closeComportamientos = document.getElementById('closeComportamientosIndicadores');
+  if(btnComportamientos && modalComportamientos && closeComportamientos) {
+    btnComportamientos.addEventListener('click', function() {
+      modalComportamientos.style.display = 'flex';
+      // Renderizar la gráfica solo cuando se abre el modal
+      Plotly.newPlot('barrasComportamientos', [
+        {
+          y: ['Indicador 1', 'Indicador 2', 'Indicador 3', 'Indicador 4'],
+          x: [40, 81, 21, 83],
+          name: 'General',
+          type: 'bar',
+          orientation: 'h',
+          marker: {color: '#fab62d'},
+          text: ["40%", "81%", "21%", "83%"],
+          textposition: 'inside',
+          insidetextanchor: 'middle',
+          textfont: {size: 13, color: '#333'}
+        },
+        {
+          y: ['Indicador 1', 'Indicador 2', 'Indicador 3', 'Indicador 4'],
+          x: [37, 83, 41, 85.1],
+          name: 'Específico',
+          type: 'bar',
+          orientation: 'h',
+          marker: {color: '#e4032e'},
+          text: ["37%", "83%", "41%", "85.1%"],
+          textposition: 'inside',
+          insidetextanchor: 'middle',
+          textfont: {size: 13, color: '#fff'}
+        }
+      ], {
+        barmode: 'group',
+        xaxis: {title: 'Porcentaje (%)', range: [0, 100], tickfont: {size: 11}},
+        yaxis: {title: ''},
+        legend: {orientation: 'h', y: -0.2},
+        margin: {t: 30, b: 60, l: 100, r: 20},
+        height: 340,
+        plot_bgcolor: '#fff',
+        paper_bgcolor: '#fff',
+        font: {family: 'Inter, sans-serif', size: 14}
+      }, {responsive: true});
+    });
+    closeComportamientos.addEventListener('click', function() {
+      modalComportamientos.style.display = 'none';
+    });
+    modalComportamientos.addEventListener('click', function(e) {
+      if (e.target === this) this.style.display = 'none';
+    });
+  }
+});
+</script>
 </body>
 </html> 

@@ -298,15 +298,38 @@
         }
 
         .menu-btn {
-            position: absolute;
+            position: fixed;
             top: 1.5rem;
             left: 2rem;
-            background: transparent;
+            background: var(--primary-red);
             border: none;
             color: var(--white);
             font-size: 2rem;
             cursor: pointer;
-            z-index: 1001;
+            z-index: 2001;
+            border-radius: 50px;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+        }
+        @media (max-width: 768px) {
+            .menu-btn {
+                top: 1rem;
+                left: 1rem;
+                font-size: 1.7rem;
+                padding: 0.5rem 1rem;
+                min-width: auto;
+                border-radius: 50%;
+                width: 48px;
+                height: 48px;
+            }
+            .menu-btn-text {
+                display: none;
+            }
         }
         .side-menu {
             position: fixed;
@@ -418,6 +441,7 @@
                 <li><a href="/" class="active">Inicio</a></li>
                 <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
                 <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+                <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</a></li>
             </ul>
         </nav>
         <div class="header-content">
@@ -1918,6 +1942,30 @@
             }
         });
 
+    </script>
+    <script>
+    // --- Interactividad del menú hamburguesa ---
+    const menuBtn = document.getElementById('menu-btn');
+    const sideMenu = document.getElementById('side-menu');
+    const menuOverlay = document.getElementById('menu-overlay');
+    function openMenu() {
+        sideMenu.classList.add('open');
+        menuOverlay.classList.add('open');
+    }
+    function closeMenu() {
+        sideMenu.classList.remove('open');
+        menuOverlay.classList.remove('open');
+    }
+    menuBtn.addEventListener('click', function() {
+        if (sideMenu.classList.contains('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+    menuOverlay.addEventListener('click', function() {
+        closeMenu();
+    });
     </script>
 </body>
 </html> 
