@@ -316,6 +316,13 @@
             min-width: 120px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.10);
         }
+        
+        .menu-btn-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
         @media (max-width: 768px) {
             .menu-btn {
                 top: 1rem;
@@ -333,10 +340,10 @@
         }
         .side-menu {
             position: fixed;
-            top: 0;
+            top: 80px;
             left: -280px;
             width: 260px;
-            height: 100vh;
+            height: calc(100vh - 80px);
             background: var(--white);
             box-shadow: 2px 0 12px rgba(0,0,0,0.12);
             transition: left 0.3s cubic-bezier(.4,0,.2,1);
@@ -399,9 +406,11 @@
                 font-size: 1.7rem;
             }
             .side-menu {
+                top: 70px;
                 width: 80vw;
                 min-width: 180px;
                 max-width: 320px;
+                height: calc(100vh - 70px);
             }
         }
         .filter-btn {
@@ -438,15 +447,18 @@
                 <!-- Botón de cerrar eliminado -->
             </div>
             <ul id="menu-options">
-                <li><a href="/" class="active">Inicio</a></li>
+                <li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>
                 <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
                 <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
-                <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</a></li>
+                <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 256 y Contrato 302</a></li>
             </ul>
         </nav>
-        <div class="header-content">
-        <h1><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
-        <p>Gestión de datos del barrio San Bernardo</p>
+        <div class="header-content" style="display: flex; align-items: center; gap: 1rem; justify-content: center; text-align: center; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="/static/images/logos/Alcaldia_SantaFe.jpg" alt="Logo Alcaldía Local" style="height: 64px; margin-right: 1rem;">
+                <h1 style="margin: 0;"><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
+            </div>
+            <h3 style="margin: 0.5rem 0 0 0; font-weight: 500; font-size: 1.25rem; color: #fff;">Indicadores de Gestión del Barrio San Bernardo</h3>
         </div>
     </header>
     <div class="container">
@@ -457,6 +469,9 @@
             <div style="display: flex; gap: 1rem; margin: 1.5rem 0 0.5rem 0; flex-wrap: wrap;">
                 <button id="refresh-btn" class="refresh-btn" style="display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-sync-alt"></i> Actualizar datos
+                </button>
+                <button id="test-load-btn" class="refresh-btn" style="display: flex; align-items: center; gap: 0.5rem; background: #fab62d;">
+                    <i class="fas fa-bug"></i> Probar carga
                 </button>
 
             </div>
@@ -485,6 +500,65 @@
                 </div>
             </div>
 
+            <!-- Top 3 Entidades -->
+            <div class="chart-container" style="margin-bottom: 2rem;">
+                <div class="chart-title">
+                    <i class="fas fa-trophy"></i> Top 3 Entidades con mayor participación
+                </div>
+                <div style="width: 100%; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                    <div id="top-entidades" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+                </div>
+            </div>
+
+            <!-- Participación de Entidades en Actividades -->
+            <div class="chart-container" style="margin-bottom: 2rem;">
+                <div class="chart-title">
+                    <i class="fas fa-chart-pie"></i> Participación de Entidades en Actividades
+                </div>
+                <div id="participacion-chart" style="width: 100%; height: 400px; margin-bottom: 1.5rem;"></div>
+                
+                <!-- Detalle de Entidad - Se despliega al hacer clic en la gráfica -->
+                <div id="detalle-entidad" style="display: none; margin-top: 2rem;">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-info-circle"></i> <span id="titulo-entidad">Detalle de Entidad</span>
+                        </div>
+                        <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                            <div style="flex: 1; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                                <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
+                                    <i class="fas fa-list"></i> Actividades Desarrolladas
+                                </h4>
+                                <div id="actividades-resumen" style="max-height: 300px; overflow-y: auto;"></div>
+                            </div>
+                            <div style="flex: 1;">
+                                <div id="grafica-mensual" style="width: 100%; height: 300px;"></div>
+                            </div>
+                        </div>
+                        <div id="actividades-mes" style="display: none; margin-top: 1.5rem;">
+                            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
+                                <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #e4032e; padding-bottom: 0.5rem;">
+                                    <i class="fas fa-calendar-alt"></i> <span id="titulo-actividades-mes">Actividades del Mes</span>
+                                </h4>
+                                <div id="actividades-mes-lista" style="max-height: 400px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                        <div id="actividades-faltantes" style="display: none; margin-top: 1.5rem;">
+                            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffeaa7;">
+                                                        <h4 style="color: #856404; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
+                            <i class="fas fa-exclamation-triangle"></i> Actividades Faltantes por Ejecutar
+                        </h4>
+                                <div id="actividades-faltantes-lista" style="max-height: 400px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Participación Diaria -->
+            <div class="chart-container" style="margin-bottom: 2rem;">
+                <div class="chart-title">
+                    <i class="fas fa-chart-bar"></i> Participación Diaria de Actividades
+                </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <button id="test-daily-chart-btn" class="refresh-btn" style="font-size: 0.9rem; padding: 0.5rem 1rem; background: #17a2b8;">
                     <i class="fas fa-bug"></i> Probar Gráfico Diario
@@ -546,66 +620,10 @@
                 </div>
             </div>
         </div>
-        <!-- Fin gráfico de participación diaria -->
         
-        <div class="chart-container" style="margin-bottom: 2rem;">
-            <div class="chart-title">
-                <i class="fas fa-chart-pie"></i> Participación de Entidades en Actividades
             </div>
-            <div id="participacion-chart" style="width: 100%; height: 400px; margin-bottom: 1.5rem;"></div>
-            <div style="width: 100%; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
-                    <i class="fas fa-trophy"></i> Top 3 Entidades
-                </h4>
-                <div id="top-entidades" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
-            </div>
-        </div>
-        <div id="detalle-entidad" style="display: none; margin-top: 2rem;">
-            <div class="chart-container">
-                <div class="chart-title">
-                    <i class="fas fa-info-circle"></i> <span id="titulo-entidad">Detalle de Entidad</span>
-                </div>
-                <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-                    <div style="flex: 1; background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                        <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
-                            <i class="fas fa-list"></i> Actividades Desarrolladas
-                        </h4>
-                        <div id="actividades-resumen" style="max-height: 300px; overflow-y: auto;"></div>
-                    </div>
-                    <div style="flex: 1;">
-                        <div id="grafica-mensual" style="width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-                <div id="actividades-mes" style="display: none; margin-top: 1.5rem;">
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border: 1px solid #e9ecef;">
-                        <h4 style="color: #333; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #e4032e; padding-bottom: 0.5rem;">
-                            <i class="fas fa-calendar-alt"></i> <span id="titulo-actividades-mes">Actividades del Mes</span>
-                        </h4>
-                        <div id="actividades-mes-lista" style="max-height: 400px; overflow-y: auto;"></div>
-                    </div>
-                </div>
-                <div id="actividades-faltantes" style="display: none; margin-top: 1.5rem;">
-                    <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border: 1px solid #ffeaa7;">
-                        <h4 style="color: #856404; margin-bottom: 1rem; font-size: 1.1rem; border-bottom: 2px solid #fab62d; padding-bottom: 0.5rem;">
-                            <i class="fas fa-exclamation-triangle"></i> Actividades con Fechas Faltantes
-                        </h4>
-                        <div id="actividades-faltantes-lista" style="max-height: 400px; overflow-y: auto;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <nav id="side-menu" class="side-menu">
-        <div class="side-menu-header">
-            <span>Navegación</span>
-            <button id="close-menu" class="close-menu" aria-label="Cerrar menú"><i class="fas fa-times"></i></button>
-        </div>
-        <ul id="menu-options">
-            <!-- Opciones del menú se agregarán aquí -->
-        </ul>
-    </nav>
-    <div id="menu-overlay" class="menu-overlay"></div>
 
+    <!-- Datos Detallados -->
     <div class="container">
         <div id="loading" class="loading">
             <i class="fas fa-spinner"></i>
@@ -657,8 +675,19 @@
         // Cargar datos y mostrar solo la tabla
         async function loadData() {
             console.log('🔄 Iniciando carga de datos...');
+            console.log('🌐 Intentando conectar a: /api/data');
+            
             try {
+                console.log('📡 Enviando petición fetch...');
                 const response = await fetch('/api/data');
+                console.log('📥 Respuesta recibida:', response);
+                console.log('📊 Status:', response.status);
+                console.log('📋 Headers:', response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 console.log('📊 Respuesta del servidor:', data);
                 
@@ -666,6 +695,12 @@
                     console.error('❌ Error en datos:', data.error);
                     showError(data.error); 
                     return; 
+                }
+                
+                if (!data.data || !Array.isArray(data.data)) {
+                    console.error('❌ Datos no válidos:', data);
+                    showError('Formato de datos inválido');
+                    return;
                 }
                 
                 datosGlobales = data.data; // Guardar datos globalmente
@@ -680,6 +715,7 @@
                 return data; // Retornar los datos para que se pueda usar como promesa
             } catch (error) { 
                 console.error('❌ Error al cargar datos:', error);
+                console.error('❌ Stack trace:', error.stack);
                 showError('Error al cargar los datos: ' + error.message); 
                 throw error; // Re-lanzar el error para que se pueda manejar
             }
@@ -759,10 +795,28 @@
                 
                 // Contar fechas válidas e inválidas
                 const fecha = row['Fecha final de ejecución'];
-                if (fecha && fecha !== 'None' && fecha !== '' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                if (fecha && fecha !== 'None' && fecha !== '') {
                     try {
-                        const fechaObj = new Date(fecha);
-                        if (!isNaN(fechaObj.getTime())) {
+                        let fechaObj = null;
+                        let fechaValida = false;
+                        
+                        // Verificar formato D/M/YY o DD/MM/YY
+                        if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                            const partes = fecha.split('/');
+                            const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                            fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            // Formato ISO: YYYY-MM-DD
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else {
+                            // Intentar con Date() directamente
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        }
+                        
+                        if (fechaValida) {
                             fechasValidas++;
                         } else {
                             fechasInvalidas++;
@@ -952,47 +1006,17 @@
             // Inicializar contador de días sin homicidios
             initDiasSinHomicidios();
             
-            // Inicializar menú lateral
-            initMenu();
-            
             // Cargar datos iniciales
             loadData();
+            
+            // Event listener para el botón de prueba
+            document.getElementById('test-load-btn').addEventListener('click', function() {
+                console.log('🔧 Botón de prueba clickeado');
+                loadData();
+            });
         });
 
-        // Función para inicializar el menú lateral
-        function initMenu() {
-            const menuOptions = document.getElementById('menu-options');
-            
-            // Crear el botón de Inicio
-            const liInicio = document.createElement('li');
-            liInicio.innerHTML = '<i class="fas fa-home"></i> Inicio';
-            liInicio.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                window.location.href = '/';
-            });
-            menuOptions.appendChild(liInicio);
-            
-            // Crear el botón del Barrio San Bernardo
-            const liSanBernardo = document.createElement('li');
-            liSanBernardo.innerHTML = '<i class="fas fa-map-marker-alt"></i> Barrio San Bernardo';
-            liSanBernardo.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                console.log('Ya estás en el Dashboard del Barrio San Bernardo');
-            });
-            menuOptions.appendChild(liSanBernardo);
-            
-            // Crear el botón de Datos
-            const liDatos = document.createElement('li');
-            liDatos.innerHTML = '<i class="fas fa-database"></i> Datos';
-            liDatos.addEventListener('click', () => {
-                sideMenu.classList.remove('open');
-                menuOverlay.classList.remove('open');
-                window.location.href = '/datos';
-            });
-            menuOptions.appendChild(liDatos);
-        }
+
 
 
 
@@ -1331,6 +1355,9 @@
             // Filtrar datos de la entidad seleccionada
             const datosEntidad = datosCompletos.filter(row => row['Entidad'] === entidad);
             
+            console.log(`🔍 Mostrando detalle para entidad: ${entidad}`);
+            console.log(`📊 Total de registros de la entidad: ${datosEntidad.length}`);
+            
             // Actualizar título
             document.getElementById('titulo-entidad').textContent = `Detalle de ${entidad}`;
             
@@ -1349,9 +1376,18 @@
             const container = document.getElementById('actividades-resumen');
             container.innerHTML = '';
             
+            // Buscar la columna "Fecha final de ejecución"
+            const columnas = Object.keys(datosEntidad[0] || {});
+            let columnaFecha = columnas.find(col => col === 'Fecha final de ejecución');
+            
+            if (!columnaFecha) {
+                console.log(`❌ No se encontró la columna "Fecha final de ejecución"`);
+                return;
+            }
+            
             datosEntidad.forEach((row, index) => {
                 const actividad = row['Resultados ( Resumen del resultado obtenido de la intervención)'] || 'Sin descripción';
-                const fecha = row['Fecha final de ejecución'] || 'Sin fecha';
+                const fecha = row[columnaFecha] || 'Sin fecha';
                 
                 const actividadDiv = document.createElement('div');
                 actividadDiv.style.cssText = `
@@ -1390,27 +1426,86 @@
             
             console.log(`🔍 Analizando ${datosEntidad.length} registros para gráfica mensual...`);
             
+            // Buscar la columna "Fecha final de ejecución"
+            const columnas = Object.keys(datosEntidad[0] || {});
+            let columnaFecha = columnas.find(col => col === 'Fecha final de ejecución');
+            
+            if (!columnaFecha) {
+                console.log(`❌ No se encontró la columna "Fecha final de ejecución"`);
+                return;
+            }
+            
+            console.log(`🔍 Usando columna de fecha: "${columnaFecha}"`);
+            
             datosEntidad.forEach((row, index) => {
-                const fecha = row['Fecha final de ejecución'];
+                const fecha = row[columnaFecha];
                 console.log(`📅 Registro ${index + 1}: "${fecha}" (tipo: ${typeof fecha})`);
                 
                 if (fecha && fecha !== 'None' && fecha !== '' && fecha !== null) {
                     try {
-                        // Verificar si es una fecha ISO válida
-                        if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                            const fechaObj = new Date(fecha);
-                            if (!isNaN(fechaObj.getTime())) {
-                                const mes = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
-                                actividadesPorMes[mes] = (actividadesPorMes[mes] || 0) + 1;
+                        let fechaObj = null;
+                        let fechaValida = false;
+                        
+                        // Intentar diferentes formatos de fecha
+                        if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                            // Formato específico: "1/03/25" o "27/03/25" (D/M/YY o DD/MM/YY)
+                            const partes = fecha.split('/');
+                            // Convertir año de 2 dígitos a 4 dígitos (asumiendo 20xx)
+                            const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                            fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato D/M/YY o DD/MM/YY detectado: ${fecha}`);
+                        } else if (fecha.match(/^\d{2}-[a-zA-Z]{3}-\d{4}$/)) {
+                            // Formato específico: "25-mar-2025"
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato DD-MMM-YYYY detectado: ${fecha}`);
+                        } else if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            // Formato ISO: YYYY-MM-DD
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato ISO detectado: ${fecha}`);
+                        } else if (fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                            // Formato DD/MM/YYYY
+                            const partes = fecha.split('/');
+                            fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato DD/MM/YYYY detectado: ${fecha}`);
+                        } else if (fecha.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                            // Formato YYYY/MM/DD
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato YYYY/MM/DD detectado: ${fecha}`);
+                        } else if (fecha.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                            // Formato DD-MM-YYYY
+                            const partes = fecha.split('-');
+                            fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Formato DD-MM-YYYY detectado: ${fecha}`);
+                        } else {
+                            // Intentar con Date() directamente
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                            console.log(`   🔍 Intentando parseo directo: ${fecha}`);
+                        }
+                        
+                        if (fechaValida) {
+                            // Verificar que la fecha sea de 2025 y solo marzo, abril o mayo
+                            const año = fechaObj.getFullYear();
+                            const mes = fechaObj.getMonth() + 1; // getMonth() devuelve 0-11
+                            
+                            if (año === 2025 && (mes >= 3 && mes <= 5)) {
+                                const mesNombre = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+                                actividadesPorMes[mesNombre] = (actividadesPorMes[mesNombre] || 0) + 1;
                                 fechasValidas++;
-                                console.log(`   ✅ Fecha válida: ${fecha} → ${mes}`);
+                                console.log(`   ✅ Fecha válida (2025, mes ${mes}): ${fecha} → ${mesNombre}`);
                             } else {
                                 fechasInvalidas++;
-                                console.log(`   ❌ Fecha inválida (NaN): ${fecha}`);
+                                console.log(`   ❌ Fecha fuera del rango permitido (2025, marzo-mayo): ${fecha} → Año: ${año}, Mes: ${mes}`);
                             }
                         } else {
                             fechasInvalidas++;
-                            console.log(`   ❌ Formato no ISO: ${fecha}`);
+                            console.log(`   ❌ Fecha inválida: ${fecha}`);
                         }
                     } catch (e) {
                         fechasInvalidas++;
@@ -1418,7 +1513,7 @@
                     }
                 } else {
                     fechasVacias++;
-                    console.log(`   ⚪ Fecha vacía: "${fecha}"`);
+                    console.log(`   ⚪ Fecha vacía: "${fecha}" - Actividad faltante por ejecutar`);
                     // Agregar a la lista de actividades faltantes
                     actividadesFaltantes.push({
                         index: index + 1,
@@ -1514,7 +1609,7 @@
                     <div style="text-align: center; padding: 2rem; color: #856404;">
                         <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 1rem; color: #28a745;"></i>
                         <p><strong>¡Excelente!</strong></p>
-                        <p>Todas las actividades tienen fechas válidas</p>
+                        <p>Todas las actividades programadas fueron ejecutadas</p>
                     </div>
                 `;
             } else {
@@ -1630,17 +1725,67 @@
         
         // --- Mostrar actividades de un mes específico ---
         function mostrarActividadesMes(mesSeleccionado, datosEntidad) {
+            // Buscar la columna "Fecha final de ejecución"
+            const columnas = Object.keys(datosEntidad[0] || {});
+            let columnaFecha = columnas.find(col => col === 'Fecha final de ejecución');
+            
+            if (!columnaFecha) {
+                console.log(`❌ No se encontró la columna "Fecha final de ejecución"`);
+                return;
+            }
+            
             // Filtrar actividades del mes seleccionado
             const actividadesDelMes = datosEntidad.filter(row => {
-                const fecha = row['Fecha final de ejecución'];
+                const fecha = row[columnaFecha];
                 if (fecha && fecha !== 'None' && fecha !== '') {
                     try {
-                        // Verificar si es una fecha ISO válida
-                        if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                            const fechaObj = new Date(fecha);
-                            if (!isNaN(fechaObj.getTime())) {
-                                const mes = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
-                                return mes === mesSeleccionado;
+                        let fechaObj = null;
+                        let fechaValida = false;
+                        
+                        // Intentar diferentes formatos de fecha (mismo código que en mostrarGraficaMensual)
+                        if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                            // Formato específico: "1/03/25" o "27/03/25" (D/M/YY o DD/MM/YY)
+                            const partes = fecha.split('/');
+                            // Convertir año de 2 dígitos a 4 dígitos (asumiendo 20xx)
+                            const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                            fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{2}-[a-zA-Z]{3}-\d{4}$/)) {
+                            // Formato específico: "25-mar-2025"
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            // Formato ISO: YYYY-MM-DD
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                            // Formato DD/MM/YYYY
+                            const partes = fecha.split('/');
+                            fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                            // Formato YYYY/MM/DD
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else if (fecha.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                            // Formato DD-MM-YYYY
+                            const partes = fecha.split('-');
+                            fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        } else {
+                            // Intentar con Date() directamente
+                            fechaObj = new Date(fecha);
+                            fechaValida = !isNaN(fechaObj.getTime());
+                        }
+                        
+                        if (fechaValida) {
+                            // Verificar que la fecha sea de 2025 y solo marzo, abril o mayo
+                            const año = fechaObj.getFullYear();
+                            const mes = fechaObj.getMonth() + 1; // getMonth() devuelve 0-11
+                            
+                            if (año === 2025 && (mes >= 3 && mes <= 5)) {
+                                const mesNombre = fechaObj.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+                                return mesNombre === mesSeleccionado;
                             }
                         }
                     } catch (e) {
@@ -1662,19 +1807,54 @@
             } else {
                 actividadesDelMes.forEach((row, index) => {
                     const actividad = row['Resultados ( Resumen del resultado obtenido de la intervención)'] || 'Sin descripción';
-                    const fecha = row['Fecha final de ejecución'] || 'Sin fecha';
+                    const fecha = row[columnaFecha] || 'Sin fecha';
                     const poblacion = row['Población impactada'] || '0';
                     
-                    // Formatear fecha para mostrar
+                                        // Formatear fecha para mostrar
                     let fechaFormateada = fecha;
-                    if (fecha && fecha !== 'None' && fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    if (fecha && fecha !== 'None' && fecha !== '') {
                         try {
-                            const fechaObj = new Date(fecha);
-                            fechaFormateada = fechaObj.toLocaleDateString('es-CO', { 
-                                year: 'numeric', 
-                                month: 'long', 
-                                day: 'numeric' 
-                            });
+                            let fechaObj = null;
+                            let fechaValida = false;
+                            
+                            // Intentar diferentes formatos de fecha
+                            if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                                // Formato específico: "1/03/25" o "27/03/25" (D/M/YY o DD/MM/YY)
+                                const partes = fecha.split('/');
+                                const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                                fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            } else if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                                // Formato ISO: YYYY-MM-DD
+                                fechaObj = new Date(fecha);
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            } else if (fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                                // Formato DD/MM/YYYY
+                                const partes = fecha.split('/');
+                                fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            } else if (fecha.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                                // Formato YYYY/MM/DD
+                                fechaObj = new Date(fecha);
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            } else if (fecha.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                                // Formato DD-MM-YYYY
+                                const partes = fecha.split('-');
+                                fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            } else {
+                                // Intentar con Date() directamente
+                                fechaObj = new Date(fecha);
+                                fechaValida = !isNaN(fechaObj.getTime());
+                            }
+                            
+                            if (fechaValida) {
+                                fechaFormateada = fechaObj.toLocaleDateString('es-CO', { 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                });
+                            }
                         } catch (e) {
                             fechaFormateada = fecha;
                         }
@@ -1744,22 +1924,78 @@
             console.log(`✅ Contenedor encontrado:`, container);
             console.log(`📏 Dimensiones del contenedor:`, container.offsetWidth, 'x', container.offsetHeight);
             
-            // Verificar que existe la columna de fecha
-            if (!data[0] || !data[0]['Fecha final de ejecución']) {
-                console.log(`❌ No se encontró la columna 'Fecha final de ejecución'`);
-                console.log(`📋 Columnas disponibles:`, Object.keys(data[0] || {}));
+                        // Verificar que existe la columna de fecha
+            const columnas = Object.keys(data[0] || {});
+            console.log(`📋 Columnas disponibles:`, columnas);
+            
+            // Buscar la columna "Fecha final de ejecución"
+            let columnaFecha = columnas.find(col => col === 'Fecha final de ejecución');
+            if (columnaFecha) {
+                console.log(`✅ Columna de fecha encontrada: "${columnaFecha}"`);
+            } else {
+                console.log(`❌ No se encontró la columna "Fecha final de ejecución"`);
+                console.log(`📋 Columnas disponibles:`, columnas);
                 return;
             }
             
-            console.log(`✅ Columna de fecha encontrada`);
-            
             // Filtrar actividades con fechas válidas y procesar
             const actividadesConFecha = data.filter(item => {
-                const fecha = item['Fecha final de ejecución'];
-                return fecha && fecha !== '' && fecha !== 'null' && fecha !== 'None';
+                const fecha = item[columnaFecha];
+                if (!fecha || fecha === '' || fecha === 'null' || fecha === 'None') {
+                    return false;
+                }
+                
+                // Verificar que la fecha sea válida usando la misma lógica que en mostrarGraficaMensual
+                try {
+                    let fechaObj = null;
+                    let fechaValida = false;
+                    
+                    // Formato específico: "1/03/25" o "27/03/25" (D/M/YY o DD/MM/YY)
+                    if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                        const partes = fecha.split('/');
+                        // Convertir año de 2 dígitos a 4 dígitos (asumiendo 20xx)
+                        const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                        fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                        fechaValida = !isNaN(fechaObj.getTime());
+                        console.log(`   🔍 Formato D/M/YY o DD/MM/YY detectado: ${fecha} → ${fechaObj}`);
+                    } else if (fecha.match(/^\d{2}-[a-zA-Z]{3}-\d{4}$/)) {
+                        // Formato: "25-mar-2025"
+                        fechaObj = new Date(fecha);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                        console.log(`   🔍 Formato DD-MMM-YYYY detectado: ${fecha} → ${fechaObj}`);
+                    } else if (fecha.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        // Formato ISO: YYYY-MM-DD
+                        fechaObj = new Date(fecha);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                    } else if (fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        // Formato DD/MM/YYYY
+                        const partes = fecha.split('/');
+                        fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                    } else if (fecha.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                        // Formato YYYY/MM/DD
+                        fechaObj = new Date(fecha);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                    } else if (fecha.match(/^\d{2}-\d{2}-\d{4}$/)) {
+                        // Formato DD-MM-YYYY
+                        const partes = fecha.split('-');
+                        fechaObj = new Date(partes[2], partes[1] - 1, partes[0]);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                    } else {
+                        // Intentar con Date() directamente
+                        fechaObj = new Date(fecha);
+                        fechaValida = !isNaN(fechaObj.getTime());
+                    }
+                    
+                    return fechaValida;
+                } catch (e) {
+                    console.log(`❌ Error validando fecha "${fecha}": ${e.message}`);
+                    return false;
+                }
             });
             
-            console.log(`📅 Actividades con fechas válidas: ${actividadesConFecha.length}`);
+            console.log(`📅 Actividades con fechas válidas: ${actividadesConFecha.length} de ${data.length} total`);
+            console.log(`❌ Fechas filtradas (inválidas): ${data.length - actividadesConFecha.length}`);
             
             if (actividadesConFecha.length === 0) {
                 console.log(`❌ No hay actividades con fechas válidas`);
@@ -1768,14 +2004,19 @@
             
             // Agrupar por fecha y contar actividades
             const actividadesPorDia = {};
-            actividadesConFecha.forEach(item => {
-                const fecha = item['Fecha final de ejecución'];
+            console.log(`🔍 Procesando ${actividadesConFecha.length} actividades con fechas...`);
+            
+            actividadesConFecha.forEach((item, index) => {
+                const fecha = item[columnaFecha];
+                console.log(`📅 Actividad ${index + 1}: "${fecha}" (tipo: ${typeof fecha})`);
+                
                 if (fecha) {
                     actividadesPorDia[fecha] = (actividadesPorDia[fecha] || 0) + 1;
                 }
             });
             
             console.log(`📊 Actividades por día:`, actividadesPorDia);
+            console.log(`📅 Todas las fechas únicas encontradas:`, Object.keys(actividadesPorDia));
             
             // Función auxiliar para obtener timestamp de una fecha en varios formatos
             function getTimestamp(fecha) {
@@ -1832,22 +2073,50 @@
                 
                 // Extraer mes de la fecha de forma robusta
                 let mes = '';
-                if (fecha.includes('-')) {
+                let formatoDetectado = '';
+                
+                if (fecha.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+                    // Formato específico: "1/03/25" o "27/03/25" (D/M/YY o DD/MM/YY)
+                    const partes = fecha.split('/');
+                    const año = parseInt(partes[2]) < 50 ? 2000 + parseInt(partes[2]) : 1900 + parseInt(partes[2]);
+                    const fechaObj = new Date(año, parseInt(partes[1]) - 1, parseInt(partes[0]));
+                    if (!isNaN(fechaObj.getTime())) {
+                        mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+                        formatoDetectado = 'D/M/YY o DD/MM/YY';
+                    } else {
+                        mes = '00';
+                        formatoDetectado = 'INVÁLIDO';
+                    }
+                } else if (fecha.match(/^\d{2}-[a-zA-Z]{3}-\d{4}$/)) {
+                    // Formato específico: "25-mar-2025"
+                    const fechaObj = new Date(fecha);
+                    if (!isNaN(fechaObj.getTime())) {
+                        mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+                        formatoDetectado = 'DD-MMM-YYYY';
+                    } else {
+                        mes = '00';
+                        formatoDetectado = 'INVÁLIDO';
+                    }
+                } else if (fecha.includes('-')) {
                     // Formato YYYY-MM-DD o similar
                     mes = fecha.split('-')[1];
+                    formatoDetectado = 'YYYY-MM-DD';
                 } else if (fecha.includes('/')) {
                     // Formato DD/MM/YYYY o similar
                     mes = fecha.split('/')[1];
+                    formatoDetectado = 'DD/MM/YYYY';
                 } else {
                     // Intentar con objeto Date
                     const fechaObj = new Date(fecha);
                     if (!isNaN(fechaObj.getTime())) {
                         mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+                        formatoDetectado = 'Date.parse()';
                     } else {
                         mes = '00'; // Valor por defecto si no se puede extraer
+                        formatoDetectado = 'INVÁLIDO';
                     }
                 }
-                console.log('Fecha:', fecha, '→ Mes extraído:', mes); // LOG
+                console.log(`🔍 Fecha: "${fecha}" → Formato: ${formatoDetectado} → Mes: ${mes} → Color: ${coloresPorMes[mes] || '#fab62d'}`);
                 const color = coloresPorMes[mes] || '#fab62d'; // Color por defecto si no se encuentra el mes
                 colores.push(color);
             });
@@ -1943,29 +2212,24 @@
         });
 
     </script>
+    
     <script>
-    // --- Interactividad del menú hamburguesa ---
-    const menuBtn = document.getElementById('menu-btn');
-    const sideMenu = document.getElementById('side-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    function openMenu() {
-        sideMenu.classList.add('open');
-        menuOverlay.classList.add('open');
-    }
-    function closeMenu() {
-        sideMenu.classList.remove('open');
-        menuOverlay.classList.remove('open');
-    }
-    menuBtn.addEventListener('click', function() {
-        if (sideMenu.classList.contains('open')) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    });
-    menuOverlay.addEventListener('click', function() {
-        closeMenu();
-    });
+        // Cargar datos automáticamente cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página cargada, iniciando carga de datos...');
+            loadData();
+        });
+        
+        // También cargar datos cuando se hace clic en el botón de actualizar
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    console.log('🔄 Botón de actualizar clickeado');
+                    loadData();
+                });
+            }
+        });
     </script>
 </body>
 </html> 
