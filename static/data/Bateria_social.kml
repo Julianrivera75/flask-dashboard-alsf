@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+<Document id="Bateria_Social_ElConsuelo">
+  <name>Bateria_Social_ElConsuelo</name>
+  <snippet></snippet>
+  <description><![CDATA[]]></description>
+  <Folder id="FeatureLayer0">
+    <name>Bateria_Social_ElConsuelo</name>
+    <snippet></snippet>
+    <description><![CDATA[]]></description>
+    <Placemark id="ID_00000">
+      <name>Colegio Aulas Colombianas San Luis (IED) Sede San Luis el Dorado</name>
+      <snippet></snippet>
+      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+<td>17050448</td>
+</tr>
+<tr>
+<td>
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+<tr>
+<td>Identificador</td>
+<td>17050448</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>Estado o condición</td>
+<td>Oficial</td>
+</tr>
+<tr>
+<td>Clasificación</td>
+<td>EDUC</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>Nombre</td>
+<td>Colegio Aulas Colombianas San Luis (IED) Sede San Luis el Dorado</td>
+</tr>
+<tr>
+<td>Código Postal</td>
+<td>110321</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>Escala máxima de visualización</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Escala mínima de visualización </td>
+<td>1500</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>Fuente o autoridad</td>
+<td>Secretaria Distrital de Educación SDE</td>
+</tr>
+<tr>
+<td>Nombre alternativo</td>
+<td></td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>Identificador objeto relacionado</td>
+<td>111001086371</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body><script type="text/javascript">
+				function changeImage(attElement, nameElement) {
+				document.getElementById('imageAttachment').src = attElement;
+				document.getElementById('imageName').innerHTML = nameElement;}
+			</script></html>
+]]></description>
+      <styleUrl>#IconStyle00</styleUrl>
+      <Point>
+        <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
+        <coordinates> -74.07299754199994,4.580237215849643,0</coordinates>
+      </Point>
+    </Placemark>
+  </Folder>
+  <Style id="IconStyle00">
+    <IconStyle>
+      <scale>1.000000</scale>
+      <Icon><href>Layer0_Symbol_abd846e0_0.png</href></Icon>
+    </IconStyle>
+    <LabelStyle>
+      <color>ff000000</color>
+      <scale>0.666667</scale>
+    </LabelStyle>
+    <PolyStyle>
+      <color>ff000000</color>
+      <outline>0</outline>
+    </PolyStyle>
+  </Style>
+</Document>
+</kml>

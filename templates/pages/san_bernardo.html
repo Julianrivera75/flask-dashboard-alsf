@@ -700,7 +700,7 @@
                 if (!data.data || !Array.isArray(data.data)) {
                     console.error('❌ Datos no válidos:', data);
                     showError('Formato de datos inválido');
-                    return;
+                    return; 
                 }
                 
                 datosGlobales = data.data; // Guardar datos globalmente
@@ -1810,7 +1810,7 @@
                     const fecha = row[columnaFecha] || 'Sin fecha';
                     const poblacion = row['Población impactada'] || '0';
                     
-                                        // Formatear fecha para mostrar
+                    // Formatear fecha para mostrar
                     let fechaFormateada = fecha;
                     if (fecha && fecha !== 'None' && fecha !== '') {
                         try {
@@ -1849,11 +1849,11 @@
                             }
                             
                             if (fechaValida) {
-                                fechaFormateada = fechaObj.toLocaleDateString('es-CO', { 
-                                    year: 'numeric', 
-                                    month: 'long', 
-                                    day: 'numeric' 
-                                });
+                            fechaFormateada = fechaObj.toLocaleDateString('es-CO', { 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            });
                             }
                         } catch (e) {
                             fechaFormateada = fecha;
@@ -1924,7 +1924,7 @@
             console.log(`✅ Contenedor encontrado:`, container);
             console.log(`📏 Dimensiones del contenedor:`, container.offsetWidth, 'x', container.offsetHeight);
             
-                        // Verificar que existe la columna de fecha
+            // Verificar que existe la columna de fecha
             const columnas = Object.keys(data[0] || {});
             console.log(`📋 Columnas disponibles:`, columnas);
             
@@ -2229,7 +2229,7 @@
                     loadData();
                 });
             }
-        });
+    });
     </script>
 </body>
 </html> 

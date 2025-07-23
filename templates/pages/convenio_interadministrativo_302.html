@@ -91,10 +91,10 @@
 
         .side-menu {
             position: fixed;
-            top: 0;
+            top: 80px;
             left: -280px;
             width: 260px;
-            height: 100vh;
+            height: calc(100vh - 80px);
             background: var(--white);
             box-shadow: 2px 0 12px rgba(0,0,0,0.12);
             transition: left 0.3s cubic-bezier(.4,0,.2,1);
@@ -184,9 +184,11 @@
             }
             
             .side-menu {
+                top: 70px;
                 width: 80vw;
                 min-width: 180px;
                 max-width: 320px;
+                height: calc(100vh - 70px);
             }
         }
 
@@ -228,6 +230,46 @@
         .content-section li {
             margin-bottom: 0.5rem;
         }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 2px solid var(--light-gray);
+            transition: transform 0.2s;
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .icon {
+            font-size: 2rem;
+            color: var(--primary-red);
+            margin-bottom: 1rem;
+        }
+        .stat-card h3 {
+            color: var(--primary-red);
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card p {
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -246,78 +288,589 @@
             <!-- <span>Navegación</span> -->
             <!-- Botón de cerrar eliminado -->
         </div>
-        <ul id="menu-options" style="margin-top: 70px;">
-            <li><a href="/">Inicio</a></li>
+        <ul id="menu-options">
+            <li><a href="/"><i class="fas fa-home"></i> Inicio</a></li>
             <li><a href="/san-bernardo"><i class="fas fa-map-marker-alt"></i> Barrio San Bernardo</a></li>
             <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
-            <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</a></li>
+            <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 256 y Contrato 302</a></li>
         </ul>
     </nav>
 
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <h1><i class="fas fa-file-contract"></i> Convenio Interadministrativo 302</h1>
-            <p>Alcaldía Local de Santa Fe - Sistema de Monitoreo y Seguimiento</p>
+        <div class="header-content" style="display: flex; align-items: center; gap: 1rem; justify-content: center; text-align: center; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="/static/images/logos/Alcaldia_SantaFe.jpg" alt="Logo Alcaldía Local" style="height: 64px; margin-right: 1rem;">
+                <h1 style="margin: 0;"><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
+            </div>
+            <h3 style="margin: 0.5rem 0 0 0; font-weight: 500; font-size: 1.25rem; color: #fff;">Datos de gestión del Convenio Interadministrativo 256 de 2024 y Contrato 302 de 2023</h3>
         </div>
     </header>
 
+    <!-- Leaflet CSS y Omnivore -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+
+    <style>
+    .map-container {
+        margin: 2.5rem 0 2rem 0;
+    }
+    .map-title {
+        color: var(--primary-red);
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+        border-bottom: 3px solid var(--primary-yellow);
+        padding-bottom: 0.5rem;
+    }
+    #map-upz-302, #map-upz-256 {
+        width: 100%;
+        height: 420px;
+        margin-bottom: 2rem;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+        border: 2px solid var(--primary-yellow);
+    }
+    
+    /* Estilos para Google Sheets */
+    .sheets-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-item {
+        background: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        text-align: center;
+        border: 2px solid var(--light-gray);
+    }
+    
+    .stat-item h3 {
+        color: var(--primary-red);
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-item p {
+        color: var(--dark-gray);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .sheets-table-container {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow-x: auto;
+        border: 2px solid var(--light-gray);
+        max-width: 100%;
+    }
+    
+    .sheets-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        min-width: 2400px; /* Ancho mínimo para acomodar todas las columnas con textos completos */
+    }
+    
+    .sheets-table th {
+        background: var(--primary-red);
+        color: var(--white);
+        padding: 0.5rem 0.3rem;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.75rem;
+        white-space: normal;
+        min-width: 80px;
+        max-width: 120px;
+        word-wrap: break-word;
+        line-height: 1.2;
+    }
+    
+    .sheets-table td {
+        padding: 0.4rem 0.3rem;
+        border-bottom: 1px solid var(--light-gray);
+        color: var(--dark-gray);
+        text-align: center;
+        white-space: nowrap;
+        min-width: 60px;
+    }
+    
+    .sheets-table tbody tr:hover {
+        background: var(--light-gray);
+    }
+    
+    .sheets-table tbody tr:nth-child(even) {
+        background: rgba(245, 245, 245, 0.5);
+    }
+    
+    @media (max-width: 768px) {
+        .sheets-table {
+            font-size: 0.8rem;
+        }
+        
+        .sheets-table th,
+        .sheets-table td {
+            padding: 0.5rem 0.3rem;
+        }
+    }
+    </style>
+
     <div class="container">
-        <div class="content-section">
-            <h2><i class="fas fa-info-circle"></i> Información del Convenio</h2>
-            <p>Esta página contiene información detallada sobre el Convenio Interadministrativo 302 entre la Alcaldía Local de Santa Fe y las entidades distritales.</p>
-            
-            <h3>Objetivos del Convenio</h3>
-            <ul>
-                <li>Fortalecer la gestión local en materia de servicios públicos</li>
-                <li>Mejorar la calidad de vida de los habitantes de la localidad</li>
-                <li>Coordinar acciones entre entidades distritales y locales</li>
-                <li>Optimizar recursos y procesos administrativos</li>
-            </ul>
-
-            <h3>Entidades Participantes</h3>
-            <ul>
-                <li>Alcaldía Local de Santa Fe</li>
-                <li>Entidades Distritales de Servicios Públicos</li>
-                <li>Organismos de Control y Vigilancia</li>
-            </ul>
-
-            <h3>Áreas de Cooperación</h3>
-            <ul>
-                <li>Gestión de residuos sólidos</li>
-                <li>Mantenimiento de vías y espacios públicos</li>
-                <li>Programas sociales y comunitarios</li>
-                <li>Desarrollo urbano y territorial</li>
-            </ul>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon" style="color: var(--primary-yellow);"><i class="fas fa-tasks"></i></div>
+                <h3>70%</h3>
+                <p>Porcentaje de Ejecución</p>
+            </div>
+            <div class="stat-card">
+                <div class="icon" style="color: var(--primary-red);"><i class="fas fa-file-alt"></i></div>
+                <h3>4</h3>
+                <p>Hojas de vida de indicadores</p>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fas fa-poll"></i></div>
+                <h3>1</h3>
+                <p>Instrumento de Encuesta de Satisfacción</p>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fas fa-stream"></i></div>
+                <h3>2</h3>
+                <p>Líneas de Tiempo</p>
+            </div>
+            <div class="stat-card" id="indicador1-card" style="cursor: pointer;">
+                <div class="icon"><i class="fas fa-users"></i></div>
+                <h3 style="font-size:1.5rem;">Indicador 1</h3>
+                <p>Participación y Comunicación Ciudadana</p>
+            </div>
+            <div class="stat-card" id="indicador2-card" style="cursor: pointer;">
+                <div class="icon" style="color: var(--primary-red);"><i class="fas fa-magic"></i></div>
+                <h3 style="color: var(--primary-red); font-size:1.5rem;">Indicador 2</h3>
+                <p>La Magia del Servicio</p>
+            </div>
+            <div class="stat-card" id="indicador3-card" style="cursor: pointer;">
+                <div class="icon"><i class="fas fa-chart-bar"></i></div>
+                <h3 style="font-size:1.5rem;">Indicador 3</h3>
+                <p>Impacto y Resultados</p>
+            </div>
+            <div class="stat-card" id="indicador4-card" style="cursor: pointer;">
+                <div class="icon"><i class="fas fa-coins"></i></div>
+                <h3 style="font-size:1.5rem;">Indicador 4</h3>
+                <p>Eficiencia en la Ejecución del Fondo de Desarrollo Local</p>
+            </div>
+        </div>
+        <!-- Primer mapa: Contrato 302 de 2023 -->
+        <div class="map-container">
+            <h2 class="map-title">Resultados de indicadores Contrato 302 de 2023</h2>
+            <div id="map-upz-302"></div>
+        </div>
+        
+        <!-- Contenedor para resultados de indicadores -->
+        <div id="indicadores-results-container" style="display: none;">
+            <!-- Los resultados se mostrarán aquí -->
+        </div>
+        
+        <!-- Segundo mapa: Convenio Interadministrativo 256 de 2024 -->
+        <div class="map-container">
+            <h2 class="map-title">Resultados de indicadores del Convenio Interadministrativo 256 de 2024</h2>
+            <div id="map-upz-256"></div>
+        </div>
+        
+        <!-- Contenedor para resultados de indicadores del segundo mapa -->
+        <div id="indicadores-results-container2" style="display: none;">
+            <!-- Los resultados se mostrarán aquí -->
         </div>
 
+        <!-- Google Sheets - Encuestas de Satisfacción -->
         <div class="content-section">
-            <h2><i class="fas fa-chart-line"></i> Indicadores de Cumplimiento</h2>
-            <p>Aquí se mostrarán los indicadores de cumplimiento y seguimiento del convenio interadministrativo.</p>
-            
-            <h3>Métricas de Seguimiento</h3>
-            <ul>
-                <li>Porcentaje de cumplimiento de metas</li>
-                <li>Eficiencia en la ejecución de recursos</li>
-                <li>Satisfacción ciudadana</li>
-                <li>Impacto en la comunidad</li>
-            </ul>
+            <h2><i class="fas fa-chart-bar"></i> Encuestas de Satisfacción - Datos en Tiempo Real - Contrato 302 de 2023</h2>
+            <div class="sheets-container">
+                <div id="sheets-loading" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-red);"></i>
+                    <p style="margin-top: 1rem; color: var(--dark-gray);">Cargando datos de encuestas...</p>
+                </div>
+                <div id="sheets-data" style="display: none;">
+                    <div class="sheets-stats">
+                        <div class="stat-item">
+                            <h3 id="total-encuestas">0</h3>
+                            <p>Total Encuestas</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="indicador1-promedio">0.00</h3>
+                            <p>Indicador 1 - Participación</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="indicador2-promedio">0.00</h3>
+                            <p>Indicador 2 - Servicio</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="indicador3-promedio">0.00</h3>
+                            <p>Indicador 3 - Impacto</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="indicador4-promedio">0.00</h3>
+                            <p>Indicador 4 - Eficiencia</p>
+                        </div>
+                    </div>
+                    <div class="sheets-table-container">
+                        <div class="table-controls" style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                            <label for="rows-per-page" style="margin-right: 1rem; font-weight: 600;">Filas por página:</label>
+                            <select id="rows-per-page" style="padding: 0.3rem; border: 1px solid #ccc; border-radius: 4px;">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">Todas</option>
+                            </select>
+                            <span id="table-info" style="margin-left: 1rem; color: #666;"></span>
+                        </div>
+                        <table id="sheets-table" class="sheets-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>UPZ</th>
+                                    <th>Barrio</th>
+                                    <th>Rango Etario</th>
+                                    <th>Género</th>
+                                    <th>Identidad de Género</th>
+                                    <th>Componente</th>
+                                    <th>1.1 Info Clara</th>
+                                    <th>1.2 Inclusión</th>
+                                    <th>1.3 Cronograma</th>
+                                    <th>1.4 Canales</th>
+                                    <th>2.1 Avances</th>
+                                    <th>2.2 Resultados</th>
+                                    <th>2.3 Elementos</th>
+                                    <th>2.4 Formación</th>
+                                    <th>2.5 Plan Acción</th>
+                                    <th>2.6 Participación</th>
+                                    <th>3.1 Gestión</th>
+                                    <th>3.2 Cronograma</th>
+                                    <th>3.3 Ejecución</th>
+                                    <th>4.1 Confianza</th>
+                                    <th>4.2 Recomendación</th>
+                                    <th>4.3 Cumplimiento</th>
+                                    <th>4.4 Transparencia</th>
+                                    <th>4.5 Desarrollo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sheets-table-body">
+                                <!-- Los datos se cargarán aquí -->
+                            </tbody>
+                        </table>
+                        <div class="table-pagination" style="padding: 1rem; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <button id="prev-page" class="pagination-btn" style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: var(--primary-red); color: white; border: none; border-radius: 4px; cursor: pointer;">Anterior</button>
+                                <button id="next-page" class="pagination-btn" style="padding: 0.5rem 1rem; background: var(--primary-red); color: white; border: none; border-radius: 4px; cursor: pointer;">Siguiente</button>
+                            </div>
+                            <span id="page-info" style="color: #666;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <!-- Segunda Google Sheets - Base de Datos Adicional -->
         <div class="content-section">
-            <h2><i class="fas fa-calendar-alt"></i> Cronograma de Actividades</h2>
-            <p>Información sobre las actividades programadas y el cronograma de ejecución del convenio.</p>
-            
-            <h3>Fases de Implementación</h3>
-            <ul>
-                <li>Fase 1: Diagnóstico y planificación</li>
-                <li>Fase 2: Ejecución de actividades</li>
-                <li>Fase 3: Monitoreo y seguimiento</li>
-                <li>Fase 4: Evaluación y cierre</li>
-            </ul>
+            <h2><i class="fas fa-database"></i> Encuestas de Satisfacción - Datos en Tiempo Real - Convenio Interadministrativo 256 de 2024</h2>
+            <div class="sheets-container">
+                <div id="sheets2-loading" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-red);"></i>
+                    <p style="margin-top: 1rem; color: var(--dark-gray);">Cargando segunda base de datos...</p>
+                </div>
+                <div id="sheets2-data" style="display: none;">
+                    <div class="sheets-stats">
+                        <div class="stat-item">
+                            <h3 id="total-registros2">0</h3>
+                            <p>Total Encuestas</p>
+                        </div>
+                        <div class="stat-item">
+                            <h3 id="promedio-satisfaccion2">0%</h3>
+                            <p>Satisfacción Promedio</p>
+                        </div>
+                    </div>
+                    <div class="sheets-table-container">
+                        <div class="table-controls" style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                            <label for="rows-per-page2" style="margin-right: 1rem; font-weight: 600;">Filas por página:</label>
+                            <select id="rows-per-page2" style="padding: 0.3rem; border: 1px solid #ccc; border-radius: 4px;">
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">Todas</option>
+                            </select>
+                            <span id="table-info2" style="margin-left: 1rem; color: #666;"></span>
+                        </div>
+                        <table id="sheets-table2" class="sheets-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>UPZ</th>
+                                    <th>Barrio</th>
+                                    <th>Rango Etario</th>
+                                    <th>Género</th>
+                                    <th>Identidad de Género</th>
+                                    <th>Componente</th>
+                                    <th>1.1 Info Clara</th>
+                                    <th>1.2 Inclusión</th>
+                                    <th>1.3 Cronograma</th>
+                                    <th>1.4 Canales</th>
+                                    <th>2.1 Avances</th>
+                                    <th>2.2 Resultados</th>
+                                    <th>2.3 Elementos</th>
+                                    <th>2.4 Formación</th>
+                                    <th>2.5 Plan Acción</th>
+                                    <th>2.6 Participación</th>
+                                    <th>3.1 Gestión</th>
+                                    <th>3.2 Cronograma</th>
+                                    <th>3.3 Ejecución</th>
+                                    <th>4.1 Confianza</th>
+                                    <th>4.2 Recomendación</th>
+                                    <th>4.3 Cumplimiento</th>
+                                    <th>4.4 Transparencia</th>
+                                    <th>4.5 Desarrollo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sheets-table-body2">
+                                <!-- Los datos se cargarán aquí -->
+                            </tbody>
+                        </table>
+                        <div class="table-pagination" style="padding: 1rem; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <button id="prev-page2" class="pagination-btn" style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: var(--primary-red); color: white; border: none; border-radius: 4px; cursor: pointer;">Anterior</button>
+                                <button id="next-page2" class="pagination-btn" style="padding: 0.5rem 1rem; background: var(--primary-red); color: white; border: none; border-radius: 4px; cursor: pointer;">Siguiente</button>
+                            </div>
+                            <span id="page-info2" style="color: #666;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal Línea de Tiempo (Tabs) -->
+    <div id="timeline-modal" class="timeline-modal">
+        <div class="timeline-modal-content">
+            <span class="timeline-close" id="timeline-close">&times;</span>
+            <h2 style="text-align:center; color:var(--primary-red); margin-bottom:1.5rem;">Línea de Tiempo</h2>
+            <div class="timeline-tabs" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <button class="timeline-tab-btn" id="tab-convenio">Convenio Interadministrativo 256 de 2024</button>
+                <button class="timeline-tab-btn" id="tab-contrato">Contrato 302 de 2023</button>
+            </div>
+            <div id="timeline-content-convenio" style="display:none; text-align:center; color:#222; font-size:1.1rem;">
+                <div class="componentes-list" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="componente-btn">COMPONENTE 1: EDUCACIÓN INICIAL</button>
+                    <button class="componente-btn">COMPONENTE 2: MUJERES CUIDADORAS</button>
+                    <button class="componente-btn">COMPONENTE 3: PARTICIPACIÓN Y CAPACIDADES</button>
+                    <button class="componente-btn">COMPONENTE 4: VIOLENCIA INTRAFAMILIAR</button>
+                    <button class="componente-btn">COMPONENTE 5: ACCESO A LA JUSTICIA</button>
+                    <button class="componente-btn">COMPONENTE 6: PREVENCIÓN CONSUMO SPA</button>
+                    <button class="componente-btn">COMPONENTE 7: PREVENCIÓN DE VIOLENCIAS CONTRA LAS MUJERES Y CONSTRUCCIÓN DE CIUDADANÍA</button>
+                    <button class="componente-btn">COMPONENTE 8: ACCIONES COMPLEMENTARIAS</button>
+                    <button class="componente-btn">COMPONENTE 10: FORTALECIMIENTO MIPYMES</button>
+                    <button class="componente-btn">COMPONENTE 11: VENDEDORES INFORMALES</button>
+                    <button class="componente-btn">COMPONENTE 12: AMBIENTAL</button>
+                </div>
+            </div>
+            <div id="timeline-content-contrato" style="display:none;">
+                <div class="timeline-visual-container">
+                    <div class="timeline-base-line"></div>
+                    <div class="timeline-nodes">
+                        <!-- 1 -->
+                        <div class="timeline-node ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-check"></i></div>
+                            <div class="timeline-date">Febrero 2024</div>
+                            <div class="timeline-desc"></div>
+                        </div>
+                        <!-- 2 -->
+                        <div class="timeline-node ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-check"></i></div>
+                            <div class="timeline-date">Febrero - Marzo 2024</div>
+                            <div class="timeline-desc">
+                                <b>Alistamiento</b><br>
+                                Presentación en la JAL<br>
+                                Convocatoria, inscripción, selección, formación
+                            </div>
+                        </div>
+                        <!-- 3 -->
+                        <div class="timeline-node ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-check"></i></div>
+                            <div class="timeline-date">Marzo - Diciembre 2024</div>
+                            <div class="timeline-desc">
+                                <b>Ejecución (40%)</b>
+                            </div>
+                        </div>
+                        <!-- 4 -->
+                        <div class="timeline-node no-ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-times"></i></div>
+                            <div class="timeline-date">28 Mar - 4 May 2025</div>
+                            <div class="timeline-desc">
+                                <b>Suspensión (marzo 2025)</b><br>
+                                Mesas de trabajo con Unidad de Transparencia SDG-FDLSF
+                            </div>
+                        </div>
+                        <!-- 5 -->
+                        <div class="timeline-node ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-check"></i></div>
+                            <div class="timeline-date">5 May - 4 Ago 2025</div>
+                            <div class="timeline-desc">
+                                <b>Prórroga</b><br>
+                                Inicio de formación componentes
+                            </div>
+                        </div>
+                        <!-- 6 -->
+                        <div class="timeline-node ejecutada">
+                            <div class="timeline-circle"><i class="fas fa-check"></i></div>
+                            <div class="timeline-date">Mayo 05-31 2025</div>
+                            <div class="timeline-desc">
+                                <b>Ejecución:</b> Estructuración del plan de inversión para proceso de capitalización
+                            </div>
+                        </div>
+                        <!-- 7 -->
+                        <div class="timeline-node parcial">
+                            <div class="timeline-circle"><i class="fas fa-minus"></i></div>
+                            <div class="timeline-date">Mayo a Julio 2025</div>
+                            <div class="timeline-desc">
+                                <b>Ejecución capitalización (75%)</b><br>
+                                <button class="timeline-details-btn" id="timeline-details-btn">Ver detalles</button>
+                                <div class="timeline-details-content" id="timeline-details-content" style="display:none; text-align:left; margin-top:0.7em;">
+                                    <ul style="margin:0 0 0 1.2em;">
+                                        <li>Componente 1: 100 fortalecimientos entregados</li>
+                                        <li>Componente 2: Jóvenes Emprendedores: 12 entregados, 18 en proceso</li>
+                                        <li>Componente 3: Vendedores informales: 16 entregados, 14 en proceso</li>
+                                        <li>Componente 4: Mujeres emprendedoras: 8 en proceso</li>
+                                        <li>Detallar tu closet: 14 entregados, 6 en proceso</li>
+                                        <li>Emprendimientos transformadores de paz: 60 fortalecimientos en proceso</li>
+            </ul>
+        </div>
+    </div>
+                        </div>
+                        <!-- 8 -->
+                        <div class="timeline-node parcial">
+                            <div class="timeline-circle"><i class="fas fa-minus"></i></div>
+                            <div class="timeline-date">Julio 2025</div>
+                            <div class="timeline-desc">
+                                <b>Ejecución ferias (100%)</b><br>
+                                <button class="timeline-details-btn" id="timeline-details-btn-2">Ver detalles</button>
+                                <div class="timeline-details-content" id="timeline-details-content-2" style="display:none; text-align:left; margin-top:0.7em;">
+                                    <ul style="margin:0 0 0 1.2em;">
+                                        <li>Componente 1: 18 de julio de 2025 (Parque los periodistas)</li>
+                                        <li>Componente 2 y 3: 23, 24, 25 de julio (Parque los periodistas)</li>
+                                        <li>Componente 4: 28, 29, 30 y 31 de julio, 1 y 2 de agosto (Parque Bicentenario)</li>
+                                        <li>Componente 5: 25 de julio (Parque Bicentenario)</li>
+                                        <li>Componente 6: 24 de julio (Parque la mariposa)</li>
+                                        <li>Transformadores de paz: 26 de julio</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Convenciones -->
+                <div class="timeline-legend" style="display: flex; justify-content: center; align-items: center; gap: 2.5rem; margin-top: 2.5rem; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#eaffea; border:3px solid #2ecc40; color:#2ecc40; font-size:1.3rem;"><i class="fas fa-check"></i></span>
+                        Actividad ejecutada
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#ffeaea; border:3px solid #e4032e; color:#e4032e; font-size:1.3rem;"><i class="fas fa-times"></i></span>
+                        Actividad no ejecutada
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; background:#fffbe6; border:3px solid #fab62d; color:#fab62d; font-size:1.3rem;"><i class="fas fa-minus"></i></span>
+                        Actividad parcialmente ejecutada
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    .timeline-modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.45); justify-content: center; align-items: center; }
+    .timeline-modal.open { display: flex; }
+    .timeline-modal-content { background: #fff; border-radius: 18px; max-width: 98vw; width: 1100px; max-height: 90vh; overflow-y: auto; padding: 2.5rem 2rem 2rem 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.18); position: relative; }
+    .timeline-close { position: absolute; top: 1.2rem; right: 2rem; font-size: 2.2rem; color: var(--primary-red); cursor: pointer; font-weight: bold; }
+    .timeline-visual-container { position: relative; padding: 3.5rem 0 1.5rem 0; }
+    .timeline-base-line { position: absolute; top: 56px; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, #fab62d 0%, #2ecc40 60%, #fab62d 100%); border-radius: 6px; z-index: 1; }
+    .timeline-nodes { display: flex; flex-direction: row; align-items: flex-start; justify-content: space-between; position: relative; z-index: 2; }
+    .timeline-node { display: flex; flex-direction: column; align-items: center; width: 160px; min-width: 140px; max-width: 200px; position: relative; }
+    .timeline-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 0.7rem; border: 4px solid #ccc; background: #fff; position: relative; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .timeline-node.ejecutada .timeline-circle { border-color: #2ecc40; color: #2ecc40; background: #eaffea; }
+    .timeline-node.no-ejecutada .timeline-circle { border-color: #e4032e; color: #e4032e; background: #ffeaea; }
+    .timeline-node.parcial .timeline-circle { border-color: #fab62d; color: #fab62d; background: #fffbe6; }
+    .timeline-date { font-weight: 700; color: #222; font-size: 1.1rem; margin-bottom: 0.5rem; text-align: center; }
+    .timeline-desc { font-size: 1rem; color: #333; text-align: center; margin-bottom: 0.5rem; }
+    @media (max-width: 1100px) { .timeline-nodes { gap: 0.5rem; } .timeline-node { width: 120px; min-width: 100px; max-width: 150px; } }
+    @media (max-width: 900px) { .timeline-modal-content { width: 98vw; padding: 1.2rem 0.5rem; } .timeline-node { width: 100px; min-width: 80px; max-width: 120px; } .timeline-base-line { top: 48px; height: 6px; } }
+    @media (max-width: 600px) { .timeline-modal-content { width: 100vw; padding: 0.5rem 0.2rem; } .timeline-nodes { gap: 0.1rem; } .timeline-node { width: 80px; min-width: 60px; max-width: 100px; } .timeline-date { font-size: 0.95rem; } .timeline-desc { font-size: 0.92rem; } .timeline-base-line { top: 38px; height: 5px; } }
+    .timeline-details-btn {
+        background: var(--primary-yellow);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4em 1.2em;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 0.5em;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .timeline-details-btn:hover {
+        background: var(--primary-red);
+    }
+    .timeline-details-content {
+        background: #fffbe6;
+        border: 1px solid #fab62d;
+        border-radius: 8px;
+        padding: 0.7em 1em;
+        font-size: 0.98rem;
+    }
+    .timeline-tab-btn {
+        background: #f5f5f5;
+        color: #333;
+        border: 2px solid var(--primary-yellow);
+        border-radius: 8px;
+        padding: 0.7em 1.5em;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border 0.2s;
+    }
+    .timeline-tab-btn.active, .timeline-tab-btn:focus {
+        background: var(--primary-yellow);
+        color: #fff;
+        border: 2px solid var(--primary-red);
+        outline: none;
+    }
+    .componente-btn {
+        background: #f5f5f5;
+        color: #333;
+        border: 2px solid var(--primary-yellow);
+        border-radius: 8px;
+        padding: 0.7em 1.2em;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s, border 0.2s;
+        margin-bottom: 0.5em;
+        min-width: 260px;
+        text-align: left;
+    }
+    .componente-btn:hover, .componente-btn:focus {
+        background: var(--primary-yellow);
+        color: #fff;
+        border: 2px solid var(--primary-red);
+        outline: none;
+    }
+    </style>
     <script>
     // --- Interactividad del menú hamburguesa ---
     const menuBtn = document.getElementById('menu-btn');
@@ -345,6 +898,2158 @@
     menuOverlay.addEventListener('click', function() {
         closeMenu();
     });
+    </script>
+    <script>
+    // Abrir modal al hacer clic en la tarjeta de Línea de Tiempo
+    document.addEventListener('DOMContentLoaded', function() {
+        const timelineBtn = Array.from(document.querySelectorAll('.stat-card')).find(card => card.textContent.includes('Línea de Tiempo'));
+        const modal = document.getElementById('timeline-modal');
+        const closeBtn = document.getElementById('timeline-close');
+        if (timelineBtn && modal && closeBtn) {
+            timelineBtn.style.cursor = 'pointer';
+            timelineBtn.addEventListener('click', () => { modal.classList.add('open'); });
+            closeBtn.addEventListener('click', () => { modal.classList.remove('open'); });
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+        }
+    });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tabs para mostrar la línea de tiempo correcta
+        const tabConvenio = document.getElementById('tab-convenio');
+        const tabContrato = document.getElementById('tab-contrato');
+        const contentConvenio = document.getElementById('timeline-content-convenio');
+        const contentContrato = document.getElementById('timeline-content-contrato');
+        function clearTabs() {
+            tabConvenio.classList.remove('active');
+            tabContrato.classList.remove('active');
+            contentConvenio.style.display = 'none';
+            contentContrato.style.display = 'none';
+        }
+        tabConvenio.addEventListener('click', function() {
+            clearTabs();
+            tabConvenio.classList.add('active');
+            contentConvenio.style.display = 'block';
+        });
+        tabContrato.addEventListener('click', function() {
+            clearTabs();
+            tabContrato.classList.add('active');
+            contentContrato.style.display = 'block';
+        });
+        // Por defecto, ninguna línea de tiempo visible
+        clearTabs();
+
+        // Acordeones de detalles
+        const detailsBtn = document.getElementById('timeline-details-btn');
+        const detailsContent = document.getElementById('timeline-details-content');
+        if(detailsBtn && detailsContent) {
+            detailsBtn.addEventListener('click', function() {
+                if(detailsContent.style.display === 'none') {
+                    detailsContent.style.display = 'block';
+                    detailsBtn.textContent = 'Ocultar detalles';
+                } else {
+                    detailsContent.style.display = 'none';
+                    detailsBtn.textContent = 'Ver detalles';
+                }
+            });
+        }
+        const detailsBtn2 = document.getElementById('timeline-details-btn-2');
+        const detailsContent2 = document.getElementById('timeline-details-content-2');
+        if(detailsBtn2 && detailsContent2) {
+            detailsBtn2.addEventListener('click', function() {
+                if(detailsContent2.style.display === 'none') {
+                    detailsContent2.style.display = 'block';
+                    detailsBtn2.textContent = 'Ocultar detalles';
+                } else {
+                    detailsContent2.style.display = 'none';
+                    detailsBtn2.textContent = 'Ver detalles';
+                }
+            });
+        }
+        // Redirección temporal de los botones de componentes
+        document.querySelectorAll('.componente-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                window.open('https://www.canva.com/design/DAGs-hvufdM/VG1QQyshclmo_tsLrAUleg/edit', '_blank');
+            });
+        });
+    });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para crear mapa con KML
+        function createMap(mapId) {
+            if(document.getElementById(mapId)) {
+                var map = L.map(mapId).setView([4.60971, -74.08175], 19);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                // Hacer el mapa global según su ID
+                if (mapId === 'map-upz-302') {
+                    window.map302 = map;
+                } else if (mapId === 'map-upz-256') {
+                    window.map256 = map;
+                }
+                
+                omnivore.kml('/static/data/upz_santafe.kml').on('ready', function() {
+                    map.fitBounds(this.getBounds());
+                    
+                    // Guardar referencia a las capas KML para poder modificarlas después
+                    if (mapId === 'map-upz-302') {
+                        window.kmlLayers302 = this;
+                    } else if (mapId === 'map-upz-256') {
+                        window.kmlLayers256 = this;
+                    }
+                    
+                    // Agregar etiquetas con nombres de UPZ a cada polígono
+                    this.eachLayer(function(layer) {
+                        if (layer.feature && layer.feature.properties) {
+                            var properties = layer.feature.properties;
+                            var upzCode = properties.name || properties.Name || properties.NAME || '';
+                            
+                            // Mapear códigos de UPZ a nombres correctos
+                            var upzNames = {
+                                '91': 'UPZ Sagrado Corazón',
+                                '92': 'UPZ La Macarena',
+                                '93': 'UPZ Las Nieves',
+                                '95': 'UPZ Las Cruces',
+                                '96': 'UPZ Lourdes'
+                            };
+                            
+                            var upzName = upzNames[upzCode] || upzCode;
+                            
+                            // Obtener el centro del polígono
+                            var center = layer.getBounds().getCenter();
+                            
+                            // Ajustar posición para UPZ Sagrado Corazón
+                            if (upzCode === '91') {
+                                center = L.latLng(center.lat + 0.002, center.lng); // Mover hacia arriba
+                            }
+                            
+                            // Crear etiqueta con el nombre de la UPZ
+                            var label = L.divIcon({
+                                className: 'upz-label',
+                                html: '<div style="font-weight: bold; font-size: 14px; color: #e4032e; text-shadow: 2px 2px 4px rgba(255,255,255,0.8), -1px -1px 2px rgba(255,255,255,0.8), 1px -1px 2px rgba(255,255,255,0.8), -1px 1px 2px rgba(255,255,255,0.8); white-space: nowrap; text-align: center;">' + upzName + '</div>',
+                                iconSize: [1, 1],
+                                iconAnchor: [0, 0]
+                            });
+                            
+                            L.marker(center, {icon: label}).addTo(map);
+                        }
+                    });
+                }).addTo(map);
+            }
+        }
+        
+        // Crear ambos mapas
+        createMap('map-upz-302');
+        createMap('map-upz-256');
+        
+        // Cargar datos de Google Sheets
+        loadGoogleSheetsData();
+        loadGoogleSheetsData2();
+    });
+    
+    // Función para cargar datos de Google Sheets
+    async function loadGoogleSheetsData() {
+        const SHEET_ID = '1UBmznvwtFI9QlccDBQbRCGs7vgcczLvX-Q8p2Z7CmcE';
+        const API_KEY = 'AIzaSyCh63RM-nu-Yc0GZJB7ksVkpGlBcsiZTWM';
+        
+        try {
+            // Primero intentamos obtener información del spreadsheet
+            const infoUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${API_KEY}`;
+            const infoResponse = await fetch(infoUrl);
+            const infoData = await infoResponse.json();
+            
+            console.log('Información del spreadsheet:', infoData);
+            
+            if (infoData.error) {
+                showError('Error de acceso: ' + infoData.error.message);
+                return;
+            }
+            
+            // Obtener el nombre de la primera hoja
+            const sheetName = infoData.sheets[0].properties.title;
+            console.log('Nombre de la hoja:', sheetName);
+            
+            // URL para obtener datos de la hoja específica
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}!A:AD?key=${API_KEY}&majorDimension=ROWS`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            console.log('Datos obtenidos:', data);
+            
+            if (data.values && data.values.length > 0) {
+                processSheetsData(data.values);
+            } else {
+                showError('No se encontraron datos en la hoja. Verifica que la hoja tenga datos.');
+            }
+        } catch (error) {
+            console.error('Error cargando datos:', error);
+            showError('Error al cargar los datos de Google Sheets: ' + error.message);
+        }
+    }
+    
+    function processSheetsData(values) {
+        const headers = values[1]; // La fila 2 (índice 1) es ahora el encabezado
+        const data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        
+        // Actualizar estadísticas
+        document.getElementById('total-encuestas').textContent = data.length;
+        
+        // Variables globales para paginación
+        window.allData = data;
+        window.currentPage = 1;
+        window.rowsPerPage = 10;
+        
+        // Calcular promedios de los 4 indicadores
+        let indicador1Total = 0;
+        let indicador1Count = 0;
+        let indicador2Total = 0;
+        let indicador2Count = 0;
+        let indicador3Total = 0;
+        let indicador3Count = 0;
+        let indicador4Total = 0;
+        let indicador4Count = 0;
+        
+        data.forEach(row => {
+            // Indicador 1 (columnas M, N, O, P - índices 12, 13, 14, 15)
+            const indicador1Values = [
+                parseInt(row[12]) || 0, // M - 1.1 Info Clara
+                parseInt(row[13]) || 0, // N - 1.2 Inclusión
+                parseInt(row[14]) || 0, // O - 1.3 Cronograma
+                parseInt(row[15]) || 0  // P - 1.4 Canales
+            ];
+            
+            const validInd1 = indicador1Values.filter(v => v > 0);
+            if (validInd1.length > 0) {
+                indicador1Total += validInd1.reduce((a, b) => a + b, 0);
+                indicador1Count += validInd1.length;
+            }
+            
+            // Indicador 2 (columnas Z, AA, AB, AC, AD - índices 25, 26, 27, 28, 29)
+            const indicador2Values = [
+                parseInt(row[25]) || 0, // Z - 4.1 Confianza
+                parseInt(row[26]) || 0, // AA - 4.2 Recomendación
+                parseInt(row[27]) || 0, // AB - 4.3 Cumplimiento
+                parseInt(row[28]) || 0, // AC - 4.4 Transparencia
+                parseInt(row[29]) || 0  // AD - 4.5 Desarrollo
+            ];
+            
+            const validInd2 = indicador2Values.filter(v => v > 0);
+            if (validInd2.length > 0) {
+                indicador2Total += validInd2.reduce((a, b) => a + b, 0);
+                indicador2Count += validInd2.length;
+            }
+            
+            // Indicador 3 (columnas Q, R, S, T, U, V - índices 16, 17, 18, 19, 20, 21)
+            const indicador3Values = [
+                parseInt(row[16]) || 0, // Q - 2.1 Avances
+                parseInt(row[17]) || 0, // R - 2.2 Resultados
+                parseInt(row[18]) || 0, // S - 2.3 Elementos
+                parseInt(row[19]) || 0, // T - 2.4 Formación
+                parseInt(row[20]) || 0, // U - 2.5 Plan Acción
+                parseInt(row[21]) || 0  // V - 2.6 Participación
+            ];
+            
+            const validInd3 = indicador3Values.filter(v => v > 0);
+            if (validInd3.length > 0) {
+                indicador3Total += validInd3.reduce((a, b) => a + b, 0);
+                indicador3Count += validInd3.length;
+            }
+            
+            // Indicador 4 (columnas W, X, Y - índices 22, 23, 24)
+            const indicador4Values = [
+                parseInt(row[22]) || 0, // W - 3.1 Gestión
+                parseInt(row[23]) || 0, // X - 3.2 Cronograma
+                parseInt(row[24]) || 0  // Y - 3.3 Ejecución
+            ];
+            
+            const validInd4 = indicador4Values.filter(v => v > 0);
+            if (validInd4.length > 0) {
+                indicador4Total += validInd4.reduce((a, b) => a + b, 0);
+                indicador4Count += validInd4.length;
+            }
+        });
+        
+        // Calcular promedios finales
+        const avgIndicador1 = indicador1Count > 0 ? (indicador1Total / indicador1Count) : 0;
+        const avgIndicador2 = indicador2Count > 0 ? (indicador2Total / indicador2Count) : 0;
+        const avgIndicador3 = indicador3Count > 0 ? (indicador3Total / indicador3Count) : 0;
+        const avgIndicador4 = indicador4Count > 0 ? (indicador4Total / indicador4Count) : 0;
+        
+        // Actualizar elementos HTML
+        document.getElementById('indicador1-promedio').textContent = avgIndicador1.toFixed(2);
+        document.getElementById('indicador2-promedio').textContent = avgIndicador2.toFixed(2);
+        document.getElementById('indicador3-promedio').textContent = avgIndicador3.toFixed(2);
+        document.getElementById('indicador4-promedio').textContent = avgIndicador4.toFixed(2);
+        
+        // Log de los promedios calculados
+        console.log('📊 Promedios calculados para Contrato 302:');
+        console.log('Indicador 1 (Participación):', avgIndicador1.toFixed(2));
+        console.log('Indicador 2 (Servicio):', avgIndicador2.toFixed(2));
+        console.log('Indicador 3 (Impacto):', avgIndicador3.toFixed(2));
+        console.log('Indicador 4 (Eficiencia):', avgIndicador4.toFixed(2));
+        console.log('Total de registros procesados:', data.length);
+        
+        // Debug: mostrar la primera fila para ver la estructura
+        if (data.length > 0) {
+            console.log('Primera fila de datos BD1:', data[0]);
+            console.log('Número de columnas BD1:', data[0].length);
+        }
+        
+        // Mostrar tabla con paginación
+        displayTableData();
+        
+        // Configurar eventos de paginación
+        document.getElementById('rows-per-page').addEventListener('change', function() {
+            window.rowsPerPage = this.value === 'all' ? data.length : parseInt(this.value);
+            window.currentPage = 1;
+            displayTableData();
+        });
+        
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (window.currentPage > 1) {
+                window.currentPage--;
+                displayTableData();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function() {
+            const maxPages = Math.ceil(data.length / window.rowsPerPage);
+            if (window.currentPage < maxPages) {
+                window.currentPage++;
+                displayTableData();
+            }
+        });
+        
+        // Mostrar datos
+        document.getElementById('sheets-loading').style.display = 'none';
+        document.getElementById('sheets-data').style.display = 'block';
+    }
+    
+    function calculateRowSatisfaction(row) {
+        let total = 0;
+        let count = 0;
+        for (let i = 12; i < Math.min(32, row.length); i++) {
+            const value = parseInt(row[i]);
+            if (!isNaN(value) && value >= 1 && value <= 5) {
+                total += value;
+                count++;
+            }
+        }
+        return count > 0 ? Math.round((total / count) * 20) : 0;
+    }
+    
+    function displayTableData() {
+        const data = window.allData;
+        const tableBody = document.getElementById('sheets-table-body');
+        tableBody.innerHTML = '';
+        
+        const startIndex = (window.currentPage - 1) * window.rowsPerPage;
+        const endIndex = window.rowsPerPage === 'all' ? data.length : startIndex + window.rowsPerPage;
+        const pageData = data.slice(startIndex, endIndex);
+        
+        pageData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row[0] || ''}</td>  <!-- A - ID -->
+                <td>${row[2] || ''}</td>  <!-- C - Fecha -->
+                <td>${row[6] || ''}</td>  <!-- G - UPZ -->
+                <td>${row[5] || ''}</td>  <!-- F - Barrio -->
+                <td>${row[7] || ''}</td>  <!-- H - Rango Etario -->
+                <td>${row[8] || ''}</td>  <!-- I - Género -->
+                <td>${row[9] || ''}</td>  <!-- J - Identidad de Género -->
+                <td>${row[10] || ''}</td> <!-- K - Componente -->
+                <td>${row[12] || ''}</td> <!-- M - 1.1 Info Clara -->
+                <td>${row[13] || ''}</td> <!-- N - 1.2 Inclusión -->
+                <td>${row[14] || ''}</td> <!-- O - 1.3 Cronograma -->
+                <td>${row[15] || ''}</td> <!-- P - 1.4 Canales -->
+                <td>${row[16] || ''}</td> <!-- Q - 2.1 Avances -->
+                <td>${row[17] || ''}</td> <!-- R - 2.2 Resultados -->
+                <td>${row[18] || ''}</td> <!-- S - 2.3 Elementos -->
+                <td>${row[19] || ''}</td> <!-- T - 2.4 Formación -->
+                <td>${row[20] || ''}</td> <!-- U - 2.5 Plan Acción -->
+                <td>${row[21] || ''}</td> <!-- V - 2.6 Participación -->
+                <td>${row[22] || ''}</td> <!-- W - 3.1 Gestión -->
+                <td>${row[23] || ''}</td> <!-- X - 3.2 Cronograma -->
+                <td>${row[24] || ''}</td> <!-- Y - 3.3 Ejecución -->
+                <td>${row[25] || ''}</td> <!-- Z - 4.1 Confianza -->
+                <td>${row[26] || ''}</td> <!-- AA - 4.2 Recomendación -->
+                <td>${row[27] || ''}</td> <!-- AB - 4.3 Cumplimiento -->
+                <td>${row[28] || ''}</td> <!-- AC - 4.4 Transparencia -->
+                <td>${row[29] || ''}</td> <!-- AD - 4.5 Desarrollo -->
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Actualizar información de paginación
+        const totalRows = data.length;
+        const maxPages = Math.ceil(totalRows / window.rowsPerPage);
+        
+        document.getElementById('table-info').textContent = `Mostrando ${startIndex + 1}-${Math.min(endIndex, totalRows)} de ${totalRows} registros`;
+        document.getElementById('page-info').textContent = `Página ${window.currentPage} de ${maxPages}`;
+        
+        // Habilitar/deshabilitar botones
+        document.getElementById('prev-page').disabled = window.currentPage === 1;
+        document.getElementById('next-page').disabled = window.currentPage === maxPages;
+    }
+    
+    function showError(message) {
+        document.getElementById('sheets-loading').innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--primary-red);"></i>
+            <p style="margin-top: 1rem; color: var(--dark-gray);">${message}</p>
+        `;
+    }
+    
+    // Función para cargar segunda base de datos de Google Sheets
+    async function loadGoogleSheetsData2() {
+        const SHEET_ID_2 = '1UBmznvwtFI9QlccDBQbRCGs7vgcczLvX-Q8p2Z7CmcE';
+        const API_KEY = 'AIzaSyCh63RM-nu-Yc0GZJB7ksVkpGlBcsiZTWM';
+        
+        try {
+            // Primero obtener información del spreadsheet para identificar la hoja correcta
+            const infoUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID_2}?key=${API_KEY}`;
+            const infoResponse = await fetch(infoUrl);
+            const infoData = await infoResponse.json();
+            
+            console.log('Información del spreadsheet 2:', infoData);
+            
+            if (infoData.error) {
+                showError2('Error de acceso: ' + infoData.error.message);
+                return;
+            }
+            
+            // Buscar la hoja con GID 1341039495 o usar la segunda hoja
+            let targetSheet = null;
+            if (infoData.sheets && infoData.sheets.length > 1) {
+                targetSheet = infoData.sheets[1]; // Usar la segunda hoja
+            } else if (infoData.sheets && infoData.sheets.length > 0) {
+                targetSheet = infoData.sheets[0]; // Usar la primera si solo hay una
+            }
+            
+            if (!targetSheet) {
+                showError2('No se encontró la hoja especificada');
+                return;
+            }
+            
+            const sheetName = targetSheet.properties.title;
+            console.log('Nombre de la hoja 2:', sheetName);
+            
+            // URL para obtener datos de la hoja específica
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID_2}/values/${sheetName}!A:AD?key=${API_KEY}&majorDimension=ROWS`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            console.log('Datos segunda BD:', data);
+            
+            if (data.values && data.values.length > 0) {
+                processSheetsData2(data.values);
+            } else {
+                showError2('No se encontraron datos en la segunda hoja');
+            }
+        } catch (error) {
+            console.error('Error cargando segunda BD:', error);
+            showError2('Error al cargar los datos de la segunda base de datos');
+        }
+    }
+    
+    function processSheetsData2(values) {
+        const headers = values[1]; // La fila 2 (índice 1) es el encabezado
+        const data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        
+        // Actualizar estadísticas
+        document.getElementById('total-registros2').textContent = data.length;
+        
+        // Calcular satisfacción promedio (columnas 12-31 son las preguntas de satisfacción)
+        let totalSatisfaction2 = 0;
+        let validResponses2 = 0;
+        
+        data.forEach(row => {
+            for (let i = 12; i < Math.min(32, row.length); i++) {
+                const value = parseInt(row[i]);
+                if (!isNaN(value) && value >= 1 && value <= 5) {
+                    totalSatisfaction2 += value;
+                    validResponses2++;
+                }
+            }
+        });
+        
+        const avgSatisfaction2 = validResponses2 > 0 ? Math.round((totalSatisfaction2 / validResponses2) * 20) : 0;
+        document.getElementById('promedio-satisfaccion2').textContent = avgSatisfaction2 + '%';
+        
+        // Debug: mostrar la primera fila para ver la estructura
+        if (data.length > 0) {
+            console.log('Primera fila de datos BD2:', data[0]);
+            console.log('Número de columnas BD2:', data[0].length);
+        }
+        
+        // Variables globales para paginación
+        window.allData2 = data;
+        window.currentPage2 = 1;
+        window.rowsPerPage2 = 10;
+        
+        // Mostrar tabla con paginación
+        displayTableData2();
+        
+        // Configurar eventos de paginación
+        document.getElementById('rows-per-page2').addEventListener('change', function() {
+            window.rowsPerPage2 = this.value === 'all' ? data.length : parseInt(this.value);
+            window.currentPage2 = 1;
+            displayTableData2();
+        });
+        
+        document.getElementById('prev-page2').addEventListener('click', function() {
+            if (window.currentPage2 > 1) {
+                window.currentPage2--;
+                displayTableData2();
+            }
+        });
+        
+        document.getElementById('next-page2').addEventListener('click', function() {
+            const maxPages = Math.ceil(data.length / window.rowsPerPage2);
+            if (window.currentPage2 < maxPages) {
+                window.currentPage2++;
+                displayTableData2();
+            }
+        });
+        
+        // Mostrar datos
+        document.getElementById('sheets2-loading').style.display = 'none';
+        document.getElementById('sheets2-data').style.display = 'block';
+    }
+    
+    function displayTableData2() {
+        const data = window.allData2;
+        const tableBody = document.getElementById('sheets-table-body2');
+        tableBody.innerHTML = '';
+        
+        const startIndex = (window.currentPage2 - 1) * window.rowsPerPage2;
+        const endIndex = window.rowsPerPage2 === 'all' ? data.length : startIndex + window.rowsPerPage2;
+        const pageData = data.slice(startIndex, endIndex);
+        
+        pageData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row[0] || ''}</td>  <!-- A - ID -->
+                <td>${row[2] || ''}</td>  <!-- C - Fecha -->
+                <td>${row[6] || ''}</td>  <!-- G - UPZ -->
+                <td>${row[5] || ''}</td>  <!-- F - Barrio -->
+                <td>${row[7] || ''}</td>  <!-- H - Rango Etario -->
+                <td>${row[8] || ''}</td>  <!-- I - Género -->
+                <td>${row[9] || ''}</td>  <!-- J - Identidad de Género -->
+                <td>${row[10] || ''}</td> <!-- K - Componente -->
+                <td>${row[12] || ''}</td> <!-- M - 1.1 Info Clara -->
+                <td>${row[13] || ''}</td> <!-- N - 1.2 Inclusión -->
+                <td>${row[14] || ''}</td> <!-- O - 1.3 Cronograma -->
+                <td>${row[15] || ''}</td> <!-- P - 1.4 Canales -->
+                <td>${row[16] || ''}</td> <!-- Q - 2.1 Avances -->
+                <td>${row[17] || ''}</td> <!-- R - 2.2 Resultados -->
+                <td>${row[18] || ''}</td> <!-- S - 2.3 Elementos -->
+                <td>${row[19] || ''}</td> <!-- T - 2.4 Formación -->
+                <td>${row[20] || ''}</td> <!-- U - 2.5 Plan Acción -->
+                <td>${row[21] || ''}</td> <!-- V - 2.6 Participación -->
+                <td>${row[22] || ''}</td> <!-- W - 3.1 Gestión -->
+                <td>${row[23] || ''}</td> <!-- X - 3.2 Cronograma -->
+                <td>${row[24] || ''}</td> <!-- Y - 3.3 Ejecución -->
+                <td>${row[25] || ''}</td> <!-- Z - 4.1 Confianza -->
+                <td>${row[26] || ''}</td> <!-- AA - 4.2 Recomendación -->
+                <td>${row[27] || ''}</td> <!-- AB - 4.3 Cumplimiento -->
+                <td>${row[28] || ''}</td> <!-- AC - 4.4 Transparencia -->
+                <td>${row[29] || ''}</td> <!-- AD - 4.5 Desarrollo -->
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Actualizar información de paginación
+        const totalRows = data.length;
+        const maxPages = Math.ceil(totalRows / window.rowsPerPage2);
+        
+        document.getElementById('table-info2').textContent = `Mostrando ${startIndex + 1}-${Math.min(endIndex, totalRows)} de ${totalRows} registros`;
+        document.getElementById('page-info2').textContent = `Página ${window.currentPage2} de ${maxPages}`;
+        
+        // Habilitar/deshabilitar botones
+        document.getElementById('prev-page2').disabled = window.currentPage2 === 1;
+        document.getElementById('next-page2').disabled = window.currentPage2 === maxPages;
+    }
+    
+    function showError2(message) {
+        document.getElementById('sheets2-loading').innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--primary-red);"></i>
+            <p style="margin-top: 1rem; color: var(--dark-gray);">${message}</p>
+        `;
+    }
+    </script>
+    
+    <!-- Contenido Indicador 1 -->
+    <div id="indicador1-content" class="indicador-content" style="display: none;">
+        <div class="content-section">
+            <div class="indicador-header">
+                <h2><i class="fas fa-users"></i> Indicador 1 - Participación y Comunicación Ciudadana</h2>
+                <button class="close-indicador" onclick="closeIndicador(1)">&times;</button>
+            </div>
+            
+            <div class="indicador-stats">
+                <div class="stat-item">
+                    <h3 id="promedio-general-ind1">0</h3>
+                    <p>Promedio General</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="total-upz-ind1">0</h3>
+                    <p>UPZ Evaluadas</p>
+                </div>
+            </div>
+            
+            <div class="upz-results">
+                <h3>Resultados por UPZ</h3>
+                <table id="upz-table" class="upz-table">
+                    <thead>
+                        <tr>
+                            <th>UPZ</th>
+                            <th>Promedio</th>
+                            <th>Nivel de Satisfacción</th>
+                            <th>Registros</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upz-table-body">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="map-update-info">
+                <p><i class="fas fa-info-circle"></i> Los polígonos del mapa se han actualizado según los resultados</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenido Indicador 2 -->
+    <div id="indicador2-content" class="indicador-content" style="display: none;">
+        <div class="content-section">
+            <div class="indicador-header">
+                <h2><i class="fas fa-magic"></i> Indicador 2 - La Magia del Servicio</h2>
+                <button class="close-indicador" onclick="closeIndicador(2)">&times;</button>
+            </div>
+            
+            <div class="indicador-stats">
+                <div class="stat-item">
+                    <h3 id="promedio-general-ind2">0</h3>
+                    <p>Promedio General</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="total-upz-ind2">0</h3>
+                    <p>UPZ Evaluadas</p>
+                </div>
+            </div>
+            
+            <div class="upz-results">
+                <h3>Resultados por UPZ</h3>
+                <table id="upz-table2" class="upz-table">
+                    <thead>
+                        <tr>
+                            <th>UPZ</th>
+                            <th>Promedio</th>
+                            <th>Nivel de Satisfacción</th>
+                            <th>Registros</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upz-table-body2">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="map-update-info">
+                <p><i class="fas fa-info-circle"></i> Los polígonos del mapa se han actualizado según los resultados</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenido Indicador 3 -->
+    <div id="indicador3-content" class="indicador-content" style="display: none;">
+        <div class="content-section">
+            <div class="indicador-header">
+                <h2><i class="fas fa-chart-bar"></i> Indicador 3 - Impacto y Resultados</h2>
+                <button class="close-indicador" onclick="closeIndicador(3)">&times;</button>
+            </div>
+            
+            <div class="indicador-stats">
+                <div class="stat-item">
+                    <h3 id="promedio-general-ind3">0</h3>
+                    <p>Promedio General</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="total-upz-ind3">0</h3>
+                    <p>UPZ Evaluadas</p>
+                </div>
+            </div>
+            
+            <div class="upz-results">
+                <h3>Resultados por UPZ</h3>
+                <table id="upz-table3" class="upz-table">
+                    <thead>
+                        <tr>
+                            <th>UPZ</th>
+                            <th>Promedio</th>
+                            <th>Nivel de Satisfacción</th>
+                            <th>Registros</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upz-table-body3">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="map-update-info">
+                <p><i class="fas fa-info-circle"></i> Los polígonos del mapa se han actualizado según los resultados</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contenido Indicador 4 -->
+    <div id="indicador4-content" class="indicador-content" style="display: none;">
+        <div class="content-section">
+            <div class="indicador-header">
+                <h2><i class="fas fa-coins"></i> Indicador 4 - Eficiencia en la Ejecución del Fondo de Desarrollo Local</h2>
+                <button class="close-indicador" onclick="closeIndicador(4)">&times;</button>
+            </div>
+            
+            <div class="indicador-stats">
+                <div class="stat-item">
+                    <h3 id="promedio-general-ind4">0</h3>
+                    <p>Promedio General</p>
+                </div>
+                <div class="stat-item">
+                    <h3 id="total-upz-ind4">0</h3>
+                    <p>UPZ Evaluadas</p>
+                </div>
+            </div>
+            
+            <div class="upz-results">
+                <h3>Resultados por UPZ</h3>
+                <table id="upz-table4" class="upz-table">
+                    <thead>
+                        <tr>
+                            <th>UPZ</th>
+                            <th>Promedio</th>
+                            <th>Nivel de Satisfacción</th>
+                            <th>Registros</th>
+                        </tr>
+                    </thead>
+                    <tbody id="upz-table-body4">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="map-update-info">
+                <p><i class="fas fa-info-circle"></i> Los polígonos del mapa se han actualizado según los resultados</p>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+    /* Estilos para los indicadores */
+    .stat-card.selected {
+        background: var(--primary-yellow) !important;
+        color: var(--dark-gray) !important;
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(250, 182, 45, 0.3);
+    }
+    
+    .stat-card.selected .icon {
+        color: var(--dark-gray) !important;
+    }
+    
+    .stat-card.selected h3 {
+        color: var(--dark-gray) !important;
+    }
+    
+    .stat-card.selected p {
+        color: var(--dark-gray) !important;
+    }
+    
+    /* Estilos para el contenido de indicadores */
+    .indicador-content {
+        margin: 2rem 0;
+    }
+    
+    .indicador-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .indicador-header h2 {
+        margin: 0;
+        color: var(--primary-red);
+        font-size: 1.8rem;
+        font-weight: 600;
+        border-bottom: 3px solid var(--primary-yellow);
+        padding-bottom: 0.5rem;
+    }
+    
+    .close-indicador {
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    
+    .close-indicador:hover {
+        background: #c00;
+    }
+    
+    .indicador-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .upz-results {
+        margin: 2rem 0;
+    }
+    
+    .upz-results h3 {
+        color: var(--primary-red);
+        margin-bottom: 1rem;
+    }
+    
+    .upz-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+    
+    .upz-table th,
+    .upz-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .upz-table th {
+        background-color: var(--primary-red);
+        color: white;
+        font-weight: 600;
+    }
+    
+    .upz-table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .color-indicator {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .color-red { background-color: #e4032e; }
+    .color-yellow { background-color: #fab62d; }
+    .color-green { background-color: #2ecc40; }
+    
+    .map-update-info {
+        background-color: #e8f5e8;
+        border: 1px solid #2ecc40;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 2rem;
+        text-align: center;
+    }
+    
+    .map-update-info i {
+        color: #2ecc40;
+        margin-right: 0.5rem;
+    }
+    </style>
+    
+    <script>
+    // Funcionalidad de todos los indicadores
+    document.addEventListener('DOMContentLoaded', function() {
+        // Indicador 1
+        const indicador1Card = document.getElementById('indicador1-card');
+        const content1 = document.getElementById('indicador1-content');
+        
+        if (indicador1Card && content1) {
+            indicador1Card.addEventListener('click', function() {
+                selectIndicador(1);
+                calculateIndicador1();
+                showIndicadorContent(1);
+            });
+        }
+        
+        // Indicador 2
+        const indicador2Card = document.getElementById('indicador2-card');
+        const content2 = document.getElementById('indicador2-content');
+        
+        if (indicador2Card && content2) {
+            indicador2Card.addEventListener('click', function() {
+                selectIndicador(2);
+                calculateIndicador2();
+                showIndicadorContent(2);
+            });
+        }
+        
+        // Indicador 3
+        const indicador3Card = document.getElementById('indicador3-card');
+        const content3 = document.getElementById('indicador3-content');
+        
+        if (indicador3Card && content3) {
+            indicador3Card.addEventListener('click', function() {
+                selectIndicador(3);
+                calculateIndicador3();
+                showIndicadorContent(3);
+            });
+        }
+        
+        // Indicador 4
+        const indicador4Card = document.getElementById('indicador4-card');
+        const content4 = document.getElementById('indicador4-content');
+        
+        if (indicador4Card && content4) {
+            indicador4Card.addEventListener('click', function() {
+                selectIndicador(4);
+                calculateIndicador4();
+                showIndicadorContent(4);
+            });
+        }
+    });
+    
+    // Función para seleccionar indicador (colorear tarjeta)
+    function selectIndicador(indicatorNumber) {
+        // Remover selección de todas las tarjetas
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Seleccionar la tarjeta del indicador
+        const selectedCard = document.getElementById(`indicador${indicatorNumber}-card`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
+        
+        // Actualizar el título del mapa inmediatamente
+        const mapTitle = document.querySelector('.map-title');
+        if (mapTitle) {
+            const indicadorNames = {
+                1: 'Participación y Comunicación Ciudadana',
+                2: 'La Magia del Servicio',
+                3: 'Impacto y Resultados',
+                4: 'Eficiencia en la Ejecución del Fondo de Desarrollo Local'
+            };
+            
+            const indicadorName = indicadorNames[indicatorNumber];
+            mapTitle.textContent = `Resultados de indicadores del Contrato 302 de 2023: ${indicadorName}`;
+        }
+    }
+    
+    // Función para mostrar contenido del indicador
+    function showIndicadorContent(indicatorNumber) {
+        // Ocultar todos los contenidos
+        document.querySelectorAll('.indicador-content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        // Actualizar el título del primer mapa
+        const mapTitle = document.querySelector('#map-upz-302').parentElement.querySelector('.map-title');
+        if (mapTitle) {
+            const indicadorNames = {
+                1: 'Participación y Comunicación Ciudadana',
+                2: 'La Magia del Servicio',
+                3: 'Impacto y Resultados',
+                4: 'Eficiencia en la Ejecución del Fondo de Desarrollo Local'
+            };
+            
+            const indicadorName = indicadorNames[indicatorNumber];
+            mapTitle.textContent = `Resultados de indicadores del Contrato 302 de 2023: ${indicadorName}`;
+        }
+        
+        // Actualizar el título del segundo mapa
+        const mapTitle2 = document.querySelector('#map-upz-256').parentElement.querySelector('.map-title');
+        if (mapTitle2) {
+            const indicadorNames = {
+                1: 'Participación y Comunicación Ciudadana',
+                2: 'La Magia del Servicio',
+                3: 'Impacto y Resultados',
+                4: 'Eficiencia en la Ejecución del Fondo de Desarrollo Local'
+            };
+            
+            const indicadorName = indicadorNames[indicatorNumber];
+            mapTitle2.textContent = `Resultados de indicadores del Convenio Interadministrativo 256 de 2024: ${indicadorName}`;
+        }
+        
+        // Mostrar el contenido del indicador seleccionado en el primer contenedor
+        const content = document.getElementById(`indicador${indicatorNumber}-content`);
+        const resultsContainer = document.getElementById('indicadores-results-container');
+        
+        if (content && resultsContainer) {
+            // Limpiar el contenedor
+            resultsContainer.innerHTML = '';
+            
+            // Clonar el contenido y mostrarlo en el contenedor
+            const clonedContent = content.cloneNode(true);
+            clonedContent.style.display = 'block';
+            resultsContainer.appendChild(clonedContent);
+            resultsContainer.style.display = 'block';
+        }
+        
+        // Mostrar el contenido del indicador seleccionado en el segundo contenedor
+        const resultsContainer2 = document.getElementById('indicadores-results-container2');
+        
+        if (resultsContainer2) {
+            // Limpiar el contenedor
+            resultsContainer2.innerHTML = '';
+            
+            // Calcular y mostrar los datos específicos del segundo Google Sheets
+            calculateAndShowResults2(indicatorNumber);
+            resultsContainer2.style.display = 'block';
+        }
+    }
+    
+    // Función para cerrar indicador
+    function closeIndicador(indicatorNumber) {
+        // Remover selección de la tarjeta
+        const selectedCard = document.getElementById(`indicador${indicatorNumber}-card`);
+        if (selectedCard) {
+            selectedCard.classList.remove('selected');
+        }
+        
+        // Restaurar el título original del primer mapa
+        const mapTitle = document.querySelector('#map-upz-302').parentElement.querySelector('.map-title');
+        if (mapTitle) {
+            mapTitle.textContent = 'Resultados de indicadores Contrato 302 de 2023';
+        }
+        
+        // Restaurar el título original del segundo mapa
+        const mapTitle2 = document.querySelector('#map-upz-256').parentElement.querySelector('.map-title');
+        if (mapTitle2) {
+            mapTitle2.textContent = 'Resultados de indicadores del Convenio Interadministrativo 256 de 2024';
+        }
+        
+        // Ocultar contenido del primer contenedor de resultados
+        const resultsContainer = document.getElementById('indicadores-results-container');
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
+        }
+        
+        // Ocultar contenido del segundo contenedor de resultados
+        const resultsContainer2 = document.getElementById('indicadores-results-container2');
+        if (resultsContainer2) {
+            resultsContainer2.style.display = 'none';
+            resultsContainer2.innerHTML = '';
+        }
+        
+        // Ocultar también el contenido original
+        const originalContent = document.getElementById(`indicador${indicatorNumber}-content`);
+        if (originalContent) {
+            originalContent.style.display = 'none';
+        }
+    }
+    
+    function calculateIndicador1() {
+        if (!window.allData || window.allData.length === 0) {
+            alert('No hay datos disponibles para calcular el Indicador 1');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 1 (columnas M, N, O, P - índices 12, 13, 14, 15)
+            const indicador1Values = [
+                parseInt(row[12]) || 0, // M - 1.1 Info Clara
+                parseInt(row[13]) || 0, // N - 1.2 Inclusión
+                parseInt(row[14]) || 0, // O - 1.3 Cronograma
+                parseInt(row[15]) || 0  // P - 1.4 Canales
+            ];
+            
+            const validValues = indicador1Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        let totalPromedio = 0;
+        let totalRegistros = 0;
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+            
+            totalPromedio += promedioUPZ * registros;
+            totalRegistros += registros;
+        });
+        
+        // Calcular promedio general
+        const promedioGeneral = totalRegistros > 0 ? totalPromedio / totalRegistros : 0;
+        
+        // Actualizar estadísticas
+        document.getElementById('promedio-general-ind1').textContent = promedioGeneral.toFixed(2);
+        document.getElementById('total-upz-ind1').textContent = upzResults.length;
+        
+        // Actualizar tabla
+        const tableBody = document.getElementById('upz-table-body');
+        tableBody.innerHTML = '';
+        
+        upzResults.forEach(result => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${result.upz}</td>
+                <td>${result.promedio.toFixed(2)}</td>
+                <td>${getNivelSatisfaccion(result.promedio)}</td>
+                <td>${result.registros}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Log de UPZ encontradas
+        console.log('UPZ encontradas en Indicador 1:', Array.from(upzNames));
+        console.log('Resultados por UPZ:', upzResults);
+        
+        // Log específico para UPZ LOURDES
+        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
+        if (lourdesResult) {
+            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
+        } else {
+            console.log('❌ UPZ LOURDES NO encontrada en resultados');
+        }
+        
+        // Actualizar mapa
+        updateMapColors(upzResults);
+        
+        // También actualizar el segundo mapa con datos de la segunda hoja
+        calculateIndicador1Map2();
+    }
+    
+    function calculateIndicador2() {
+        if (!window.allData || window.allData.length === 0) {
+            alert('No hay datos disponibles para calcular el Indicador 2');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames2 = new Set();
+        
+        window.allData.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames2.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 2 (columnas Z, AA, AB, AC, AD - índices 25, 26, 27, 28, 29)
+            const indicador2Values = [
+                parseInt(row[25]) || 0, // Z - 4.1 Confianza
+                parseInt(row[26]) || 0, // AA - 4.2 Recomendación
+                parseInt(row[27]) || 0, // AB - 4.3 Cumplimiento
+                parseInt(row[28]) || 0, // AC - 4.4 Transparencia
+                parseInt(row[29]) || 0  // AD - 4.5 Desarrollo
+            ];
+            
+            const validValues = indicador2Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        let totalPromedio = 0;
+        let totalRegistros = 0;
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+            
+            totalPromedio += promedioUPZ * registros;
+            totalRegistros += registros;
+        });
+        
+        // Calcular promedio general
+        const promedioGeneral = totalRegistros > 0 ? totalPromedio / totalRegistros : 0;
+        
+        // Actualizar estadísticas
+        document.getElementById('promedio-general-ind2').textContent = promedioGeneral.toFixed(2);
+        document.getElementById('total-upz-ind2').textContent = upzResults.length;
+        
+        // Actualizar tabla
+        const tableBody = document.getElementById('upz-table-body2');
+        tableBody.innerHTML = '';
+        
+        upzResults.forEach(result => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${result.upz}</td>
+                <td>${result.promedio.toFixed(2)}</td>
+                <td>${getNivelSatisfaccion(result.promedio)}</td>
+                <td>${result.registros}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Log de UPZ encontradas
+        console.log('UPZ encontradas en Indicador 2:', Array.from(upzNames2));
+        console.log('Resultados por UPZ:', upzResults);
+        
+        // Log específico para UPZ LOURDES
+        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
+        if (lourdesResult) {
+            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
+        } else {
+            console.log('❌ UPZ LOURDES NO encontrada en resultados');
+        }
+        
+        // Actualizar mapa
+        updateMapColors(upzResults);
+        
+        // También actualizar el segundo mapa con datos de la segunda hoja
+        calculateIndicador2Map2();
+    }
+    
+    function calculateIndicador3() {
+        if (!window.allData || window.allData.length === 0) {
+            alert('No hay datos disponibles para calcular el Indicador 3');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames3 = new Set();
+        
+        window.allData.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames3.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 3 (columnas Q, R, S, T, U, V - índices 16, 17, 18, 19, 20, 21)
+            const indicador3Values = [
+                parseInt(row[16]) || 0, // Q - 2.1 Avances
+                parseInt(row[17]) || 0, // R - 2.2 Resultados
+                parseInt(row[18]) || 0, // S - 2.3 Elementos
+                parseInt(row[19]) || 0, // T - 2.4 Formación
+                parseInt(row[20]) || 0, // U - 2.5 Plan Acción
+                parseInt(row[21]) || 0  // V - 2.6 Participación
+            ];
+            
+            const validValues = indicador3Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        let totalPromedio = 0;
+        let totalRegistros = 0;
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+            
+            totalPromedio += promedioUPZ * registros;
+            totalRegistros += registros;
+        });
+        
+        // Calcular promedio general
+        const promedioGeneral = totalRegistros > 0 ? totalPromedio / totalRegistros : 0;
+        
+        // Actualizar estadísticas
+        document.getElementById('promedio-general-ind3').textContent = promedioGeneral.toFixed(2);
+        document.getElementById('total-upz-ind3').textContent = upzResults.length;
+        
+        // Actualizar tabla
+        const tableBody = document.getElementById('upz-table-body3');
+        tableBody.innerHTML = '';
+        
+        upzResults.forEach(result => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${result.upz}</td>
+                <td>${result.promedio.toFixed(2)}</td>
+                <td>${getNivelSatisfaccion(result.promedio)}</td>
+                <td>${result.registros}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Log de UPZ encontradas
+        console.log('UPZ encontradas en Indicador 3:', Array.from(upzNames3));
+        console.log('Resultados por UPZ:', upzResults);
+        
+        // Log específico para UPZ LOURDES
+        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
+        if (lourdesResult) {
+            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
+        } else {
+            console.log('❌ UPZ LOURDES NO encontrada en resultados');
+        }
+        
+        // Actualizar mapa
+        updateMapColors(upzResults);
+        
+        // También actualizar el segundo mapa con datos de la segunda hoja
+        calculateIndicador3Map2();
+    }
+    
+    function calculateIndicador4() {
+        if (!window.allData || window.allData.length === 0) {
+            alert('No hay datos disponibles para calcular el Indicador 4');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames4 = new Set();
+        
+        window.allData.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames4.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 4 (columnas W, X, Y - índices 22, 23, 24)
+            const indicador4Values = [
+                parseInt(row[22]) || 0, // W - 3.1 Gestión
+                parseInt(row[23]) || 0, // X - 3.2 Cronograma
+                parseInt(row[24]) || 0  // Y - 3.3 Ejecución
+            ];
+            
+            const validValues = indicador4Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        let totalPromedio = 0;
+        let totalRegistros = 0;
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+            
+            totalPromedio += promedioUPZ * registros;
+            totalRegistros += registros;
+        });
+        
+        // Calcular promedio general
+        const promedioGeneral = totalRegistros > 0 ? totalPromedio / totalRegistros : 0;
+        
+        // Actualizar estadísticas
+        document.getElementById('promedio-general-ind4').textContent = promedioGeneral.toFixed(2);
+        document.getElementById('total-upz-ind4').textContent = upzResults.length;
+        
+        // Actualizar tabla
+        const tableBody = document.getElementById('upz-table-body4');
+        tableBody.innerHTML = '';
+        
+        upzResults.forEach(result => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${result.upz}</td>
+                <td>${result.promedio.toFixed(2)}</td>
+                <td>${getNivelSatisfaccion(result.promedio)}</td>
+                <td>${result.registros}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        
+        // Log de UPZ encontradas
+        console.log('UPZ encontradas en Indicador 4:', Array.from(upzNames4));
+        console.log('Resultados por UPZ:', upzResults);
+        
+        // Log específico para UPZ LOURDES
+        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
+        if (lourdesResult) {
+            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
+            console.log('🔍 Color asignado a LOURDES:', lourdesResult.color);
+            console.log('🔍 Promedio de LOURDES:', lourdesResult.promedio);
+            console.log('🔍 Función getColorByPromedio para LOURDES:', getColorByPromedio(lourdesResult.promedio));
+        } else {
+            console.log('❌ UPZ LOURDES NO encontrada en resultados');
+            console.log('❌ UPZ disponibles:', upzResults.map(r => r.upz));
+        }
+        
+        // Actualizar mapa
+        updateMapColors(upzResults);
+        
+        // También actualizar el segundo mapa con datos de la segunda hoja
+        calculateIndicador4Map2();
+    }
+    
+    function getColorByPromedio(promedio) {
+        if (promedio >= 1 && promedio < 3) return 'red';        // 1.00 a 2.99 = Rojo
+        if (promedio >= 3 && promedio < 4) return 'yellow';     // 3.00 a 3.99 = Amarillo
+        if (promedio >= 4 && promedio <= 5) return 'green';     // 4.00 a 5.00 = Verde
+        return 'gray';                                          // Otros valores = Gris
+    }
+    
+    function getNivelSatisfaccion(promedio) {
+        if (promedio >= 4 && promedio <= 5) return '😊 De acuerdo';     // Verde = De acuerdo
+        if (promedio >= 3 && promedio < 4) return '😐 Ni de acuerdo ni en desacuerdo'; // Amarillo = Neutral
+        if (promedio >= 1 && promedio < 3) return '😞 En desacuerdo';   // Rojo = En desacuerdo
+        return '❓ Sin datos';                                    // Gris = Sin datos
+    }
+    
+    // Función para calcular Indicador 1 en el segundo mapa usando datos de la segunda hoja
+    function calculateIndicador1Map2() {
+        if (!window.allData2 || window.allData2.length === 0) {
+            console.log('No hay datos disponibles para calcular el Indicador 1 en el segundo mapa');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData2.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 1 (columnas M, N, O, P - índices 12, 13, 14, 15)
+            const indicador1Values = [
+                parseInt(row[12]) || 0, // M - 1.1 Info Clara
+                parseInt(row[13]) || 0, // N - 1.2 Inclusión
+                parseInt(row[14]) || 0, // O - 1.3 Cronograma
+                parseInt(row[15]) || 0  // P - 1.4 Canales
+            ];
+            
+            const validValues = indicador1Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+        });
+        
+        // Log de UPZ encontradas en el segundo mapa
+        console.log('UPZ encontradas en Indicador 1 (Mapa 2):', Array.from(upzNames));
+        console.log('Resultados por UPZ (Mapa 2):', upzResults);
+        
+        // Actualizar el segundo mapa
+        updateMapColors2(upzResults);
+    }
+    
+    // Mapeo global de nombres de UPZ a códigos
+    const upzMapping = {
+        'UPZ SAGRADO CORAZÓN': '91',
+        'UPZ SAGRADO CORAZON': '91', // Sin acento
+        'UPZ LA MACARENA': '92',
+        'UPZ LAS NIEVES': '93',
+        'UPZ LAS CRUCES': '95',
+        'UPZ LOURDES': '96',
+        'LOURDES': '96', // Solo el nombre sin UPZ
+        'UPZ LOURDES ': '96' // Con espacio al final
+    };
+    
+    function updateMapColors(upzResults) {
+        // Obtener el mapa del Contrato 302 y sus capas KML
+        const map = window.map302;
+        const kmlLayers = window.kmlLayers302;
+        
+        if (!map || !kmlLayers) {
+            console.log('Mapa o capas KML no disponibles');
+            return;
+        }
+        
+        console.log('Actualizando colores del mapa con resultados:', upzResults);
+        console.log('Mapeo de UPZ disponible:', upzMapping);
+        
+        // Definir colores
+        const colors = {
+            'red': '#e4032e',
+            'yellow': '#fab62d',
+            'green': '#2ecc40',
+            'gray': '#cccccc'
+        };
+        
+        let polygonsUpdated = 0;
+        
+        // Actualizar colores de polígonos
+        kmlLayers.eachLayer(function(layer) {
+            if (layer.feature && layer.feature.properties) {
+                const properties = layer.feature.properties;
+                const upzCode = properties.name || properties.Name || properties.NAME || '';
+                
+                console.log(`Procesando polígono con código UPZ: ${upzCode}`);
+                
+                // Log específico para LOURDES
+                if (upzCode === '96' || upzCode.toString().includes('LOURDES')) {
+                    console.log(`🎯 Procesando polígono LOURDES con código: ${upzCode}`);
+                }
+                
+                // Buscar si hay resultados para esta UPZ
+                const result = upzResults.find(r => {
+                    const mappedCode = upzMapping[r.upz.toUpperCase()];
+                    
+                    // Log específico para LOURDES
+                    if (r.upz.toUpperCase().includes('LOURDES')) {
+                        console.log(`🎯 Buscando LOURDES - UPZ: ${r.upz}, mappedCode: ${mappedCode}, upzCode: ${upzCode}`);
+                    }
+                    
+                    return mappedCode === upzCode;
+                });
+                
+                // Si no se encuentra, intentar búsqueda más flexible
+                if (!result) {
+                    const flexibleResult = upzResults.find(r => {
+                        const upzName = r.upz.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        const mappedCode = upzMapping[upzName];
+                        return mappedCode === upzCode;
+                    });
+                    
+                    if (flexibleResult) {
+                        const color = colors[flexibleResult.color];
+                        if (color) {
+                            layer.setStyle({
+                                fillColor: color,
+                                fillOpacity: 0.7,
+                                color: color,
+                                weight: 2
+                            });
+                            console.log(`✅ Actualizando UPZ ${flexibleResult.upz} (${upzCode}) a color ${flexibleResult.color} (búsqueda flexible)`);
+                            polygonsUpdated++;
+                        }
+                    } else {
+                        // Búsqueda aún más flexible - buscar por nombre parcial
+                        const partialResult = upzResults.find(r => {
+                            const upzName = r.upz.toUpperCase().trim();
+                            const upzCodeStr = upzCode.toString();
+                            
+                            // Verificar si el nombre de la UPZ contiene el código o viceversa
+                            return upzName.includes(upzCodeStr) || upzCodeStr.includes(upzName.replace('UPZ ', ''));
+                        });
+                        
+                        if (partialResult) {
+                            const color = colors[partialResult.color];
+                            if (color) {
+                                layer.setStyle({
+                                    fillColor: color,
+                                    fillOpacity: 0.7,
+                                    color: color,
+                                    weight: 2
+                                });
+                                console.log(`✅ Actualizando UPZ ${partialResult.upz} (${upzCode}) a color ${partialResult.color} (búsqueda parcial)`);
+                                polygonsUpdated++;
+                            }
+                        } else {
+                            console.log(`❌ No se encontró resultado para UPZ código: ${upzCode}`);
+                            console.log(`UPZ disponibles en resultados:`, upzResults.map(r => r.upz));
+                        }
+                    }
+                }
+                
+                if (result) {
+                    const color = colors[result.color];
+                    if (color) {
+                        // Aplicar el color al polígono
+                        layer.setStyle({
+                            fillColor: color,
+                            fillOpacity: 0.7,
+                            color: color,
+                            weight: 2
+                        });
+                        console.log(`✅ Actualizando UPZ ${result.upz} (${upzCode}) a color ${result.color}`);
+                        polygonsUpdated++;
+                    }
+                }
+            }
+        });
+        
+        console.log(`Total de polígonos actualizados: ${polygonsUpdated}`);
+    }
+    
+    function updateMapColors2(upzResults) {
+        // Obtener el mapa del Convenio 256 y sus capas KML
+        const map = window.map256;
+        const kmlLayers = window.kmlLayers256;
+        
+        if (!map || !kmlLayers) {
+            console.log('Mapa 2 o capas KML no disponibles');
+            return;
+        }
+        
+        console.log('Actualizando colores del mapa 2 con resultados:', upzResults);
+        console.log('Mapeo de UPZ disponible:', upzMapping);
+        
+        // Definir colores
+        const colors = {
+            'red': '#e4032e',
+            'yellow': '#fab62d',
+            'green': '#2ecc40',
+            'gray': '#cccccc'
+        };
+        
+        let polygonsUpdated = 0;
+        
+        // Actualizar colores de polígonos
+        kmlLayers.eachLayer(function(layer) {
+            if (layer.feature && layer.feature.properties) {
+                const properties = layer.feature.properties;
+                const upzCode = properties.name || properties.Name || properties.NAME || '';
+                
+                console.log(`Procesando polígono del mapa 2 con código UPZ: ${upzCode}`);
+                
+                // Log específico para LOURDES
+                if (upzCode === '96' || upzCode.toString().includes('LOURDES')) {
+                    console.log(`🎯 Procesando polígono LOURDES del mapa 2 con código: ${upzCode}`);
+                }
+                
+                // Buscar si hay resultados para esta UPZ
+                const result = upzResults.find(r => {
+                    const mappedCode = upzMapping[r.upz.toUpperCase()];
+                    
+                    // Log específico para LOURDES
+                    if (r.upz.toUpperCase().includes('LOURDES')) {
+                        console.log(`🎯 Buscando LOURDES en mapa 2 - UPZ: ${r.upz}, mappedCode: ${mappedCode}, upzCode: ${upzCode}`);
+                    }
+                    
+                    return mappedCode === upzCode;
+                });
+                
+                // Si no se encuentra, intentar búsqueda más flexible
+                if (!result) {
+                    const flexibleResult = upzResults.find(r => {
+                        const upzName = r.upz.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        const mappedCode = upzMapping[upzName];
+                        return mappedCode === upzCode;
+                    });
+                    
+                    if (flexibleResult) {
+                        const color = colors[flexibleResult.color];
+                        if (color) {
+                            layer.setStyle({
+                                fillColor: color,
+                                fillOpacity: 0.7,
+                                color: color,
+                                weight: 2
+                            });
+                            console.log(`✅ Actualizando UPZ ${flexibleResult.upz} (${upzCode}) en mapa 2 a color ${flexibleResult.color} (búsqueda flexible)`);
+                            polygonsUpdated++;
+                        }
+                    } else {
+                        // Búsqueda aún más flexible - buscar por nombre parcial
+                        const partialResult = upzResults.find(r => {
+                            const upzName = r.upz.toUpperCase().trim();
+                            const upzCodeStr = upzCode.toString();
+                            
+                            // Verificar si el nombre de la UPZ contiene el código o viceversa
+                            return upzName.includes(upzCodeStr) || upzCodeStr.includes(upzName.replace('UPZ ', ''));
+                        });
+                        
+                        if (partialResult) {
+                            const color = colors[partialResult.color];
+                            if (color) {
+                                layer.setStyle({
+                                    fillColor: color,
+                                    fillOpacity: 0.7,
+                                    color: color,
+                                    weight: 2
+                                });
+                                console.log(`✅ Actualizando UPZ ${partialResult.upz} (${upzCode}) en mapa 2 a color ${partialResult.color} (búsqueda parcial)`);
+                                polygonsUpdated++;
+                            }
+                        } else {
+                            console.log(`❌ No se encontró resultado para UPZ código: ${upzCode} en mapa 2`);
+                            console.log(`UPZ disponibles en resultados del mapa 2:`, upzResults.map(r => r.upz));
+                        }
+                    }
+                }
+                
+                if (result) {
+                    const color = colors[result.color];
+                    if (color) {
+                        // Aplicar el color al polígono
+                        layer.setStyle({
+                            fillColor: color,
+                            fillOpacity: 0.7,
+                            color: color,
+                            weight: 2
+                        });
+                        console.log(`✅ Actualizando UPZ ${result.upz} (${upzCode}) en mapa 2 a color ${result.color}`);
+                        polygonsUpdated++;
+                    }
+                }
+            }
+        });
+        
+        console.log(`Total de polígonos actualizados en mapa 2: ${polygonsUpdated}`);
+    }
+    
+    // Función para calcular Indicador 2 en el segundo mapa usando datos de la segunda hoja
+    function calculateIndicador2Map2() {
+        if (!window.allData2 || window.allData2.length === 0) {
+            console.log('No hay datos disponibles para calcular el Indicador 2 en el segundo mapa');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData2.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 2 (columnas Z, AA, AB, AC, AD - índices 25, 26, 27, 28, 29)
+            const indicador2Values = [
+                parseInt(row[25]) || 0, // Z - 4.1 Confianza
+                parseInt(row[26]) || 0, // AA - 4.2 Recomendación
+                parseInt(row[27]) || 0, // AB - 4.3 Cumplimiento
+                parseInt(row[28]) || 0, // AC - 4.4 Transparencia
+                parseInt(row[29]) || 0  // AD - 4.5 Desarrollo
+            ];
+            
+            const validValues = indicador2Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+        });
+        
+        // Log de UPZ encontradas en el segundo mapa
+        console.log('UPZ encontradas en Indicador 2 (Mapa 2):', Array.from(upzNames));
+        console.log('Resultados por UPZ (Mapa 2):', upzResults);
+        
+        // Actualizar el segundo mapa
+        updateMapColors2(upzResults);
+    }
+    
+    // Función para calcular Indicador 3 en el segundo mapa usando datos de la segunda hoja
+    function calculateIndicador3Map2() {
+        if (!window.allData2 || window.allData2.length === 0) {
+            console.log('No hay datos disponibles para calcular el Indicador 3 en el segundo mapa');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData2.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 3 (columnas Q, R, S, T, U, V - índices 16, 17, 18, 19, 20, 21)
+            const indicador3Values = [
+                parseInt(row[16]) || 0, // Q - 2.1 Avances
+                parseInt(row[17]) || 0, // R - 2.2 Resultados
+                parseInt(row[18]) || 0, // S - 2.3 Elementos
+                parseInt(row[19]) || 0, // T - 2.4 Formación
+                parseInt(row[20]) || 0, // U - 2.5 Plan Acción
+                parseInt(row[21]) || 0  // V - 2.6 Participación
+            ];
+            
+            const validValues = indicador3Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+        });
+        
+        // Log de UPZ encontradas en el segundo mapa
+        console.log('UPZ encontradas en Indicador 3 (Mapa 2):', Array.from(upzNames));
+        console.log('Resultados por UPZ (Mapa 2):', upzResults);
+        
+        // Actualizar el segundo mapa
+        updateMapColors2(upzResults);
+    }
+    
+    // Función para calcular Indicador 4 en el segundo mapa usando datos de la segunda hoja
+    function calculateIndicador4Map2() {
+        if (!window.allData2 || window.allData2.length === 0) {
+            console.log('No hay datos disponibles para calcular el Indicador 4 en el segundo mapa');
+            return;
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData2.forEach(row => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Calcular promedio del Indicador 4 (columnas W, X, Y - índices 22, 23, 24)
+            const indicador4Values = [
+                parseInt(row[22]) || 0, // W - 3.1 Gestión
+                parseInt(row[23]) || 0, // X - 3.2 Cronograma
+                parseInt(row[24]) || 0  // Y - 3.3 Ejecución
+            ];
+            
+            const validValues = indicador4Values.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+        });
+        
+        // Log de UPZ encontradas en el segundo mapa
+        console.log('UPZ encontradas en Indicador 4 (Mapa 2):', Array.from(upzNames));
+        console.log('Resultados por UPZ (Mapa 2):', upzResults);
+        
+        // Actualizar el segundo mapa
+        updateMapColors2(upzResults);
+        
+        // También actualizar la tabla de resultados del segundo mapa
+        updateResultsTable2(4, upzResults);
+    }
+    
+    // Función para actualizar la tabla de resultados del segundo mapa
+    function updateResultsTable2(indicatorNumber, upzResults) {
+        const resultsContainer2 = document.getElementById('indicadores-results-container2');
+        if (!resultsContainer2) return;
+        
+        const indicadorNames = {
+            1: 'Participación y Comunicación Ciudadana',
+            2: 'La Magia del Servicio',
+            3: 'Impacto y Resultados',
+            4: 'Eficiencia en la Ejecución del Fondo de Desarrollo Local'
+        };
+        
+        const indicadorName = indicadorNames[indicatorNumber];
+        
+        // Calcular estadísticas generales
+        let totalPromedio = 0;
+        let totalRegistros = 0;
+        
+        upzResults.forEach(result => {
+            totalPromedio += result.promedio * result.registros;
+            totalRegistros += result.registros;
+        });
+        
+        const promedioGeneral = totalRegistros > 0 ? totalPromedio / totalRegistros : 0;
+        
+        // Crear el contenido HTML para la tabla
+        const contentHTML = `
+            <div class="content-section">
+                <div class="indicador-header">
+                    <h2><i class="fas fa-chart-bar"></i> Indicador ${indicatorNumber} - ${indicadorName} (Convenio 256)</h2>
+                    <button class="close-indicador" onclick="closeIndicador(${indicatorNumber})">&times;</button>
+                </div>
+                
+                <div class="indicador-stats">
+                    <div class="stat-item">
+                        <h3>${promedioGeneral.toFixed(2)}</h3>
+                        <p>Promedio General</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>${upzResults.length}</h3>
+                        <p>UPZ Evaluadas</p>
+                    </div>
+                </div>
+                
+                <div class="upz-results">
+                    <h3>Resultados por UPZ (Convenio 256)</h3>
+                    <table class="upz-table">
+                        <thead>
+                            <tr>
+                                <th>UPZ</th>
+                                <th>Promedio</th>
+                                <th>Nivel de Satisfacción</th>
+                                <th>Registros</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${upzResults.map(result => `
+                                <tr>
+                                    <td>${result.upz}</td>
+                                    <td>${result.promedio.toFixed(2)}</td>
+                                    <td>${getNivelSatisfaccion(result.promedio)}</td>
+                                    <td>${result.registros}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="map-update-info">
+                    <p><i class="fas fa-info-circle"></i> Los polígonos del mapa se han actualizado según los resultados del Convenio 256</p>
+                </div>
+            </div>
+        `;
+        
+        // Mostrar el contenido en el segundo contenedor
+        resultsContainer2.innerHTML = contentHTML;
+        resultsContainer2.style.display = 'block';
+    }
+    
+    // Función para calcular y mostrar resultados del segundo Google Sheets
+    function calculateAndShowResults2(indicatorNumber) {
+        console.log('🔍 Calculando Indicador ' + indicatorNumber + ' para el segundo mapa');
+        console.log('🔍 Datos disponibles en allData2:', window.allData2 ? window.allData2.length : 0);
+        
+        if (!window.allData2 || window.allData2.length === 0) {
+            console.log('❌ No hay datos disponibles para calcular el Indicador ' + indicatorNumber + ' en el segundo mapa');
+            return;
+        }
+        
+        // Mostrar la primera fila para debugging
+        if (window.allData2.length > 0) {
+            console.log('🔍 Primera fila de allData2:', window.allData2[0]);
+        }
+        
+        // Agrupar datos por UPZ
+        const upzData = {};
+        
+        // Log para ver qué UPZ están en los datos
+        const upzNames = new Set();
+        
+        window.allData2.forEach((row, index) => {
+            const upz = row[6]; // Columna G - UPZ (índice 6)
+            upzNames.add(upz);
+            
+            if (!upzData[upz]) {
+                upzData[upz] = [];
+            }
+            
+            // Log para las primeras filas
+            if (index < 3) {
+                console.log(`🔍 Fila ${index + 1}: UPZ = ${upz}, Datos = [${row.slice(12, 30).join(', ')}]`);
+            }
+            
+            let indicadorValues = [];
+            
+            // Calcular promedio según el indicador seleccionado
+            switch(indicatorNumber) {
+                case 1:
+                    // Indicador 1 (columnas M, N, O, P - índices 12, 13, 14, 15)
+                    indicadorValues = [
+                        parseInt(row[12]) || 0, // M - 1.1 Info Clara
+                        parseInt(row[13]) || 0, // N - 1.2 Inclusión
+                        parseInt(row[14]) || 0, // O - 1.3 Cronograma
+                        parseInt(row[15]) || 0  // P - 1.4 Canales
+                    ];
+                    break;
+                case 2:
+                    // Indicador 2 (columnas Z, AA, AB, AC, AD - índices 25, 26, 27, 28, 29)
+                    indicadorValues = [
+                        parseInt(row[25]) || 0, // Z - 4.1 Confianza
+                        parseInt(row[26]) || 0, // AA - 4.2 Recomendación
+                        parseInt(row[27]) || 0, // AB - 4.3 Cumplimiento
+                        parseInt(row[28]) || 0, // AC - 4.4 Transparencia
+                        parseInt(row[29]) || 0  // AD - 4.5 Desarrollo
+                    ];
+                    break;
+                case 3:
+                    // Indicador 3 (columnas Q, R, S, T, U, V - índices 16, 17, 18, 19, 20, 21)
+                    indicadorValues = [
+                        parseInt(row[16]) || 0, // Q - 2.1 Avances
+                        parseInt(row[17]) || 0, // R - 2.2 Resultados
+                        parseInt(row[18]) || 0, // S - 2.3 Elementos
+                        parseInt(row[19]) || 0, // T - 2.4 Formación
+                        parseInt(row[20]) || 0, // U - 2.5 Plan Acción
+                        parseInt(row[21]) || 0  // V - 2.6 Participación
+                    ];
+                    break;
+                case 4:
+                    // Indicador 4 (columnas W, X, Y - índices 22, 23, 24)
+                    indicadorValues = [
+                        parseInt(row[22]) || 0, // W - 3.1 Gestión
+                        parseInt(row[23]) || 0, // X - 3.2 Cronograma
+                        parseInt(row[24]) || 0  // Y - 3.3 Ejecución
+                    ];
+                    break;
+            }
+            
+            const validValues = indicadorValues.filter(v => v > 0);
+            if (validValues.length > 0) {
+                const promedio = validValues.reduce((a, b) => a + b, 0) / validValues.length;
+                upzData[upz].push(promedio);
+            }
+        });
+        
+        // Calcular promedio por UPZ
+        const upzResults = [];
+        
+        Object.keys(upzData).forEach(upz => {
+            const promedios = upzData[upz];
+            const promedioUPZ = promedios.reduce((a, b) => a + b, 0) / promedios.length;
+            const registros = promedios.length;
+            
+            upzResults.push({
+                upz: upz,
+                promedio: promedioUPZ,
+                registros: registros,
+                color: getColorByPromedio(promedioUPZ)
+            });
+        });
+        
+        // Log de UPZ encontradas en el segundo mapa
+        console.log('UPZ encontradas en Indicador ' + indicatorNumber + ' (Mapa 2):', Array.from(upzNames));
+        console.log('Resultados por UPZ (Mapa 2):', upzResults);
+        
+        // Mostrar los resultados en la tabla
+        updateResultsTable2(indicatorNumber, upzResults);
+    }
     </script>
 </body>
 </html> 
