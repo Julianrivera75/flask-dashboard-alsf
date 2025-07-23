@@ -1,60 +1,58 @@
-// Script para forzar la carga de datos y mapas
-console.log('🚀 Iniciando carga forzada de datos y mapas...');
+// Script para forzar la carga de datos y mapas - Versión independiente
+console.log('🚀 Iniciando carga forzada de datos y mapas (versión independiente)...');
 
-// Variable global para el mapa
-let map = null;
+// Variables globales
+let forceLoadMap = null;
+let isForceLoadInitialized = false;
+let forceLoadLayers = {
+    puntosCriticos: null,
+    bateriaSocial: null,
+    elConsuelo: null
+};
 
 // Función para esperar a que el mapa esté disponible
-function waitForMap() {
+function waitForForceLoadMap() {
     return new Promise((resolve, reject) => {
         let attempts = 0;
-        const maxAttempts = 60; // 30 segundos máximo (60 * 500ms)
+        const maxAttempts = 60; // 30 segundos máximo
         
         const checkMap = () => {
             attempts++;
-            console.log(`🔄 Intento ${attempts}/${maxAttempts} de encontrar mapa válido`);
+            console.log(`🔄 [Force-Load] Intento ${attempts}/${maxAttempts} de encontrar mapa válido`);
             
             // Verificar que el mapa esté en window.map y sea un objeto válido de Leaflet
             if (typeof window.map !== 'undefined' && window.map && typeof window.map.addLayer === 'function') {
-                console.log('🗺️ Mapa válido encontrado:', window.map);
-                map = window.map;
-                resolve(map);
+                console.log('🗺️ [Force-Load] Mapa válido encontrado:', window.map);
+                forceLoadMap = window.map;
+                resolve(forceLoadMap);
             } else {
-                console.log('⏳ Esperando mapa válido...', typeof window.map, window.map);
-                // Verificar si hay un elemento de mapa en el DOM
-                const mapElement = document.getElementById('map');
-                if (mapElement) {
-                    console.log('📍 Elemento de mapa encontrado en DOM:', mapElement);
-                    // Verificar si Leaflet está disponible
-                    if (typeof L !== 'undefined') {
-                        console.log('🍃 Leaflet disponible:', L);
-                    } else {
-                        console.log('❌ Leaflet no está disponible');
-                    }
-                } else {
-                    console.log('❌ No se encontró elemento de mapa en DOM');
-                }
+                console.log('⏳ [Force-Load] Esperando mapa válido...', typeof window.map, window.map);
                 
                 if (attempts >= maxAttempts) {
-                    console.error('❌ Timeout: No se pudo encontrar un mapa válido después de 30 segundos');
+                    console.error('❌ [Force-Load] Timeout: No se pudo encontrar un mapa válido después de 30 segundos');
                     reject(new Error('Timeout esperando mapa'));
                     return;
                 }
                 
-                setTimeout(checkMap, 500); // Aumentar el intervalo a 500ms
+                setTimeout(checkMap, 500);
             }
         };
         checkMap();
     });
 }
 
-// Función para cargar puntos críticos directamente
+// Función para cargar puntos críticos
 function forceLoadPuntosCriticos() {
-    console.log('📥 Cargando puntos críticos forzadamente...');
+    console.log('📥 [Force-Load] Cargando puntos críticos...');
     
-    if (!map || typeof map.addLayer !== 'function') {
-        console.error('❌ Error: Mapa no disponible o no válido para puntos críticos');
+    if (!forceLoadMap || typeof forceLoadMap.addLayer !== 'function') {
+        console.error('❌ [Force-Load] Error: Mapa no disponible para puntos críticos');
         return;
+    }
+    
+    // Remover capa anterior si existe
+    if (forceLoadLayers.puntosCriticos && forceLoadMap && typeof forceLoadMap.removeLayer === 'function') {
+        forceLoadMap.removeLayer(forceLoadLayers.puntosCriticos);
     }
     
     // Datos hardcodeados de los puntos críticos
@@ -74,9 +72,9 @@ function forceLoadPuntosCriticos() {
         {name: '15', lat: 4.58163, lng: -74.07131, description: 'Punto crítico 15 - Ordinarios'}
     ];
 
-    console.log('📍 Datos de puntos críticos cargados:', puntosCriticosData.length, 'puntos');
+    console.log('📍 [Force-Load] Datos de puntos críticos cargados:', puntosCriticosData.length, 'puntos');
     
-    // Crear marcadores directamente
+    // Crear marcadores
     const markers = [];
     const latlngs = [];
     
@@ -105,78 +103,41 @@ function forceLoadPuntosCriticos() {
     });
     
     // Agregar al mapa
-    if (map && typeof map.addLayer === 'function') {
+    if (forceLoadMap && typeof forceLoadMap.addLayer === 'function') {
         const layerGroup = L.layerGroup(markers);
-        layerGroup.addTo(map);
+        layerGroup.addTo(forceLoadMap);
         
         if (latlngs.length > 0) {
-            map.fitBounds(latlngs, {padding: [50, 50]});
+            forceLoadMap.fitBounds(latlngs, {padding: [50, 50]});
         }
         
-        console.log('✅ Puntos críticos agregados al mapa:', markers.length, 'marcadores');
-        
-        // Guardar referencia para poder remover después
-        window.puntosCriticosLayer = layerGroup;
+        forceLoadLayers.puntosCriticos = layerGroup;
+        console.log('✅ [Force-Load] Puntos críticos agregados al mapa:', markers.length, 'marcadores');
     } else {
-        console.error('❌ Error: Mapa no disponible o no tiene método addLayer');
-    }
-}
-
-// Función para cargar mapa de El Consuelo
-function forceLoadElConsuelo() {
-    console.log('🗺️ Cargando mapa de El Consuelo forzadamente...');
-    
-    if (!map || typeof map.addLayer !== 'function') {
-        console.error('❌ Error: Mapa no disponible o no válido para El Consuelo');
-        return;
-    }
-    
-    if (typeof omnivore !== 'undefined') {
-        try {
-            console.log('🔍 Verificando mapa antes de cargar KML:', map);
-            console.log('🔍 Métodos del mapa:', Object.getOwnPropertyNames(map));
-            
-            const kmlLayer = omnivore.kml('/static/data/ELCONSUELO.kml')
-                .on('ready', function() {
-                    console.log('✅ Mapa de El Consuelo cargado correctamente');
-                    if (map && typeof map.fitBounds === 'function') {
-                        map.fitBounds(this.getBounds());
-                    }
-                })
-                .on('error', function(error) {
-                    console.error('❌ Error cargando mapa de El Consuelo:', error);
-                });
-            
-            // Agregar al mapa de forma segura
-            if (map && typeof map.addLayer === 'function') {
-                kmlLayer.addTo(map);
-                window.elConsueloLayer = kmlLayer;
-                console.log('✅ KML agregado al mapa exitosamente');
-            } else {
-                console.error('❌ Error: Mapa no tiene método addLayer');
-            }
-        } catch (error) {
-            console.error('❌ Error en carga de mapa de El Consuelo:', error);
-        }
-    } else {
-        console.error('❌ Error: Omnivore no disponible');
+        console.error('❌ [Force-Load] Error: Mapa no disponible o no tiene método addLayer');
     }
 }
 
 // Función para cargar batería social
 function forceLoadBateriaSocial() {
-    console.log('🔋 Cargando batería social forzadamente...');
+    console.log('🔋 [Force-Load] Cargando batería social...');
     
-    if (!map || typeof map.addLayer !== 'function') {
-        console.error('❌ Error: Mapa no disponible o no válido para batería social');
+    if (!forceLoadMap || typeof forceLoadMap.addLayer !== 'function') {
+        console.error('❌ [Force-Load] Error: Mapa no disponible para batería social');
         return;
     }
     
-    if (typeof omnivore !== 'undefined') {
-        try {
+    // Remover capa anterior si existe
+    if (forceLoadLayers.bateriaSocial && forceLoadMap && typeof forceLoadMap.removeLayer === 'function') {
+        forceLoadMap.removeLayer(forceLoadLayers.bateriaSocial);
+    }
+    
+    try {
+        if (typeof omnivore !== 'undefined') {
+            console.log('📄 [Force-Load] Cargando KML de batería social...');
             const bateriaLayer = omnivore.kml('/static/data/Bateria_social.kml')
                 .on('ready', function() {
-                    console.log('✅ Batería social cargada correctamente');
+                    console.log('✅ [Force-Load] KML de batería social cargado exitosamente');
                     this.eachLayer(function(layer) {
                         if (layer.setStyle) {
                             layer.setStyle({color: '#4ECDC4', weight: 3, fillOpacity: 0.5});
@@ -184,95 +145,162 @@ function forceLoadBateriaSocial() {
                     });
                 })
                 .on('error', function(error) {
-                    console.error('❌ Error cargando batería social:', error);
+                    console.error('❌ [Force-Load] Error cargando batería social:', error);
                 });
             
-            // Agregar al mapa de forma segura
-            if (map && typeof map.addLayer === 'function') {
-                bateriaLayer.addTo(map);
-                window.bateriaSocialLayer = bateriaLayer;
-                console.log('✅ Batería social agregada al mapa exitosamente');
-            } else {
-                console.error('❌ Error: Mapa no tiene método addLayer');
+            if (forceLoadMap && typeof forceLoadMap.addLayer === 'function') {
+                bateriaLayer.addTo(forceLoadMap);
+                forceLoadLayers.bateriaSocial = bateriaLayer;
+                console.log('✅ [Force-Load] Batería social agregada al mapa exitosamente');
             }
-        } catch (error) {
-            console.error('❌ Error en carga de batería social:', error);
+        } else {
+            console.error('❌ [Force-Load] Error: Omnivore no disponible');
         }
-    } else {
-        console.error('❌ Error: Omnivore no disponible');
+    } catch (error) {
+        console.error('❌ [Force-Load] Error en carga de batería social:', error);
     }
 }
 
-// Función para configurar toggles
-function setupToggles() {
-    console.log('🎛️ Configurando toggles...');
+// Función para remover puntos críticos
+function forceRemovePuntosCriticos() {
+    console.log('❌ [Force-Load] Removiendo puntos críticos...');
+    if (forceLoadLayers.puntosCriticos && forceLoadMap && typeof forceLoadMap.removeLayer === 'function') {
+        forceLoadMap.removeLayer(forceLoadLayers.puntosCriticos);
+        forceLoadLayers.puntosCriticos = null;
+        console.log('✅ [Force-Load] Puntos críticos removidos');
+    }
+}
+
+// Función para remover batería social
+function forceRemoveBateriaSocial() {
+    console.log('❌ [Force-Load] Removiendo batería social...');
+    if (forceLoadLayers.bateriaSocial && forceLoadMap && typeof forceLoadMap.removeLayer === 'function') {
+        forceLoadMap.removeLayer(forceLoadLayers.bateriaSocial);
+        forceLoadLayers.bateriaSocial = null;
+        console.log('✅ [Force-Load] Batería social removida');
+    }
+}
+
+// Función para configurar toggles de forma independiente
+function setupForceLoadToggles() {
+    console.log('🎛️ [Force-Load] Configurando toggles independientes...');
+    
+    // Función helper para configurar un toggle
+    function setupToggle(toggleId, onToggle, offToggle) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle) {
+            console.log(`✅ [Force-Load] Toggle ${toggleId} encontrado`);
+            
+            // Crear un nuevo listener sin interferir con los existentes
+            const originalOnChange = toggle.onchange;
+            
+            toggle.addEventListener('change', function(e) {
+                console.log(`🔄 [Force-Load] Toggle ${toggleId}:`, e.target.checked);
+                
+                // Ejecutar nuestro código
+                if (e.target.checked) {
+                    if (onToggle) onToggle();
+                } else {
+                    if (offToggle) offToggle();
+                }
+                
+                // Ejecutar el código original si existe
+                if (originalOnChange) {
+                    originalOnChange.call(this, e);
+                }
+            });
+            
+            return toggle;
+        } else {
+            console.error(`❌ [Force-Load] Error: No se encontró el toggle ${toggleId}`);
+            return null;
+        }
+    }
     
     // Toggle puntos críticos
-    const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-    if (togglePuntosCriticos) {
-        togglePuntosCriticos.addEventListener('change', function(e) {
-            console.log('🔄 Toggle puntos críticos:', e.target.checked);
-            if (e.target.checked) {
-                forceLoadPuntosCriticos();
-            } else {
-                if (window.puntosCriticosLayer && map && typeof map.removeLayer === 'function') {
-                    map.removeLayer(window.puntosCriticosLayer);
-                    console.log('❌ Puntos críticos removidos');
-                }
-            }
-        });
-    }
+    setupToggle('toggle-puntos-criticos', 
+        forceLoadPuntosCriticos,
+        forceRemovePuntosCriticos
+    );
     
-    // Toggle puntos intervenidos
-    const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
-    if (togglePuntosIntervenidos) {
-        togglePuntosIntervenidos.addEventListener('change', function(e) {
-            console.log('🔄 Toggle puntos intervenidos:', e.target.checked);
-            // Por ahora solo recargamos todos los puntos
-            if (e.target.checked) {
-                forceLoadPuntosCriticos();
-            }
-        });
-    }
+    // Toggle puntos intervenidos (por ahora igual que puntos críticos)
+    setupToggle('toggle-puntos-intervenidos',
+        forceLoadPuntosCriticos,
+        forceRemovePuntosCriticos
+    );
     
     // Toggle batería social
-    const toggleBateriaSocial = document.getElementById('toggle-bateria-social');
-    if (toggleBateriaSocial) {
-        toggleBateriaSocial.addEventListener('change', function(e) {
-            console.log('🔄 Toggle batería social:', e.target.checked);
-            if (e.target.checked) {
-                forceLoadBateriaSocial();
-            } else {
-                if (window.bateriaSocialLayer && map && typeof map.removeLayer === 'function') {
-                    map.removeLayer(window.bateriaSocialLayer);
-                    console.log('❌ Batería social removida');
-                }
-            }
-        });
-    }
+    setupToggle('toggle-bateria-social',
+        forceLoadBateriaSocial,
+        forceRemoveBateriaSocial
+    );
 }
 
 // Función principal de inicialización
 async function initializeForceLoad() {
-    console.log('🚀 Inicializando carga forzada...');
+    if (isForceLoadInitialized) {
+        console.log('⚠️ [Force-Load] Ya inicializado, saltando...');
+        return;
+    }
+    
+    console.log('🚀 [Force-Load] Inicializando carga forzada...');
     
     try {
         // Esperar a que el mapa esté disponible
-        await waitForMap();
-        console.log('✅ Mapa disponible, configurando...');
+        await waitForForceLoadMap();
+        console.log('✅ [Force-Load] Mapa disponible, configurando...');
         
         // Configurar toggles
-        setupToggles();
+        setupForceLoadToggles();
         
-        // Cargar mapa de El Consuelo automáticamente
-        setTimeout(forceLoadElConsuelo, 500);
+        isForceLoadInitialized = true;
+        console.log('✅ [Force-Load] Inicialización completada exitosamente');
         
     } catch (error) {
-        console.error('❌ Error en inicialización:', error);
+        console.error('❌ [Force-Load] Error en inicialización:', error);
+        // Intentar configurar toggles de todas formas
+        setupForceLoadToggles();
     }
 }
 
-// Ejecutar inicialización inmediatamente ya que el script se carga al final
-initializeForceLoad();
+// Función para verificar si el DOM está listo
+function isDOMReady() {
+    return document.readyState === 'complete' || document.readyState === 'interactive';
+}
 
-console.log('🚀 Script de carga forzada inicializado'); 
+// Función para esperar a que el DOM esté listo
+function waitForDOM() {
+    return new Promise((resolve) => {
+        if (isDOMReady()) {
+            resolve();
+        } else {
+            document.addEventListener('DOMContentLoaded', resolve);
+            window.addEventListener('load', resolve);
+        }
+    });
+}
+
+// Inicialización principal
+async function main() {
+    console.log('🚀 [Force-Load] Iniciando script force-load...');
+    
+    try {
+        // Esperar a que el DOM esté listo
+        await waitForDOM();
+        console.log('✅ [Force-Load] DOM listo');
+        
+        // Esperar un poco más para asegurar que todos los scripts estén cargados
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Inicializar
+        await initializeForceLoad();
+        
+    } catch (error) {
+        console.error('❌ [Force-Load] Error en inicialización principal:', error);
+    }
+}
+
+// Ejecutar inicialización
+main();
+
+console.log('🚀 [Force-Load] Script de carga forzada inicializado'); 
