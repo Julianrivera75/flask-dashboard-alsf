@@ -22,6 +22,8 @@
     <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
     
 
+    
+
 
     <style>
         :root {
@@ -819,8 +821,9 @@
 
     <script>
     // --- Inicialización del mapa ---
-        var map = L.map('map').setView([4.60971, -74.08175], 15);
-        console.log('🗺️ Mapa inicializado correctamente');
+        window.map = L.map('map').setView([4.60971, -74.08175], 15);
+        var map = window.map; // Mantener compatibilidad
+        console.log('🗺️ Mapa inicializado correctamente como window.map');
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
@@ -974,34 +977,6 @@
                             return response.text();
                         })
                         .then(kmlText => {
-                            console.log('📄 KML cargado, procesando...');
-                            var parser = new DOMParser();
-                            var kml = parser.parseFromString(kmlText, 'text/xml');
-                            var placemarks = kml.getElementsByTagName('Placemark');
-                            console.log('📋 Placemarks encontrados:', placemarks.length);
-                            puntosCriticosData = [];
-                            for (var i = 0; i < placemarks.length; i++) {
-                                try {
-                                    var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
-                                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
-                                    var lat = parseFloat(coords[1]);
-                                    var lng = parseFloat(coords[0]);
-                                    var description = '';
-                                    if (placemarks[i].getElementsByTagName('description')[0]) {
-                                        description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
-                                    }
-                                    puntosCriticosData.push({name, lat, lng, description});
-                                    console.log('📍 Punto procesado:', name, 'en', lat, lng);
-                                } catch (error) {
-                                    console.error('❌ Error procesando placemark', i, ':', error);
-                                }
-                            }
-                            console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
-                            renderPuntosCriticosLayer(false);
-                        })
-                        .catch(error => {
-                            console.error('❌ Error cargando KML:', error);
-                        });
                             console.log('📄 KML cargado, procesando...');
                             var parser = new DOMParser();
                             var kml = parser.parseFromString(kmlText, 'text/xml');
@@ -1801,6 +1776,9 @@ document.getElementById('toggle-bateria-social').addEventListener('change', func
         }
     }
 });
+
+// Script para forzar carga de datos y mapas
 </script>
+<script src="/static/js/force-load.js"></script>
 </body>
 </html> 
