@@ -440,7 +440,7 @@
                 <h3>1</h3>
                 <p>Instrumento de Encuesta de Satisfacción</p>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="timeline-card" style="cursor: pointer;">
                 <div class="icon"><i class="fas fa-stream"></i></div>
                 <h3>2</h3>
                 <p>Líneas de Tiempo</p>
@@ -902,14 +902,31 @@
     <script>
     // Abrir modal al hacer clic en la tarjeta de Línea de Tiempo
     document.addEventListener('DOMContentLoaded', function() {
-        const timelineBtn = Array.from(document.querySelectorAll('.stat-card')).find(card => card.textContent.includes('Línea de Tiempo'));
+        const timelineBtn = document.getElementById('timeline-card');
         const modal = document.getElementById('timeline-modal');
         const closeBtn = document.getElementById('timeline-close');
         if (timelineBtn && modal && closeBtn) {
+            console.log('✅ Elementos de línea del tiempo encontrados correctamente');
             timelineBtn.style.cursor = 'pointer';
-            timelineBtn.addEventListener('click', () => { modal.classList.add('open'); });
-            closeBtn.addEventListener('click', () => { modal.classList.remove('open'); });
-            modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+            timelineBtn.addEventListener('click', () => { 
+                console.log('🕐 Abriendo modal de línea del tiempo');
+                modal.classList.add('open'); 
+            });
+            closeBtn.addEventListener('click', () => { 
+                console.log('❌ Cerrando modal de línea del tiempo');
+                modal.classList.remove('open'); 
+            });
+            modal.addEventListener('click', (e) => { 
+                if (e.target === modal) {
+                    console.log('❌ Cerrando modal al hacer clic fuera');
+                    modal.classList.remove('open'); 
+                }
+            });
+        } else {
+            console.error('❌ Error: No se encontraron elementos de línea del tiempo');
+            console.log('timelineBtn:', timelineBtn);
+            console.log('modal:', modal);
+            console.log('closeBtn:', closeBtn);
         }
     });
     </script>

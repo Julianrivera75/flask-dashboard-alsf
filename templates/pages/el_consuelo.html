@@ -21,10 +21,7 @@
     <!-- Leaflet Omnivore plugin para KML -->
     <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
     
-    <!-- Lightbox2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css" rel="stylesheet" />
-    <!-- Lightbox2 JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/js/lightbox.min.js"></script>
+
 
     <style>
         :root {
@@ -823,6 +820,7 @@
     <script>
     // --- Inicialización del mapa ---
         var map = L.map('map').setView([4.60971, -74.08175], 15);
+        console.log('🗺️ Mapa inicializado correctamente');
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
@@ -889,16 +887,28 @@
     let puntosCriticosData = [];
 
     function renderPuntosCriticosLayer(intervenidosActivos) {
+        console.log('🎨 Renderizando capa de puntos críticos, intervenidos activos:', intervenidosActivos);
+        console.log('🗺️ Mapa disponible:', typeof map !== 'undefined' ? 'Sí' : 'No');
+        console.log('📊 Datos disponibles:', puntosCriticosData.length);
+        
+        if (typeof map === 'undefined') {
+            console.error('❌ Error: El mapa no está inicializado');
+            return;
+        }
+        
         if (puntosCriticosLayer) {
+            console.log('🗑️ Removiendo capa anterior');
             map.removeLayer(puntosCriticosLayer);
         }
         const markers = [];
         const latlngs = [];
+        console.log('🎯 Creando marcadores para', puntosCriticosData.length, 'puntos');
         for (const punto of puntosCriticosData) {
             const color = (intervenidosActivos && puntosIntervenidosIds.includes(punto.name)) ? 'green' : 'red';
             const iconUrl = color === 'green'
                 ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png'
                 : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+            console.log('🎯 Creando marcador para punto', punto.name, 'color:', color, 'en', punto.lat, punto.lng);
             const marker = L.marker([punto.lat, punto.lng], {
                 icon: L.divIcon({
                     className: 'custom-marker-' + color,
@@ -913,66 +923,151 @@
                     shadowSize: [41, 41]
                 })
             });
-            // Asociar popup con la descripción del KML
+            // Asociar popup con la descripción del KML (sin fotos para mejor interacción)
+            let popupContent = '';
             if (punto.description) {
-                marker.bindPopup(punto.description);
+                // Remover todas las etiquetas de imagen y enlaces de lightbox del contenido
+                popupContent = punto.description
+                    .replace(/<img[^>]*>/g, '') // Remover etiquetas img
+                    .replace(/<a[^>]*data-lightbox[^>]*>.*?<\/a>/g, '') // Remover enlaces de lightbox
+                    .replace(/<a[^>]*href="[^"]*\.(jpg|jpeg|png|gif)[^"]*"[^>]*>.*?<\/a>/g, '') // Remover enlaces a imágenes
+                    .trim(); // Limpiar espacios extra
+                
+                // Si después de limpiar no queda contenido, usar nombre del punto
+                if (!popupContent || popupContent === '') {
+                    popupContent = 'Punto crítico ' + punto.name;
+                }
+                
+                // Log para verificar el contenido del popup (sin fotos)
+                console.log('📍 Popup para punto ' + punto.name + ':', popupContent.substring(0, 100) + '...');
             } else {
-                marker.bindPopup('Punto crítico ' + punto.name);
+                popupContent = 'Punto crítico ' + punto.name;
             }
+            marker.bindPopup(popupContent);
             markers.push(marker);
             latlngs.push([punto.lat, punto.lng]);
         }
         puntosCriticosLayer = L.layerGroup(markers);
         puntosCriticosLayer.addTo(map);
+        console.log('✅ Capa de puntos críticos agregada al mapa con', markers.length, 'marcadores');
         if (latlngs.length > 0) {
             map.fitBounds(latlngs, {padding: [50, 50]});
+            console.log('🗺️ Mapa ajustado a los puntos críticos');
         }
     }
 
-    document.getElementById('toggle-puntos-criticos').addEventListener('change', function(e) {
-        if (e.target.checked) {
-            if (puntosCriticosData.length === 0) {
-                fetch('/static/data/puntos_criticos.kml')
-                    .then(response => response.text())
-                    .then(kmlText => {
-                        var parser = new DOMParser();
-                        var kml = parser.parseFromString(kmlText, 'text/xml');
-                        var placemarks = kml.getElementsByTagName('Placemark');
-                        puntosCriticosData = [];
-                        for (var i = 0; i < placemarks.length; i++) {
-                            var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
-                            var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
-                            var lat = parseFloat(coords[1]);
-                            var lng = parseFloat(coords[0]);
-                            var description = '';
-                            if (placemarks[i].getElementsByTagName('description')[0]) {
-                                description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+    // Esperar a que el DOM esté listo para los toggles
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
+        if (togglePuntosCriticos) {
+            console.log('✅ Toggle puntos críticos encontrado');
+            togglePuntosCriticos.addEventListener('change', function(e) {
+            console.log('🔄 Toggle puntos críticos cambiado:', e.target.checked);
+            if (e.target.checked) {
+                if (puntosCriticosData.length === 0) {
+                    console.log('📥 Cargando datos de puntos críticos...');
+                    fetch('/static/data/puntos_criticos.kml')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('No se pudo cargar el archivo KML: ' + response.status);
                             }
-                            puntosCriticosData.push({name, lat, lng, description});
-                        }
-                        renderPuntosCriticosLayer(false);
-                    });
+                            return response.text();
+                        })
+                        .then(kmlText => {
+                            console.log('📄 KML cargado, procesando...');
+                            var parser = new DOMParser();
+                            var kml = parser.parseFromString(kmlText, 'text/xml');
+                            var placemarks = kml.getElementsByTagName('Placemark');
+                            console.log('📋 Placemarks encontrados:', placemarks.length);
+                            puntosCriticosData = [];
+                            for (var i = 0; i < placemarks.length; i++) {
+                                try {
+                                    var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
+                                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                                    var lat = parseFloat(coords[1]);
+                                    var lng = parseFloat(coords[0]);
+                                    var description = '';
+                                    if (placemarks[i].getElementsByTagName('description')[0]) {
+                                        description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+                                    }
+                                    puntosCriticosData.push({name, lat, lng, description});
+                                    console.log('📍 Punto procesado:', name, 'en', lat, lng);
+                                } catch (error) {
+                                    console.error('❌ Error procesando placemark', i, ':', error);
+                                }
+                            }
+                            console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
+                            renderPuntosCriticosLayer(false);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error cargando KML:', error);
+                        });
+                            console.log('📄 KML cargado, procesando...');
+                            var parser = new DOMParser();
+                            var kml = parser.parseFromString(kmlText, 'text/xml');
+                            var placemarks = kml.getElementsByTagName('Placemark');
+                            console.log('📋 Placemarks encontrados:', placemarks.length);
+                            puntosCriticosData = [];
+                            for (var i = 0; i < placemarks.length; i++) {
+                                try {
+                                    var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
+                                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                                    var lat = parseFloat(coords[1]);
+                                    var lng = parseFloat(coords[0]);
+                                    var description = '';
+                                    if (placemarks[i].getElementsByTagName('description')[0]) {
+                                        description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+                                    }
+                                    puntosCriticosData.push({name, lat, lng, description});
+                                    console.log('📍 Punto procesado:', name, 'en', lat, lng);
+                                } catch (error) {
+                                    console.error('❌ Error procesando placemark', i, ':', error);
+                                }
+                            }
+                            console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
+                            renderPuntosCriticosLayer(false);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error cargando KML:', error);
+                        });
+                } else {
+                    console.log('📍 Mostrando puntos críticos existentes');
+                    renderPuntosCriticosLayer(false);
+                }
             } else {
-                renderPuntosCriticosLayer(false);
+                console.log('❌ Ocultando puntos críticos');
+                if (puntosCriticosLayer) {
+                    map.removeLayer(puntosCriticosLayer);
+                }
             }
-        } else {
-            if (puntosCriticosLayer) {
-                map.removeLayer(puntosCriticosLayer);
-            }
-        }
-    });
+        });
+    } else {
+        console.error('❌ Error: No se encontró el toggle de puntos críticos');
+    }
 
-    document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
-        if (e.target.checked) {
-            if (puntosCriticosData.length > 0) {
-                renderPuntosCriticosLayer(true);
+    const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
+    if (togglePuntosIntervenidos) {
+        console.log('✅ Toggle puntos intervenidos encontrado');
+        togglePuntosIntervenidos.addEventListener('change', function(e) {
+            console.log('🔄 Toggle puntos intervenidos cambiado:', e.target.checked);
+            if (e.target.checked) {
+                if (puntosCriticosData.length > 0) {
+                    console.log('📍 Mostrando puntos críticos intervenidos');
+                    renderPuntosCriticosLayer(true);
+                } else {
+                    console.log('⚠️ No hay datos de puntos críticos cargados');
+                }
+            } else {
+                if (puntosCriticosData.length > 0) {
+                    console.log('📍 Mostrando todos los puntos críticos');
+                    renderPuntosCriticosLayer(false);
+                }
             }
-        } else {
-            if (puntosCriticosData.length > 0) {
-                renderPuntosCriticosLayer(false);
-            }
-        }
-    });
+        });
+    } else {
+        console.error('❌ Error: No se encontró el toggle de puntos intervenidos');
+    }
+    }); // Cierre del DOMContentLoaded
 
     // --- Agrupador genérico ---
     function agruparPorCampo(data, campo) {
@@ -1165,15 +1260,26 @@
       var modalIndicadores = document.getElementById('indicadoresModal');
       var closeIndicadores = document.getElementById('closeIndicadoresModal');
       if(btnIndicadores && modalIndicadores && closeIndicadores) {
+        console.log('✅ Botón indicadores de gestión encontrado');
         btnIndicadores.addEventListener('click', function() {
+          console.log('🔄 Abriendo modal de indicadores de gestión');
           modalIndicadores.style.display = 'flex';
         });
         closeIndicadores.addEventListener('click', function() {
+          console.log('❌ Cerrando modal de indicadores de gestión');
           modalIndicadores.style.display = 'none';
         });
         modalIndicadores.addEventListener('click', function(e) {
-          if (e.target === this) this.style.display = 'none';
+          if (e.target === this) {
+            console.log('❌ Cerrando modal al hacer clic fuera');
+            this.style.display = 'none';
+          }
         });
+      } else {
+        console.error('❌ Error: No se encontraron elementos del modal de indicadores');
+        console.log('btnIndicadores:', btnIndicadores);
+        console.log('modalIndicadores:', modalIndicadores);
+        console.log('closeIndicadores:', closeIndicadores);
       }
     });
     </script>
@@ -1365,15 +1471,26 @@ document.addEventListener('DOMContentLoaded', function() {
   var modalRuta = document.getElementById('modalRutaMetodologica');
   var closeRuta = document.getElementById('closeRutaMetodologica');
   if(btnRuta && modalRuta && closeRuta) {
+    console.log('✅ Botón ruta metodológica encontrado');
     btnRuta.addEventListener('click', function() {
+      console.log('🔄 Abriendo modal de ruta metodológica');
       modalRuta.style.display = 'flex';
     });
     closeRuta.addEventListener('click', function() {
+      console.log('❌ Cerrando modal de ruta metodológica');
       modalRuta.style.display = 'none';
     });
     modalRuta.addEventListener('click', function(e) {
-      if (e.target === this) this.style.display = 'none';
+      if (e.target === this) {
+        console.log('❌ Cerrando modal al hacer clic fuera');
+        this.style.display = 'none';
+      }
     });
+  } else {
+    console.error('❌ Error: No se encontraron elementos del modal de ruta metodológica');
+    console.log('btnRuta:', btnRuta);
+    console.log('modalRuta:', modalRuta);
+    console.log('closeRuta:', closeRuta);
   }
 });
 </script>
@@ -1396,15 +1513,26 @@ document.addEventListener('DOMContentLoaded', function() {
   var modalPlan = document.getElementById('modalPlanTrabajo');
   var closePlan = document.getElementById('closePlanTrabajo');
   if(btnPlan && modalPlan && closePlan) {
+    console.log('✅ Botón plan de trabajo encontrado');
     btnPlan.addEventListener('click', function() {
+      console.log('🔄 Abriendo modal de plan de trabajo');
       modalPlan.style.display = 'flex';
     });
     closePlan.addEventListener('click', function() {
+      console.log('❌ Cerrando modal de plan de trabajo');
       modalPlan.style.display = 'none';
     });
     modalPlan.addEventListener('click', function(e) {
-      if (e.target === this) this.style.display = 'none';
+      if (e.target === this) {
+        console.log('❌ Cerrando modal al hacer clic fuera');
+        this.style.display = 'none';
+      }
     });
+  } else {
+    console.error('❌ Error: No se encontraron elementos del modal de plan de trabajo');
+    console.log('btnPlan:', btnPlan);
+    console.log('modalPlan:', modalPlan);
+    console.log('closePlan:', closePlan);
   }
 });
 </script>
@@ -1478,15 +1606,26 @@ document.addEventListener('DOMContentLoaded', function() {
   var modalAnalisis = document.getElementById('modalAnalisisEjercicio');
   var closeAnalisis = document.getElementById('closeAnalisisEjercicio');
   if(btnAnalisis && modalAnalisis && closeAnalisis) {
+    console.log('✅ Botón análisis del ejercicio encontrado');
     btnAnalisis.addEventListener('click', function() {
+      console.log('🔄 Abriendo modal de análisis del ejercicio');
       modalAnalisis.style.display = 'flex';
     });
     closeAnalisis.addEventListener('click', function() {
+      console.log('❌ Cerrando modal de análisis del ejercicio');
       modalAnalisis.style.display = 'none';
     });
     modalAnalisis.addEventListener('click', function(e) {
-      if (e.target === this) this.style.display = 'none';
+      if (e.target === this) {
+        console.log('❌ Cerrando modal al hacer clic fuera');
+        this.style.display = 'none';
+      }
     });
+  } else {
+    console.error('❌ Error: No se encontraron elementos del modal de análisis del ejercicio');
+    console.log('btnAnalisis:', btnAnalisis);
+    console.log('modalAnalisis:', modalAnalisis);
+    console.log('closeAnalisis:', closeAnalisis);
   }
 });
 </script>
@@ -1532,7 +1671,9 @@ document.addEventListener('DOMContentLoaded', function() {
   var modalComportamientos = document.getElementById('modalComportamientosIndicadores');
   var closeComportamientos = document.getElementById('closeComportamientosIndicadores');
   if(btnComportamientos && modalComportamientos && closeComportamientos) {
+    console.log('✅ Botón comportamientos de indicadores encontrado');
     btnComportamientos.addEventListener('click', function() {
+      console.log('🔄 Abriendo modal de comportamientos de indicadores');
       modalComportamientos.style.display = 'flex';
       // Renderizar la gráfica solo cuando se abre el modal
       Plotly.newPlot('barrasComportamientos', [
@@ -1573,11 +1714,20 @@ document.addEventListener('DOMContentLoaded', function() {
       }, {responsive: true});
     });
     closeComportamientos.addEventListener('click', function() {
+      console.log('❌ Cerrando modal de comportamientos de indicadores');
       modalComportamientos.style.display = 'none';
     });
     modalComportamientos.addEventListener('click', function(e) {
-      if (e.target === this) this.style.display = 'none';
+      if (e.target === this) {
+        console.log('❌ Cerrando modal al hacer clic fuera');
+        this.style.display = 'none';
+      }
     });
+    } else {
+    console.error('❌ Error: No se encontraron elementos del modal de comportamientos de indicadores');
+    console.log('btnComportamientos:', btnComportamientos);
+    console.log('modalComportamientos:', modalComportamientos);
+    console.log('closeComportamientos:', closeComportamientos);
   }
 });
 </script>
@@ -1602,15 +1752,26 @@ document.addEventListener('DOMContentLoaded', function() {
   var modalCaja = document.getElementById('modalCajaHerramientas');
   var closeCaja = document.getElementById('closeCajaHerramientas');
   if(btnCaja && modalCaja && closeCaja) {
+    console.log('✅ Botón caja de herramientas encontrado');
     btnCaja.addEventListener('click', function() {
+      console.log('🔄 Abriendo modal de caja de herramientas');
       modalCaja.style.display = 'flex';
     });
     closeCaja.addEventListener('click', function() {
+      console.log('❌ Cerrando modal de caja de herramientas');
       modalCaja.style.display = 'none';
     });
     modalCaja.addEventListener('click', function(e) {
-      if (e.target === this) this.style.display = 'none';
+      if (e.target === this) {
+        console.log('❌ Cerrando modal al hacer clic fuera');
+        this.style.display = 'none';
+      }
     });
+  } else {
+    console.error('❌ Error: No se encontraron elementos del modal de caja de herramientas');
+    console.log('btnCaja:', btnCaja);
+    console.log('modalCaja:', modalCaja);
+    console.log('closeCaja:', closeCaja);
   }
 });
 </script>
