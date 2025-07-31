@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from datetime import timedelta
 
 class Config:
     """
@@ -53,3 +54,27 @@ class Config:
         'https://www.googleapis.com/auth/spreadsheets',
         'https://www.googleapis.com/auth/drive'
     ] 
+
+class DevelopmentConfig(Config):
+    """Configuración para desarrollo"""
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
+
+class ProductionConfig(Config):
+    """Configuración para producción"""
+    DEBUG = False
+    SESSION_COOKIE_SECURE = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+
+class TestingConfig(Config):
+    """Configuración para testing"""
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'
+    WTF_CSRF_ENABLED = False
+
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+} 

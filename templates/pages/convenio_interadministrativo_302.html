@@ -1111,7 +1111,29 @@
     
     function processSheetsData(values) {
         const headers = values[1]; // La fila 2 (índice 1) es ahora el encabezado
-        const data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        let data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        
+        // Eliminar duplicados basándose en la combinación de UPZ y otros campos únicos
+        const uniqueData = [];
+        const seen = new Set();
+        
+        data.forEach(row => {
+            // Crear una clave única basada en UPZ y otros campos relevantes
+            const upz = row[6] || ''; // Columna G - UPZ
+            const timestamp = row[1] || ''; // Columna B - Timestamp
+            const uniqueKey = `${upz}_${timestamp}`;
+            
+            if (!seen.has(uniqueKey)) {
+                seen.add(uniqueKey);
+                uniqueData.push(row);
+            } else {
+                console.log(`Duplicado eliminado: UPZ ${upz}, Timestamp ${timestamp}`);
+            }
+        });
+        
+        data = uniqueData;
+        
+        console.log(`Datos originales: ${values.slice(2).length}, Datos únicos: ${data.length}`);
         
         // Actualizar estadísticas
         document.getElementById('total-encuestas').textContent = data.length;
@@ -1376,7 +1398,29 @@
     
     function processSheetsData2(values) {
         const headers = values[1]; // La fila 2 (índice 1) es el encabezado
-        const data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        let data = values.slice(2).filter(row => row.length > 0 && row[0] !== '' && !isNaN(parseInt(row[0])) && parseInt(row[0]) > 0);
+        
+        // Eliminar duplicados basándose en la combinación de UPZ y otros campos únicos
+        const uniqueData = [];
+        const seen = new Set();
+        
+        data.forEach(row => {
+            // Crear una clave única basada en UPZ y otros campos relevantes
+            const upz = row[6] || ''; // Columna G - UPZ
+            const timestamp = row[1] || ''; // Columna B - Timestamp
+            const uniqueKey = `${upz}_${timestamp}`;
+            
+            if (!seen.has(uniqueKey)) {
+                seen.add(uniqueKey);
+                uniqueData.push(row);
+            } else {
+                console.log(`Duplicado eliminado BD2: UPZ ${upz}, Timestamp ${timestamp}`);
+            }
+        });
+        
+        data = uniqueData;
+        
+        console.log(`Datos originales BD2: ${values.slice(2).length}, Datos únicos BD2: ${data.length}`);
         
         // Actualizar estadísticas
         document.getElementById('total-registros2').textContent = data.length;
@@ -1994,7 +2038,18 @@
         const upzNames = new Set();
         
         window.allData.forEach(row => {
-            const upz = row[6]; // Columna G - UPZ (índice 6)
+            let upz = row[6]; // Columna G - UPZ (índice 6)
+            
+            // Normalizar el nombre de la UPZ para evitar variaciones
+            upz = upz ? upz.trim().toUpperCase() : '';
+            
+            // Mapear variaciones de nombres
+            if (upz.includes('LOURDES')) upz = 'UPZ LOURDES';
+            if (upz.includes('SAGRADO CORAZON') || upz.includes('SAGRADO CORAZÓN')) upz = 'UPZ SAGRADO CORAZÓN';
+            if (upz.includes('MACARENA')) upz = 'UPZ LA MACARENA';
+            if (upz.includes('NIEVES')) upz = 'UPZ LAS NIEVES';
+            if (upz.includes('CRUCES')) upz = 'UPZ LAS CRUCES';
+            
             upzNames.add(upz);
             
             if (!upzData[upz]) {
@@ -2063,13 +2118,7 @@
         console.log('UPZ encontradas en Indicador 1:', Array.from(upzNames));
         console.log('Resultados por UPZ:', upzResults);
         
-        // Log específico para UPZ LOURDES
-        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
-        if (lourdesResult) {
-            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
-        } else {
-            console.log('❌ UPZ LOURDES NO encontrada en resultados');
-        }
+
         
         // Actualizar mapa
         updateMapColors(upzResults);
@@ -2091,7 +2140,18 @@
         const upzNames2 = new Set();
         
         window.allData.forEach(row => {
-            const upz = row[6]; // Columna G - UPZ (índice 6)
+            let upz = row[6]; // Columna G - UPZ (índice 6)
+            
+            // Normalizar el nombre de la UPZ para evitar variaciones
+            upz = upz ? upz.trim().toUpperCase() : '';
+            
+            // Mapear variaciones de nombres
+            if (upz.includes('LOURDES')) upz = 'UPZ LOURDES';
+            if (upz.includes('SAGRADO CORAZON') || upz.includes('SAGRADO CORAZÓN')) upz = 'UPZ SAGRADO CORAZÓN';
+            if (upz.includes('MACARENA')) upz = 'UPZ LA MACARENA';
+            if (upz.includes('NIEVES')) upz = 'UPZ LAS NIEVES';
+            if (upz.includes('CRUCES')) upz = 'UPZ LAS CRUCES';
+            
             upzNames2.add(upz);
             
             if (!upzData[upz]) {
@@ -2161,13 +2221,7 @@
         console.log('UPZ encontradas en Indicador 2:', Array.from(upzNames2));
         console.log('Resultados por UPZ:', upzResults);
         
-        // Log específico para UPZ LOURDES
-        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
-        if (lourdesResult) {
-            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
-        } else {
-            console.log('❌ UPZ LOURDES NO encontrada en resultados');
-        }
+
         
         // Actualizar mapa
         updateMapColors(upzResults);
@@ -2189,7 +2243,18 @@
         const upzNames3 = new Set();
         
         window.allData.forEach(row => {
-            const upz = row[6]; // Columna G - UPZ (índice 6)
+            let upz = row[6]; // Columna G - UPZ (índice 6)
+            
+            // Normalizar el nombre de la UPZ para evitar variaciones
+            upz = upz ? upz.trim().toUpperCase() : '';
+            
+            // Mapear variaciones de nombres
+            if (upz.includes('LOURDES')) upz = 'UPZ LOURDES';
+            if (upz.includes('SAGRADO CORAZON') || upz.includes('SAGRADO CORAZÓN')) upz = 'UPZ SAGRADO CORAZÓN';
+            if (upz.includes('MACARENA')) upz = 'UPZ LA MACARENA';
+            if (upz.includes('NIEVES')) upz = 'UPZ LAS NIEVES';
+            if (upz.includes('CRUCES')) upz = 'UPZ LAS CRUCES';
+            
             upzNames3.add(upz);
             
             if (!upzData[upz]) {
@@ -2260,13 +2325,7 @@
         console.log('UPZ encontradas en Indicador 3:', Array.from(upzNames3));
         console.log('Resultados por UPZ:', upzResults);
         
-        // Log específico para UPZ LOURDES
-        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
-        if (lourdesResult) {
-            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
-        } else {
-            console.log('❌ UPZ LOURDES NO encontrada en resultados');
-        }
+
         
         // Actualizar mapa
         updateMapColors(upzResults);
@@ -2288,7 +2347,18 @@
         const upzNames4 = new Set();
         
         window.allData.forEach(row => {
-            const upz = row[6]; // Columna G - UPZ (índice 6)
+            let upz = row[6]; // Columna G - UPZ (índice 6)
+            
+            // Normalizar el nombre de la UPZ para evitar variaciones
+            upz = upz ? upz.trim().toUpperCase() : '';
+            
+            // Mapear variaciones de nombres
+            if (upz.includes('LOURDES')) upz = 'UPZ LOURDES';
+            if (upz.includes('SAGRADO CORAZON') || upz.includes('SAGRADO CORAZÓN')) upz = 'UPZ SAGRADO CORAZÓN';
+            if (upz.includes('MACARENA')) upz = 'UPZ LA MACARENA';
+            if (upz.includes('NIEVES')) upz = 'UPZ LAS NIEVES';
+            if (upz.includes('CRUCES')) upz = 'UPZ LAS CRUCES';
+            
             upzNames4.add(upz);
             
             if (!upzData[upz]) {
@@ -2356,17 +2426,7 @@
         console.log('UPZ encontradas en Indicador 4:', Array.from(upzNames4));
         console.log('Resultados por UPZ:', upzResults);
         
-        // Log específico para UPZ LOURDES
-        const lourdesResult = upzResults.find(r => r.upz.toUpperCase().includes('LOURDES'));
-        if (lourdesResult) {
-            console.log('🔍 UPZ LOURDES encontrada:', lourdesResult);
-            console.log('🔍 Color asignado a LOURDES:', lourdesResult.color);
-            console.log('🔍 Promedio de LOURDES:', lourdesResult.promedio);
-            console.log('🔍 Función getColorByPromedio para LOURDES:', getColorByPromedio(lourdesResult.promedio));
-        } else {
-            console.log('❌ UPZ LOURDES NO encontrada en resultados');
-            console.log('❌ UPZ disponibles:', upzResults.map(r => r.upz));
-        }
+
         
         // Actualizar mapa
         updateMapColors(upzResults);
@@ -2403,7 +2463,18 @@
         const upzNames = new Set();
         
         window.allData2.forEach(row => {
-            const upz = row[6]; // Columna G - UPZ (índice 6)
+            let upz = row[6]; // Columna G - UPZ (índice 6)
+            
+            // Normalizar el nombre de la UPZ para evitar variaciones
+            upz = upz ? upz.trim().toUpperCase() : '';
+            
+            // Mapear variaciones de nombres
+            if (upz.includes('LOURDES')) upz = 'UPZ LOURDES';
+            if (upz.includes('SAGRADO CORAZON') || upz.includes('SAGRADO CORAZÓN')) upz = 'UPZ SAGRADO CORAZÓN';
+            if (upz.includes('MACARENA')) upz = 'UPZ LA MACARENA';
+            if (upz.includes('NIEVES')) upz = 'UPZ LAS NIEVES';
+            if (upz.includes('CRUCES')) upz = 'UPZ LAS CRUCES';
+            
             upzNames.add(upz);
             
             if (!upzData[upz]) {
@@ -2456,9 +2527,7 @@
         'UPZ LA MACARENA': '92',
         'UPZ LAS NIEVES': '93',
         'UPZ LAS CRUCES': '95',
-        'UPZ LOURDES': '96',
-        'LOURDES': '96', // Solo el nombre sin UPZ
-        'UPZ LOURDES ': '96' // Con espacio al final
+        'UPZ LOURDES': '96'
     };
     
     function updateMapColors(upzResults) {
@@ -2492,19 +2561,13 @@
                 
                 console.log(`Procesando polígono con código UPZ: ${upzCode}`);
                 
-                // Log específico para LOURDES
-                if (upzCode === '96' || upzCode.toString().includes('LOURDES')) {
-                    console.log(`🎯 Procesando polígono LOURDES con código: ${upzCode}`);
-                }
+
                 
                 // Buscar si hay resultados para esta UPZ
                 const result = upzResults.find(r => {
                     const mappedCode = upzMapping[r.upz.toUpperCase()];
                     
-                    // Log específico para LOURDES
-                    if (r.upz.toUpperCase().includes('LOURDES')) {
-                        console.log(`🎯 Buscando LOURDES - UPZ: ${r.upz}, mappedCode: ${mappedCode}, upzCode: ${upzCode}`);
-                    }
+
                     
                     return mappedCode === upzCode;
                 });
@@ -2609,19 +2672,13 @@
                 
                 console.log(`Procesando polígono del mapa 2 con código UPZ: ${upzCode}`);
                 
-                // Log específico para LOURDES
-                if (upzCode === '96' || upzCode.toString().includes('LOURDES')) {
-                    console.log(`🎯 Procesando polígono LOURDES del mapa 2 con código: ${upzCode}`);
-                }
+
                 
                 // Buscar si hay resultados para esta UPZ
                 const result = upzResults.find(r => {
                     const mappedCode = upzMapping[r.upz.toUpperCase()];
                     
-                    // Log específico para LOURDES
-                    if (r.upz.toUpperCase().includes('LOURDES')) {
-                        console.log(`🎯 Buscando LOURDES en mapa 2 - UPZ: ${r.upz}, mappedCode: ${mappedCode}, upzCode: ${upzCode}`);
-                    }
+
                     
                     return mappedCode === upzCode;
                 });
