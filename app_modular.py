@@ -12,6 +12,7 @@ from config.development import DevelopmentConfig
 from services.data_service import DataService
 from services.google_sheets_service import GoogleSheetsConnector
 from services.chart_service import ChartGenerator
+from services.railway_geoserver_service import RailwayGeoServerService
 
 # Configurar logging
 import os
@@ -46,6 +47,8 @@ def create_app(config_class=DevelopmentConfig):
     data_service = DataService()
     sheets_connector = GoogleSheetsConnector()
     chart_generator = ChartGenerator()
+    # Inicializar servicio GeoServer
+    geoserver_service = RailwayGeoServerService()
     
     @app.route('/')
     def index():
@@ -511,6 +514,160 @@ def create_app(config_class=DevelopmentConfig):
             return jsonify({'data': raw_data, 'total': len(raw_data)})
         except Exception as e:
             return jsonify({'error': str(e), 'data': []}), 500
+    
+    @app.route('/api/geoserver/layers')
+    def get_geoserver_layers():
+        """Obtener capas disponibles en GeoServer"""
+        try:
+            layers = geoserver_service.list_layers()
+            return jsonify({
+                'success': True,
+                'layers': layers
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    @app.route('/api/geoserver/upload-layer', methods=['POST'])
+    def upload_layer_to_geoserver():
+        """Subir nueva capa a GeoServer"""
+        try:
+            file = request.files['shapefile']
+            layer_name = request.form['layer_name']
+            workspace = request.form['workspace']
+            
+            # Guardar archivo temporalmente
+            temp_path = f"/tmp/{layer_name}.zip"
+            file.save(temp_path)
+            
+            # Subir a GeoServer
+            if geoserver_service.upload_shapefile(temp_path, workspace, layer_name):
+                return jsonify({
+                    'success': True,
+                    'message': f'Capa {layer_name} creada exitosamente'
+                })
+            
+            return jsonify({
+                'success': False,
+                'error': 'Error al crear la capa'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    @app.route('/api/geoserver/create-geojson-layer', methods=['POST'])
+    def create_geojson_layer():
+        """Crear capa desde GeoJSON"""
+        try:
+            data = request.json
+            workspace = data.get('workspace')
+            layer_name = data.get('layer_name')
+            geojson_data = data.get('geojson')
+            
+            if geoserver_service.create_layer_from_geojson(workspace, layer_name, geojson_data):
+                return jsonify({
+                    'success': True,
+                    'message': f'Capa GeoJSON {layer_name} creada exitosamente'
+                })
+            
+            return jsonify({
+                'success': False,
+                'error': 'Error al crear la capa GeoJSON'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    @app.route('/api/geoserver/wms-url/<workspace>/<layer>')
+    def get_wms_url(workspace, layer):
+        """Obtener URL de capa WMS"""
+        try:
+            wms_url = geoserver_service.get_wms_layer_url(workspace, layer)
+            return jsonify({
+                'success': True,
+                'wms_url': wms_url
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    @app.route('/api/geoserver/wfs-features/<workspace>/<layer>')
+    def get_wfs_features(workspace, layer):
+        """Obtener features WFS"""
+        try:
+            filter_param = request.args.get('filter')
+            features = geoserver_service.get_wfs_features(workspace, layer, filter_param)
+            return jsonify({
+                'success': True,
+                'features': features
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
+
+    @app.route('/api/geoserver/update-from-sheets', methods=['POST'])
+    def update_geoserver_from_sheets():
+        """Actualizar capa en GeoServer con datos de Google Sheets"""
+        try:
+            # Obtener datos de Google Sheets
+            sheets_connector = GoogleSheetsConnector()
+            data = sheets_connector.get_data()
+            
+            # Convertir a GeoJSON
+            geojson_features = []
+            for row in data:
+                if 'latitud' in row and 'longitud' in row:
+                    feature = {
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [float(row['longitud']), float(row['latitud'])]
+                        },
+                        "properties": {
+                            "id": row.get('id', ''),
+                            "barrio": row.get('barrio', ''),
+                            "upz": row.get('upz', ''),
+                            "estado": row.get('estado', ''),
+                            "fecha": row.get('fecha', '')
+                        }
+                    }
+                    geojson_features.append(feature)
+            
+            geojson_data = {
+                "type": "FeatureCollection",
+                "features": geojson_features
+            }
+            
+            # Actualizar capa en GeoServer
+            workspace = "santafe"
+            layer_name = "puntos_criticos"
+            
+            if geoserver_service.create_layer_from_geojson(workspace, layer_name, geojson_data):
+                return jsonify({
+                    'success': True,
+                    'message': 'Capa actualizada exitosamente desde Google Sheets',
+                    'features_count': len(geojson_features)
+                })
+            
+            return jsonify({
+                'success': False,
+                'error': 'Error al actualizar la capa'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            })
     
     @app.errorhandler(404)
     def not_found(error):
