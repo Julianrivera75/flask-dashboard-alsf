@@ -13,6 +13,7 @@ from services.data_service import DataService
 from services.google_sheets_service import GoogleSheetsConnector
 from services.chart_service import ChartGenerator
 from services.railway_geoserver_service import RailwayGeoServerService
+from services.supabase_service import SupabaseService
 
 # Configurar logging
 import os
@@ -49,6 +50,8 @@ def create_app(config_class=DevelopmentConfig):
     chart_generator = ChartGenerator()
     # Inicializar servicio GeoServer
     geoserver_service = RailwayGeoServerService()
+    # Inicializar servicio Supabase
+    supabase_service = SupabaseService()
     
     @app.route('/')
     def index():
@@ -399,6 +402,158 @@ def create_app(config_class=DevelopmentConfig):
             logger.error(f"Error en dashboard de El Consuelo: {str(e)}")
             return render_template('error.html', error=str(e)), 500
 
+    @app.route('/formulario')
+    def formulario_georeferenciado():
+        """Página del formulario georeferenciado"""
+        return render_template('pages/formulario_georeferenciado.html')
+
+    @app.route('/api/reportes', methods=['POST'])
+    def crear_reporte():
+        """Crear nuevo reporte en Supabase"""
+        try:
+            data = request.json
+            
+            # Validar datos requeridos
+            required_fields = ['nombre', 'email', 'direccion', 'latitud', 'longitud', 'tipoReporte', 'descripcion']
+            for field in required_fields:
+                if not data.get(field):
+                    return jsonify({
+                        'success': False,
+                        'error': f'Campo requerido: {field}'
+                    }), 400
+            
+            # Crear reporte
+            result = supabase_service.create_report(data)
+            
+            if result['success']:
+                return jsonify({
+                    'success': True,
+                    'message': 'Reporte creado exitosamente',
+                    'report_id': result['id']
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': result['error']
+                }), 500
+                
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route('/api/reportes', methods=['GET'])
+    def obtener_reportes():
+        """Obtener reportes con filtros"""
+        try:
+            filters = {}
+            
+            # Parámetros de filtro
+            if request.args.get('tipo_reporte'):
+                filters['tipo_reporte'] = request.args.get('tipo_reporte')
+            if request.args.get('prioridad'):
+                filters['prioridad'] = request.args.get('prioridad')
+            if request.args.get('estado'):
+                filters['estado'] = request.args.get('estado')
+            if request.args.get('fecha_inicio'):
+                filters['fecha_inicio'] = request.args.get('fecha_inicio')
+            if request.args.get('fecha_fin'):
+                filters['fecha_fin'] = request.args.get('fecha_fin')
+            
+            reports = supabase_service.get_reports(filters)
+            
+            return jsonify({
+                'success': True,
+                'reports': reports,
+                'total': len(reports)
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route('/api/reportes/<int:report_id>/status', methods=['PUT'])
+    def actualizar_estado_reporte(report_id):
+        """Actualizar estado de un reporte"""
+        try:
+            data = request.json
+            new_status = data.get('estado')
+            
+            if not new_status:
+                return jsonify({
+                    'success': False,
+                    'error': 'Estado requerido'
+                }), 400
+            
+            success = supabase_service.update_report_status(report_id, new_status)
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': 'Estado actualizado exitosamente'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Error actualizando estado'
+                }), 500
+                
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route('/api/reportes/nearby')
+    def reportes_cercanos():
+        """Obtener reportes cercanos a una ubicación"""
+        try:
+            lat = float(request.args.get('lat', 0))
+            lng = float(request.args.get('lng', 0))
+            radius = float(request.args.get('radius', 5))  # km por defecto
+            
+            if lat == 0 and lng == 0:
+                return jsonify({
+                    'success': False,
+                    'error': 'Coordenadas requeridas'
+                }), 400
+            
+            reports = supabase_service.get_reports_by_location(lat, lng, radius)
+            
+            return jsonify({
+                'success': True,
+                'reports': reports,
+                'total': len(reports),
+                'center': {'lat': lat, 'lng': lng},
+                'radius_km': radius
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+
+    @app.route('/api/reportes/statistics')
+    def estadisticas_reportes():
+        """Obtener estadísticas de reportes"""
+        try:
+            stats = supabase_service.get_statistics()
+            
+            return jsonify({
+                'success': True,
+                'statistics': stats
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
     @app.route('/convenio-interadministrativo-302')
     def convenio_interadministrativo_302():
         """Ruta para la página del Convenio Interadministrativo 302"""

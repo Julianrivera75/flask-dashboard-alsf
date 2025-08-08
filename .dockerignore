@@ -1,24 +1,60 @@
-.git
-.gitignore
-README.md
-.env
-__pycache__
+# Archivos de desarrollo
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-env
+env/
+venv/
+.venv/
 pip-log.txt
 pip-delete-this-directory.txt
-.tox
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
 *.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis 
+
+# Archivos de configuración local
+.env
+.env.local
+.env.production
+
+# Archivos de credenciales (se manejarán como variables de entorno)
+credentials/
+*.json
+
+# Archivos de datos grandes
+data/
+*.dat
+*.kml
+
+# Archivos de documentación
+docs/
+*.md
+
+# Archivos de test
+tests/
+test_*
+
+# Archivos de Git
+.git/
+.gitignore
+
+# Archivos de Docker
+Dockerfile
+Dockerfile.light
+.dockerignore
+
+# Archivos de Railway
+railway.json 

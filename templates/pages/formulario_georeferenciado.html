@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario Georeferenciado - ALSF</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        .map-container {
+            height: 400px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .location-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 10px 0;
+        }
+        .submit-btn {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #ecf0f1;
+            padding: 12px;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .coordinates-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-card">
+            <h2 class="text-center mb-4">
+                📍 Formulario Georeferenciado ALSF
+            </h2>
+            
+            <!-- Alertas -->
+            <div id="alertContainer"></div>
+            
+            <form id="georeferencedForm">
+                <!-- Información Personal -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">👤 Nombre Completo *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">📧 Correo Electrónico *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">📱 Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">🏢 Organización</label>
+                            <input type="text" class="form-control" id="organizacion" name="organizacion">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ubicación -->
+                <div class="form-group">
+                    <label class="form-label">📍 Ubicación del Reporte *</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" 
+                           placeholder="Ingrese la dirección o descripción del lugar" required>
+                </div>
+                
+                <!-- Coordenadas -->
+                <div class="coordinates-display">
+                    <h5>🗺️ Coordenadas Geográficas</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Latitud</label>
+                            <input type="number" class="form-control" id="latitud" name="latitud" 
+                                   step="0.000001" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Longitud</label>
+                            <input type="number" class="form-control" id="longitud" name="longitud" 
+                                   step="0.000001" readonly>
+                        </div>
+                    </div>
+                    <button type="button" class="btn location-btn" onclick="getCurrentLocation()">
+                        📍 Obtener Ubicación Actual
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="searchLocation()">
+                        🔍 Buscar en Mapa
+                    </button>
+                </div>
+                
+                <!-- Mapa -->
+                <div class="form-group">
+                    <label class="form-label">🗺️ Seleccionar Ubicación en el Mapa</label>
+                    <div id="map" class="map-container"></div>
+                    <small class="text-muted">Haz clic en el mapa para seleccionar la ubicación exacta</small>
+                </div>
+                
+                <!-- Información del Reporte -->
+                <div class="form-group">
+                    <label class="form-label">📋 Tipo de Reporte *</label>
+                    <select class="form-control" id="tipoReporte" name="tipoReporte" required>
+                        <option value="">Seleccione el tipo de reporte</option>
+                        <option value="infraestructura">🏗️ Infraestructura</option>
+                        <option value="seguridad">🛡️ Seguridad</option>
+                        <option value="medioambiente">🌱 Medio Ambiente</option>
+                        <option value="social">👥 Social</option>
+                        <option value="economico">💰 Económico</option>
+                        <option value="otro">📝 Otro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">📝 Descripción del Reporte *</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" 
+                              rows="4" placeholder="Describa detalladamente el reporte..." required></textarea>
+                </div>
+                
+                <!-- Prioridad -->
+                <div class="form-group">
+                    <label class="form-label">⚡ Prioridad</label>
+                    <select class="form-control" id="prioridad" name="prioridad">
+                        <option value="baja">🟢 Baja</option>
+                        <option value="media" selected>🟡 Media</option>
+                        <option value="alta">🟠 Alta</option>
+                        <option value="urgente">🔴 Urgente</option>
+                    </select>
+                </div>
+                
+                <!-- Fotos -->
+                <div class="form-group">
+                    <label class="form-label">📸 Fotos (Opcional)</label>
+                    <input type="file" class="form-control" id="fotos" name="fotos" 
+                           accept="image/*" multiple>
+                    <small class="text-muted">Puede subir hasta 5 fotos (máximo 5MB cada una)</small>
+                </div>
+                
+                <!-- Fecha y Hora -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">📅 Fecha del Reporte</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">🕐 Hora del Reporte</label>
+                            <input type="time" class="form-control" id="hora" name="hora">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botón de Envío -->
+                <button type="submit" class="btn submit-btn">
+                    📤 Enviar Reporte
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variables globales
+        let map;
+        let marker;
+        let currentPosition = null;
+        
+        // Inicializar mapa
+        function initMap() {
+            // Coordenadas de Bogotá
+            const bogotaLat = 4.7110;
+            const bogotaLng = -74.0721;
+            
+            map = L.map('map').setView([bogotaLat, bogotaLng], 12);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Evento de clic en el mapa
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                updateCoordinates(lat, lng);
+                updateMarker(lat, lng);
+            });
+        }
+        
+        // Actualizar coordenadas
+        function updateCoordinates(lat, lng) {
+            document.getElementById('latitud').value = lat.toFixed(6);
+            document.getElementById('longitud').value = lng.toFixed(6);
+            currentPosition = { lat, lng };
+        }
+        
+        // Actualizar marcador
+        function updateMarker(lat, lng) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            
+            marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup('Ubicación seleccionada').openPopup();
+        }
+        
+        // Obtener ubicación actual
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                showAlert('📍 Obteniendo ubicación actual...', 'info');
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        updateCoordinates(lat, lng);
+                        updateMarker(lat, lng);
+                        map.setView([lat, lng], 15);
+                        
+                        showAlert('✅ Ubicación obtenida exitosamente', 'success');
+                    },
+                    function(error) {
+                        console.error('Error obteniendo ubicación:', error);
+                        showAlert('❌ Error obteniendo ubicación. Verifique los permisos.', 'danger');
+                    }
+                );
+            } else {
+                showAlert('❌ Geolocalización no soportada en este navegador', 'danger');
+            }
+        }
+        
+        // Buscar ubicación
+        function searchLocation() {
+            const address = document.getElementById('direccion').value;
+            
+            if (!address) {
+                showAlert('⚠️ Ingrese una dirección para buscar', 'warning');
+                return;
+            }
+            
+            showAlert('🔍 Buscando ubicación...', 'info');
+            
+            // Usar Nominatim para geocodificación
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        
+                        updateCoordinates(lat, lng);
+                        updateMarker(lat, lng);
+                        map.setView([lat, lng], 15);
+                        
+                        showAlert('✅ Ubicación encontrada', 'success');
+                    } else {
+                        showAlert('❌ No se encontró la ubicación', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en búsqueda:', error);
+                    showAlert('❌ Error en la búsqueda', 'danger');
+                });
+        }
+        
+        // Mostrar alertas
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.appendChild(alertDiv);
+            
+            // Auto-remover después de 5 segundos
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('georeferencedForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validar coordenadas
+            const lat = document.getElementById('latitud').value;
+            const lng = document.getElementById('longitud').value;
+            
+            if (!lat || !lng) {
+                showAlert('⚠️ Debe seleccionar una ubicación en el mapa', 'warning');
+                return;
+            }
+            
+            // Obtener datos del formulario
+            const formData = new FormData(this);
+            formData.append('timestamp', new Date().toISOString());
+            formData.append('user_agent', navigator.userAgent);
+            
+            // Mostrar loading
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '⏳ Enviando...';
+            submitBtn.disabled = true;
+            
+            // Enviar a Google Sheets
+            submitToGoogleSheets(formData)
+                .then(response => {
+                    showAlert('✅ Reporte enviado exitosamente', 'success');
+                    this.reset();
+                    if (marker) {
+                        map.removeLayer(marker);
+                        marker = null;
+                    }
+                    updateCoordinates('', '');
+                })
+                .catch(error => {
+                    console.error('Error enviando formulario:', error);
+                    showAlert('❌ Error enviando el reporte. Intente nuevamente.', 'danger');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+        
+        // Enviar a Google Sheets
+        async function submitToGoogleSheets(formData) {
+            // URL del script de Google Apps Script
+            const scriptUrl = 'TU_GOOGLE_APPS_SCRIPT_URL';
+            
+            const response = await fetch(scriptUrl, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            
+            return response.json();
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            
+            // Establecer fecha y hora actual
+            const now = new Date();
+            document.getElementById('fecha').value = now.toISOString().split('T')[0];
+            document.getElementById('hora').value = now.toTimeString().slice(0, 5);
+        });
+    </script>
+</body>
+</html> 

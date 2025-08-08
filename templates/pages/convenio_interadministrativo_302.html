@@ -270,6 +270,17 @@
             font-weight: 600;
             font-size: 1.1rem;
         }
+        
+        /* Estilos específicos para el porcentaje de ejecución */
+        #porcentaje-ejecucion {
+            color: var(--primary-red) !important;
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            margin-bottom: 0.5rem !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 <body>
@@ -427,7 +438,7 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="icon" style="color: var(--primary-yellow);"><i class="fas fa-tasks"></i></div>
-                <h3>70%</h3>
+                <h3 id="porcentaje-ejecucion">- %</h3>
                 <p>Porcentaje de Ejecución</p>
             </div>
             <div class="stat-card">
@@ -465,12 +476,7 @@
                 <h3 style="font-size:1.5rem;">Indicador 4</h3>
                 <p>Eficiencia en la Ejecución del Fondo de Desarrollo Local</p>
             </div>
-            <!-- Botón para Instrumento de Encuesta de Satisfacción -->
-            <div class="stat-card" id="btn-encuesta-satisfaccion" style="cursor: pointer; background: linear-gradient(135deg, #e4032e, #fab62d); color: white;">
-                <div class="icon"><i class="fas fa-clipboard-check" style="color: white;"></i></div>
-                <h3 style="font-size:1.5rem; color: white;">Instrumento</h3>
-                <p style="color: white;">Encuesta de Satisfacción</p>
-            </div>
+
         </div>
         <!-- Primer mapa: Contrato 302 de 2023 -->
         <div class="map-container">
@@ -3470,69 +3476,20 @@
       </div>
     </div>
 
-    <!-- JavaScript para el modal de encuesta -->
+
+
+    <!-- JavaScript para el porcentaje de ejecución -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var btnEncuesta = document.getElementById('btn-encuesta-satisfaccion');
-      var modalEncuesta = document.getElementById('modalEncuestaSatisfaccion');
-      var closeEncuesta = document.getElementById('closeEncuestaSatisfaccion');
-      var btnEnviar = document.getElementById('btnEnviarEncuesta');
-      var btnLimpiar = document.getElementById('btnLimpiarEncuesta');
-      
-      if(btnEncuesta && modalEncuesta && closeEncuesta) {
-        console.log('✅ Botón encuesta de satisfacción encontrado');
-        btnEncuesta.addEventListener('click', function() {
-          console.log('🔄 Abriendo modal de encuesta de satisfacción');
-          modalEncuesta.style.display = 'flex';
-        });
-        closeEncuesta.addEventListener('click', function() {
-          console.log('❌ Cerrando modal de encuesta de satisfacción');
-          modalEncuesta.style.display = 'none';
-        });
-        modalEncuesta.addEventListener('click', function(e) {
-          if (e.target === this) {
-            console.log('❌ Cerrando modal al hacer clic fuera');
-            this.style.display = 'none';
-          }
-        });
-      } else {
-        console.error('❌ Error: No se encontraron elementos del modal de encuesta de satisfacción');
-      }
-      
-      // Función para limpiar el formulario
-      if(btnLimpiar) {
-        btnLimpiar.addEventListener('click', function() {
-          console.log('🧹 Limpiando formulario de encuesta');
-          
-          // Limpiar campos de texto
-          const inputs = modalEncuesta.querySelectorAll('input[type="text"], input[type="tel"], input[type="date"]');
-          inputs.forEach(input => input.value = '');
-          
-          // Limpiar selects
-          const selects = modalEncuesta.querySelectorAll('select');
-          selects.forEach(select => select.selectedIndex = 0);
-          
-          // Limpiar radio buttons
-          const radios = modalEncuesta.querySelectorAll('input[type="radio"]');
-          radios.forEach(radio => radio.checked = false);
-          
-          alert('Formulario limpiado correctamente');
-        });
-      }
-      
-      // Función para enviar la encuesta
-      if(btnEnviar) {
-        btnEnviar.addEventListener('click', function() {
-          console.log('📤 Enviando encuesta de satisfacción');
-          
-          // Aquí puedes agregar la lógica para enviar los datos
-          // Por ahora solo mostraremos un mensaje de confirmación
-          alert('¡Gracias por completar la encuesta de satisfacción! Los datos han sido registrados.');
-          
-          // Cerrar el modal después de enviar
-          modalEncuesta.style.display = 'none';
-        });
-      }
+        // Asegurar que el porcentaje de ejecución se muestre correctamente
+        const porcentajeElement = document.getElementById('porcentaje-ejecucion');
+        if (porcentajeElement) {
+            // Forzar el valor del porcentaje
+            porcentajeElement.textContent = '- %';
+            porcentajeElement.style.display = 'block';
+            porcentajeElement.style.visibility = 'visible';
+            porcentajeElement.style.opacity = '1';
+        }
     });
     </script>
 

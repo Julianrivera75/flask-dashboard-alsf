@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Indicadores de Gestión Localidad de Santa Fé</title>
     
     <!-- Plotly.js para gráficas -->
@@ -470,10 +473,6 @@
                 <button id="refresh-btn" class="refresh-btn" style="display: flex; align-items: center; gap: 0.5rem;">
                     <i class="fas fa-sync-alt"></i> Actualizar datos
                 </button>
-                <button id="test-load-btn" class="refresh-btn" style="display: flex; align-items: center; gap: 0.5rem; background: #fab62d;">
-                    <i class="fas fa-bug"></i> Probar carga
-                </button>
-
             </div>
             <div id="last-update-info" style="margin-bottom: 1.5rem; color: #333; font-size: 1rem; font-weight: 500;">
                 <i class="fas fa-clock"></i> Última actualización: <span id="last-update-text">Cargando...</span>
@@ -493,10 +492,7 @@
                     <div class="icon"><i class="fas fa-shield-alt"></i></div>
                     <h3 id="dias-sin-homicidios">0</h3>
                     <p id="dias-sin-homicidios-label">Días sin homicidio</p>
-                    <p id="fecha-base" style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">Desde: 12/03/2025</p>
-                    <div style="display: flex; justify-content: center; margin-top: 0.7rem;">
-                        <button id="reset-homicidios-btn" class="refresh-btn" style="font-size: 0.95rem; padding: 0.4rem 1rem; background: #e4032e;">Reiniciar contador</button>
-                    </div>
+                    <p id="fecha-base" style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">Desde: 04/07/2025</p>
                 </div>
             </div>
 
@@ -885,22 +881,9 @@
         function initDiasSinHomicidios() {
             const diasElement = document.getElementById('dias-sin-homicidios');
             const fechaBaseElement = document.getElementById('fecha-base');
-            const resetBtn = document.getElementById('reset-homicidios-btn');
             
-            // Obtener datos del localStorage
-            let baseDate = localStorage.getItem('diasSinHomicidiosBase');
-            let lastReset = localStorage.getItem('diasSinHomicidiosLastReset');
-            
-            // Si no hay fecha base, usar 12 de marzo de 2025
-            if (!baseDate) {
-                baseDate = '2025-03-12';
-                localStorage.setItem('diasSinHomicidiosBase', baseDate);
-            }
-            
-            // Si hay fecha de último reset, usar esa como base
-            if (lastReset) {
-                baseDate = lastReset;
-            }
+            // Fecha base fija: 4 de julio de 2025
+            const baseDate = '2025-07-04';
             
             function updateCounter() {
                 const today = new Date();
@@ -908,9 +891,14 @@
                 const diffTime = today - base;
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 
-                diasElement.textContent = diffDays;
+                // Si la fecha base es en el futuro, mostrar 0
+                if (diffDays < 0) {
+                    diasElement.textContent = '0';
+                } else {
+                    diasElement.textContent = diffDays;
+                }
                 
-                // Mostrar fecha base
+                // Mostrar fecha base fija
                 const baseDateObj = new Date(baseDate);
                 fechaBaseElement.textContent = `Desde: ${baseDateObj.toLocaleDateString('es-CO')}`;
             }
@@ -918,41 +906,6 @@
             // Actualizar contador cada día
             updateCounter();
             setInterval(updateCounter, 24 * 60 * 60 * 1000); // Actualizar cada 24 horas
-            
-            // Evento para resetear contador
-            resetBtn.addEventListener('click', function() {
-                const codigo = prompt('Ingrese el código de seguridad para reiniciar el contador:');
-                if (codigo === '1988') {
-                    const fechaInicio = prompt('Ingrese la fecha de inicio del ciclo (formato YYYY-MM-DD):');
-                    if (fechaInicio === null) return; // Cancelar
-                    
-                    // Validar formato de fecha YYYY-MM-DD
-                    if (/^\d{4}-\d{2}-\d{2}$/.test(fechaInicio)) {
-                        const fechaObj = new Date(fechaInicio);
-                        if (!isNaN(fechaObj.getTime())) {
-                            // Calcular días desde la fecha ingresada hasta hoy
-                            const hoy = new Date();
-                            const diffTime = hoy - fechaObj;
-                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                            
-                            // Guardar la fecha de inicio en localStorage
-                            localStorage.setItem('diasSinHomicidiosReset', fechaInicio);
-                            
-                            // Actualizar el contador y la fecha base
-                            diasElement.textContent = diffDays;
-                            fechaBaseElement.textContent = `Desde: ${fechaObj.toLocaleDateString('es-CO')}`;
-                            
-                            alert('Contador reiniciado correctamente.');
-                        } else {
-                            alert('La fecha ingresada no es válida.');
-                        }
-                    } else {
-                        alert('Formato incorrecto. Use YYYY-MM-DD.');
-                    }
-                } else if (codigo !== null) {
-                    alert('Código de seguridad incorrecto. El contador no se reinició.');
-                }
-            });
         }
         function updateDataTable(data) {
             if (!data || data.length === 0) return;
@@ -1009,11 +962,30 @@
             // Cargar datos iniciales
             loadData();
             
-            // Event listener para el botón de prueba
-            document.getElementById('test-load-btn').addEventListener('click', function() {
-                console.log('🔧 Botón de prueba clickeado');
-                loadData();
-            });
+            // Forzar actualización del contador cada minuto para asegurar que esté actualizado
+            setInterval(function() {
+                const diasElement = document.getElementById('dias-sin-homicidios');
+                const fechaBaseElement = document.getElementById('fecha-base');
+                
+                if (diasElement && fechaBaseElement) {
+                    const baseDate = '2025-07-04';
+                    const today = new Date();
+                    const base = new Date(baseDate);
+                    const diffTime = today - base;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    // Si la fecha base es en el futuro, mostrar 0
+                    if (diffDays < 0) {
+                        diasElement.textContent = '0';
+                    } else {
+                        diasElement.textContent = diffDays;
+                    }
+                    
+                    // Mostrar fecha base fija
+                    const baseDateObj = new Date(baseDate);
+                    fechaBaseElement.textContent = `Desde: ${baseDateObj.toLocaleDateString('es-CO')}`;
+                }
+            }, 60000); // Actualizar cada minuto
         });
 
 
@@ -1122,68 +1094,22 @@
         }
         // --- Visualizador: Días sin homicidios ---
         function getDiasSinHomicidios() {
-            const lastReset = localStorage.getItem('diasSinHomicidiosReset');
-            if (lastReset) {
-                // Si se ha reiniciado, contar desde la fecha de reinicio
-                const last = new Date(lastReset);
-                const now = new Date();
-                const diff = Math.floor((now - last) / (1000*60*60*24));
-                return diff;
-            }
-            // Si nunca se ha reiniciado, contar desde el 12 de marzo de 2025
-            const baseDate = new Date('2025-03-12');
+            // Fecha base fija: 4 de julio de 2025
+            const baseDate = new Date('2025-07-04');
             const now = new Date();
             const diff = Math.floor((now - baseDate) / (1000*60*60*24));
-            return diff;
+            // Si la fecha base es en el futuro, retornar 0
+            return diff < 0 ? 0 : diff;
         }
         function setDiasSinHomicidios(dias) {
             document.getElementById('dias-sin-homicidios').textContent = dias;
         }
         function getFechaBase() {
-            const lastReset = localStorage.getItem('diasSinHomicidiosReset');
-            if (lastReset) {
-                // Si se ha reiniciado, mostrar fecha de reinicio
-                const fecha = new Date(lastReset);
-                return fecha.toLocaleDateString('es-CO');
-            }
-            // Si nunca se ha reiniciado, mostrar 12 de marzo de 2025
-            return '12/03/2025';
+            // Fecha base fija: 4 de julio de 2025
+            return '04/07/2025';
         }
         function updateFechaBase() {
             document.getElementById('fecha-base').textContent = 'Desde: ' + getFechaBase();
-        }
-        function resetDiasSinHomicidios() {
-            const codigo = prompt('Ingrese el código de seguridad para reiniciar el contador:');
-            if (codigo === '1988') {
-                const fechaInicio = prompt('Ingrese la fecha de inicio del ciclo (formato YYYY-MM-DD):');
-                if (fechaInicio === null) return; // Cancelar
-                
-                // Validar formato de fecha YYYY-MM-DD
-                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaInicio)) {
-                    const fechaObj = new Date(fechaInicio);
-                    if (!isNaN(fechaObj.getTime())) {
-                        // Calcular días desde la fecha ingresada hasta hoy
-                        const hoy = new Date();
-                        const diffTime = hoy - fechaObj;
-                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                        
-                        // Guardar la fecha de inicio en localStorage
-                        localStorage.setItem('diasSinHomicidiosReset', fechaInicio);
-                        
-                        // Actualizar el contador y la fecha base
-                        setDiasSinHomicidios(diffDays);
-                        document.getElementById('fecha-base').textContent = `Desde: ${fechaObj.toLocaleDateString('es-CO')}`;
-                        
-                        alert('Contador reiniciado correctamente.');
-                    } else {
-                        alert('La fecha ingresada no es válida.');
-                    }
-                } else {
-                    alert('Formato incorrecto. Use YYYY-MM-DD.');
-                }
-            } else if (codigo !== null) {
-                alert('Código de seguridad incorrecto. El contador no se reinició.');
-            }
         }
         // Actualizar visualizadores al cargar datos
         function updateVisualizadores(data) {
