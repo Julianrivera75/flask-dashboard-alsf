@@ -296,3 +296,6 @@
  TAB ...................................... Complete filename & cycle.
  SHIFT-TAB ...................... ESC-TAB   Complete filename & reverse cycle.
  ctrl-L ................................... Complete filename, list all.
+* [32m(HEAD detached from 5ed589d)[m
+  main[m
+  [31mremotes/origin/main[m
