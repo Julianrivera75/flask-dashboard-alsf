@@ -17,7 +17,7 @@ class DataService:
     def __init__(self):
         self.required_fields = [
             'Entidad',
-            'Actividad',
+            'Descripción de los compromisos',
             'Fecha final de ejecución',
             'Población impactada'
         ]
@@ -59,12 +59,19 @@ class DataService:
                     stats['valid_records'] += 1
                     stats['total_population'] += processed_record['population_impacted']
                     
+                    # Debug: mostrar valores de población
+                    pop_value = record.get('Población impactada', 'N/A')
+                    logger.info(f"Registro {stats['valid_records']}: Población impactada = '{pop_value}' -> {processed_record['population_impacted']}")
+                    
                     if processed_record['has_valid_date']:
                         stats['valid_dates'] += 1
                     else:
                         stats['invalid_dates'] += 1
                 else:
                     stats['invalid_records'] += 1
+            
+            # Debug: mostrar total final
+            logger.info(f"Total población impactada: {stats['total_population']}")
             
             return {
                 'data': processed_data,
@@ -131,7 +138,7 @@ class DataService:
             entity_stats[entity]['activities_count'] += 1
             entity_stats[entity]['total_population'] += record['population_impacted']
             entity_stats[entity]['activities'].append({
-                'activity': record['original'].get('Actividad', ''),
+                'activity': record['original'].get('Descripción de los compromisos', ''),
                 'date': record['original'].get('Fecha final de ejecución', ''),
                 'population': record['population_impacted']
             })

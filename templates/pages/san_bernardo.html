@@ -50,6 +50,26 @@
             box-shadow: var(--shadow);
             position: relative;
         }
+        
+        .logout-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
 
         .header h1 {
             font-size: 2.5rem;
@@ -456,7 +476,8 @@
                 <li><a href="/convenio-interadministrativo-302"><i class="fas fa-file-contract"></i> Convenio Interadministrativo 256 y Contrato 302</a></li>
             </ul>
         </nav>
-        <div class="header-content" style="display: flex; align-items: center; gap: 1rem; justify-content: center; text-align: center; flex-direction: column;">
+        <div class="header-content" style="display: flex; align-items: center; gap: 1rem; justify-content: center; text-align: center; flex-direction: column; position: relative;">
+            <a href="{{ url_for('logout') }}" class="logout-btn" style="position: absolute; top: 0; right: 0; background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; text-decoration: none;">🚪 Cerrar Sesión</a>
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <img src="/static/images/logos/Alcaldia_SantaFe.jpg" alt="Logo Alcaldía Local" style="height: 64px; margin-right: 1rem;">
                 <h1 style="margin: 0;"><i class="fas fa-chart-line"></i> Indicadores de Gestión Localidad Santa Fe</h1>
@@ -1304,10 +1325,12 @@
             
             // Buscar la columna "Fecha final de ejecución"
             const columnas = Object.keys(datosEntidad[0] || {});
+            console.log('🔍 Columnas disponibles:', columnas);
             let columnaFecha = columnas.find(col => col === 'Fecha final de ejecución');
             
             if (!columnaFecha) {
                 console.log(`❌ No se encontró la columna "Fecha final de ejecución"`);
+                console.log('🔍 Columnas disponibles:', columnas);
                 return;
             }
             

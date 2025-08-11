@@ -2,10 +2,9 @@
 Aplicación principal Flask - Versión Modular
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
 import os
 import logging
-from datetime import datetime
 
 # Importar módulos propios
 from config.development import DevelopmentConfig
@@ -36,6 +35,9 @@ def create_app(config_class=DevelopmentConfig):
     # Configurar la aplicación
     app.config.from_object(config_class)
     
+    # Configuración para sesiones (necesario para autenticación)
+    app.secret_key = 'tu_clave_secreta_super_segura_2024'
+    
     # Configuración para producción
     if app.config.get('ENV') == 'production':
         app.config['DEBUG'] = False
@@ -63,9 +65,29 @@ def create_app(config_class=DevelopmentConfig):
             logger.error(f"Error en ruta principal: {str(e)}")
             return render_template('error.html', error=str(e)), 500
     
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        """Ruta para autenticación"""
+        if request.method == 'POST':
+            password = request.form.get('password')
+            if password == 'ALFS2025*':  # Contraseña para acceder
+                session['authenticated'] = True
+                return redirect(url_for('san_bernardo'))
+            else:
+                return render_template('login.html', error='Contraseña incorrecta')
+        return render_template('login.html')
+    
+    @app.route('/logout')
+    def logout():
+        """Ruta para cerrar sesión"""
+        session.pop('authenticated', None)
+        return redirect(url_for('index'))
+    
     @app.route('/san-bernardo')
     def san_bernardo():
         """Ruta para el dashboard del Barrio San Bernardo"""
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
         try:
             logger.info("Accediendo al dashboard de San Bernardo")
             return render_template('pages/san_bernardo.html')
@@ -557,6 +579,8 @@ def create_app(config_class=DevelopmentConfig):
     @app.route('/convenio-interadministrativo-302')
     def convenio_interadministrativo_302():
         """Ruta para la página del Convenio Interadministrativo 302"""
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
         try:
             logger.info("Accediendo a la página del Convenio Interadministrativo 302")
             return render_template('pages/convenio_interadministrativo_302.html')
@@ -570,32 +594,16 @@ def create_app(config_class=DevelopmentConfig):
         try:
             logger.info("Solicitando datos desde API")
             
-            # Obtener datos de Google Sheets
+            # Obtener datos reales desde Google Sheets
             raw_data = sheets_connector.get_data()
-            
-            # Depuración: imprimir headers y primeros valores de la columna O
-            if raw_data:
-                headers = list(raw_data[0].keys())
-                print('Headers:')
-                for idx, h in enumerate(headers):
-                    print(f'{idx}: {repr(h)}')
-                if len(headers) > 14:
-                    col_o = headers[14]
-                    print(f'Columna O (índice 14): {repr(col_o)}')
-                    print('Primeros 10 valores de columna O:')
-                    for row in raw_data[:10]:
-                        print(row.get(col_o, ''))
-            
-            # Procesar datos usando el servicio
             processed_data = data_service.process_raw_data(raw_data)
             
             # Preparar respuesta
             response = {
-                'data': [record['original'] for record in processed_data['data']],
+                'data': processed_data['data'],
                 'statistics': processed_data['statistics'],
-                'validation': processed_data['validation'],
-                'last_update': datetime.now().isoformat(),
-                'columns_order': list(processed_data['data'][0]['original'].keys()) if processed_data['data'] else []
+                'last_update': '2024-01-01T00:00:00',
+                'columns_order': processed_data.get('columns_order', [])
             }
             
             logger.info(f"Datos obtenidos exitosamente: {len(response['data'])} registros")
@@ -662,10 +670,12 @@ def create_app(config_class=DevelopmentConfig):
     def api_el_consuelo_data():
         """API para obtener datos de encuestas de El Consuelo"""
         try:
+            # Obtener datos reales desde Google Sheets de El Consuelo
             sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
             credentials_file = 'credentials/credentials_consuelo.json'
-            sheets_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var="GOOGLE_CREDENTIALS_CONSUELO_JSON")
-            raw_data = sheets_connector.get_data(sheet_id)
+            consuelo_connector = GoogleSheetsConnector(credentials_file=credentials_file)
+            raw_data = consuelo_connector.get_data(sheet_id)
+            
             return jsonify({'data': raw_data, 'total': len(raw_data)})
         except Exception as e:
             return jsonify({'error': str(e), 'data': []}), 500
