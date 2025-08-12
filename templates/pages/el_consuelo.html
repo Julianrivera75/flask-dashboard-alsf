@@ -994,137 +994,183 @@
 
     // Esperar a que el DOM esté listo para los toggles
     document.addEventListener('DOMContentLoaded', function() {
-        const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-        const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
+        console.log('🔄 DOM cargado, inicializando toggles...');
         
-        // Función para limpiar estado de toggles
-        function limpiarEstados() {
-            console.log('🧹 Limpiando estados de toggles');
-            if (puntosCriticosLayer) {
-                map.removeLayer(puntosCriticosLayer);
-                puntosCriticosLayer = null;
-            }
-            if (togglePuntosIntervenidos) {
-                togglePuntosIntervenidos.checked = false;
-            }
-        }
-        
-        if (togglePuntosCriticos) {
-            console.log('✅ Toggle puntos críticos encontrado');
-            togglePuntosCriticos.addEventListener('change', function(e) {
-                console.log('🔄 Toggle puntos críticos cambiado:', e.target.checked);
-                
-                // Limpiar estado del otro toggle
+        // Esperar un poco más para asegurar que todo esté listo
+        setTimeout(function() {
+            const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
+            const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
+            
+            console.log('🔍 Buscando toggles:', {
+                puntosCriticos: !!togglePuntosCriticos,
+                puntosIntervenidos: !!togglePuntosIntervenidos
+            });
+            
+            // Función para limpiar estado de toggles
+            function limpiarEstados() {
+                console.log('🧹 Limpiando estados de toggles');
+                if (puntosCriticosLayer && map) {
+                    try {
+                        map.removeLayer(puntosCriticosLayer);
+                        puntosCriticosLayer = null;
+                    } catch (error) {
+                        console.log('⚠️ Error removiendo capa:', error);
+                    }
+                }
                 if (togglePuntosIntervenidos) {
                     togglePuntosIntervenidos.checked = false;
                 }
+            }
+            
+            if (togglePuntosCriticos) {
+                console.log('✅ Toggle puntos críticos encontrado');
                 
-                if (e.target.checked) {
-                    if (puntosCriticosData.length === 0) {
-                        console.log('📥 Cargando datos de puntos críticos...');
-                        fetch('/static/data/puntos_criticos.kml')
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error('No se pudo cargar el archivo KML: ' + response.status);
-                                }
-                                return response.text();
-                            })
-                            .then(kmlText => {
-                                console.log('📄 KML cargado, procesando...');
-                                var parser = new DOMParser();
-                                var kml = parser.parseFromString(kmlText, 'text/xml');
-                                var placemarks = kml.getElementsByTagName('Placemark');
-                                console.log('📋 Placemarks encontrados:', placemarks.length);
-                                puntosCriticosData = [];
-                                for (var i = 0; i < placemarks.length; i++) {
-                                    try {
-                                        var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
-                                        var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
-                                        var lat = parseFloat(coords[1]);
-                                        var lng = parseFloat(coords[0]);
-                                        var description = '';
-                                        if (placemarks[i].getElementsByTagName('description')[0]) {
-                                            description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
-                                        }
-                                        puntosCriticosData.push({name, lat, lng, description});
-                                        console.log('📍 Punto procesado:', name, 'en', lat, lng);
-                                    } catch (error) {
-                                        console.error('❌ Error procesando placemark', i, ':', error);
+                // Asegurar estado inicial
+                togglePuntosCriticos.checked = false;
+                
+                togglePuntosCriticos.addEventListener('change', function(e) {
+                    console.log('🔄 Toggle puntos críticos cambiado:', e.target.checked);
+                    
+                    // Limpiar estado del otro toggle
+                    if (togglePuntosIntervenidos) {
+                        togglePuntosIntervenidos.checked = false;
+                    }
+                    
+                    if (e.target.checked) {
+                        if (puntosCriticosData.length === 0) {
+                            console.log('📥 Cargando datos de puntos críticos...');
+                            fetch('/static/data/puntos_criticos.kml')
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('No se pudo cargar el archivo KML: ' + response.status);
                                     }
-                                }
-                                console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
-                                renderPuntosCriticosLayer(false);
-                            })
-                            .catch(error => {
-                                console.error('❌ Error cargando KML:', error);
-                                e.target.checked = false; // Revertir el toggle si falla
-                            });
+                                    return response.text();
+                                })
+                                .then(kmlText => {
+                                    console.log('📄 KML cargado, procesando...');
+                                    var parser = new DOMParser();
+                                    var kml = parser.parseFromString(kmlText, 'text/xml');
+                                    var placemarks = kml.getElementsByTagName('Placemark');
+                                    console.log('📋 Placemarks encontrados:', placemarks.length);
+                                    puntosCriticosData = [];
+                                    for (var i = 0; i < placemarks.length; i++) {
+                                        try {
+                                            var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
+                                            var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                                            var lat = parseFloat(coords[1]);
+                                            var lng = parseFloat(coords[0]);
+                                            var description = '';
+                                            if (placemarks[i].getElementsByTagName('description')[0]) {
+                                                description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+                                            }
+                                            puntosCriticosData.push({name, lat, lng, description});
+                                            console.log('📍 Punto procesado:', name, 'en', lat, lng);
+                                        } catch (error) {
+                                            console.error('❌ Error procesando placemark', i, ':', error);
+                                        }
+                                    }
+                                    console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
+                                    renderPuntosCriticosLayer(false);
+                                })
+                                .catch(error => {
+                                    console.error('❌ Error cargando KML:', error);
+                                    e.target.checked = false; // Revertir el toggle si falla
+                                });
+                        } else {
+                            console.log('📍 Mostrando puntos críticos existentes');
+                            renderPuntosCriticosLayer(false);
+                        }
                     } else {
-                        console.log('📍 Mostrando puntos críticos existentes');
-                        renderPuntosCriticosLayer(false);
+                        console.log('❌ Ocultando puntos críticos');
+                        limpiarEstados();
                     }
-                } else {
-                    console.log('❌ Ocultando puntos críticos');
-                    limpiarEstados();
-                }
-            });
-        } else {
-            console.error('❌ Error: No se encontró el toggle de puntos críticos');
-        }
+                });
+            } else {
+                console.error('❌ Error: No se encontró el toggle de puntos críticos');
+            }
 
-        if (togglePuntosIntervenidos) {
-            console.log('✅ Toggle puntos intervenidos encontrado');
-            togglePuntosIntervenidos.addEventListener('change', function(e) {
-                console.log('🔄 Toggle puntos intervenidos cambiado:', e.target.checked);
+            if (togglePuntosIntervenidos) {
+                console.log('✅ Toggle puntos intervenidos encontrado');
                 
-                // Solo permitir activar si el toggle principal está activo
-                if (e.target.checked && !togglePuntosCriticos.checked) {
-                    console.log('⚠️ No se puede activar puntos intervenidos sin activar puntos críticos primero');
-                    e.target.checked = false;
-                    return;
-                }
+                // Asegurar estado inicial
+                togglePuntosIntervenidos.checked = false;
                 
-                if (e.target.checked) {
-                    if (puntosCriticosData.length > 0) {
-                        console.log('📍 Mostrando puntos críticos intervenidos');
-                        renderPuntosCriticosLayer(true);
-                    } else {
-                        console.log('⚠️ No hay datos de puntos críticos cargados');
+                togglePuntosIntervenidos.addEventListener('change', function(e) {
+                    console.log('🔄 Toggle puntos intervenidos cambiado:', e.target.checked);
+                    
+                    // Solo permitir activar si el toggle principal está activo
+                    if (e.target.checked && !togglePuntosCriticos.checked) {
+                        console.log('⚠️ No se puede activar puntos intervenidos sin activar puntos críticos primero');
                         e.target.checked = false;
+                        return;
                     }
-                } else {
-                    if (puntosCriticosData.length > 0) {
-                        console.log('📍 Mostrando todos los puntos críticos');
-                        renderPuntosCriticosLayer(false);
+                    
+                    if (e.target.checked) {
+                        if (puntosCriticosData.length > 0) {
+                            console.log('📍 Mostrando puntos críticos intervenidos');
+                            renderPuntosCriticosLayer(true);
+                        } else {
+                            console.log('⚠️ No hay datos de puntos críticos cargados');
+                            e.target.checked = false;
+                        }
+                    } else {
+                        if (puntosCriticosData.length > 0) {
+                            console.log('📍 Mostrando todos los puntos críticos');
+                            renderPuntosCriticosLayer(false);
+                        }
                     }
+                });
+            } else {
+                console.error('❌ Error: No se encontró el toggle de puntos intervenidos');
+            }
+        }, 100); // Pequeño delay para asegurar que todo esté listo
+        
+        // Fallback adicional para Railway - intentar nuevamente si falla
+        setTimeout(function() {
+            if (!document.getElementById('toggle-puntos-criticos') || !document.getElementById('toggle-puntos-intervenidos')) {
+                console.log('⚠️ Fallback: Reintentando inicialización de toggles...');
+                const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
+                const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
+                
+                if (togglePuntosCriticos && togglePuntosIntervenidos) {
+                    console.log('✅ Fallback exitoso: Toggles encontrados');
+                    // Asegurar estado inicial
+                    togglePuntosCriticos.checked = false;
+                    togglePuntosIntervenidos.checked = false;
                 }
-            });
-        } else {
-            console.error('❌ Error: No se encontró el toggle de puntos intervenidos');
-        }
+            }
+        }, 500);
     }); // Cierre del DOMContentLoaded
     
     // Asegurar que los toggles estén desactivados al cargar la página
     window.addEventListener('load', function() {
         console.log('🔄 Página cargada, verificando estado de toggles...');
-        const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-        const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
         
-        if (togglePuntosCriticos) {
-            togglePuntosCriticos.checked = false;
-            console.log('✅ Toggle puntos críticos desactivado');
-        }
-        if (togglePuntosIntervenidos) {
-            togglePuntosIntervenidos.checked = false;
-            console.log('✅ Toggle puntos intervenidos desactivado');
-        }
-        
-        // Limpiar cualquier capa existente
-        if (puntosCriticosLayer) {
-            map.removeLayer(puntosCriticosLayer);
-            puntosCriticosLayer = null;
-            console.log('🧹 Capa de puntos críticos limpiada');
-        }
+        // Esperar un poco más para asegurar que todo esté listo
+        setTimeout(function() {
+            const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
+            const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
+            
+            if (togglePuntosCriticos) {
+                togglePuntosCriticos.checked = false;
+                console.log('✅ Toggle puntos críticos desactivado');
+            }
+            if (togglePuntosIntervenidos) {
+                togglePuntosIntervenidos.checked = false;
+                console.log('✅ Toggle puntos intervenidos desactivado');
+            }
+            
+            // Limpiar cualquier capa existente de forma segura
+            if (puntosCriticosLayer && map) {
+                try {
+                    map.removeLayer(puntosCriticosLayer);
+                    puntosCriticosLayer = null;
+                    console.log('🧹 Capa de puntos críticos limpiada');
+                } catch (error) {
+                    console.log('⚠️ Error limpiando capa:', error);
+                }
+            }
+        }, 200); // Delay más largo para asegurar que todo esté listo
     });
 
     // --- Agrupador genérico ---
@@ -1300,26 +1346,31 @@
     </script>
     <script>
     // --- Interactividad del menú hamburguesa ---
-    const menuBtn = document.getElementById('menu-btn');
-    const sideMenu = document.getElementById('side-menu');
-    const menuOverlay = document.getElementById('menu-overlay');
-    function openMenu() {
-        sideMenu.classList.add('open');
-        menuOverlay.classList.add('open');
-    }
-    function closeMenu() {
-        sideMenu.classList.remove('open');
-        menuOverlay.classList.remove('open');
-    }
-    menuBtn.addEventListener('click', function() {
-        if (sideMenu.classList.contains('open')) {
-            closeMenu();
-        } else {
-            openMenu();
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        
+        if (menuBtn && sideMenu && menuOverlay) {
+            function openMenu() {
+                sideMenu.classList.add('open');
+                menuOverlay.classList.add('open');
+            }
+            function closeMenu() {
+                sideMenu.classList.remove('open');
+                menuOverlay.classList.remove('open');
+            }
+            menuBtn.addEventListener('click', function() {
+                if (sideMenu.classList.contains('open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+            menuOverlay.addEventListener('click', function() {
+                closeMenu();
+            });
         }
-    });
-    menuOverlay.addEventListener('click', function() {
-        closeMenu();
     });
     </script>
     <script>
