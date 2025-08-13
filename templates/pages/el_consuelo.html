@@ -501,10 +501,6 @@
             <label style="font-weight:600; font-size:1.1rem; margin-right:2em;">
                 <input type="checkbox" id="toggle-puntos-criticos" style="margin-right:0.5em; transform: scale(1.3); vertical-align:middle;"> Mostrar puntos críticos en el mapa
             </label>
-            <label style="font-weight:600; font-size:1.1rem; margin-right:2em;">
-                <input type="checkbox" id="toggle-puntos-intervenidos" style="margin-right:0.5em; transform: scale(1.3); vertical-align:middle;"> Puntos críticos intervenidos
-            </label>
-
         </div>
 
         <!-- Botón para resaltar polígonos intervenidos -->
@@ -513,6 +509,26 @@
         </div>
         
 
+
+        <!-- Convenciones del mapa -->
+        <div style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; box-shadow: var(--shadow);">
+            <h3 style="color: var(--primary-red); font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; text-align: center;">
+                <i class="fas fa-map-marker-alt"></i> Convenciones del Mapa
+            </h3>
+            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: #28a745; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                    <span style="font-weight: 600; color: #333;">Puntos Críticos Intervenidos</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="width: 20px; height: 20px; background: #dc3545; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></div>
+                    <span style="font-weight: 600; color: #333;">Puntos Críticos No Intervenidos</span>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #666;">
+                <i class="fas fa-info-circle"></i> Los puntos 1, 3, 6 y 15 han sido intervenidos y se muestran en verde
+            </div>
+        </div>
 
         <!-- Mapa de El Consuelo -->
         <div id="map" style="width: 100%; height: 500px; margin: 2rem 0; border-radius: 12px; box-shadow: var(--shadow);"></div>
@@ -971,13 +987,12 @@
     });
     // --- Puntos críticos y puntos críticos intervenidos ---
     // IDs de puntos intervenidos
-    const puntosIntervenidosIds = ['1', '3', '6', '15'];
     let puntosCriticosMarkers = [];
     let puntosCriticosLayer = null;
     let puntosCriticosData = [];
 
-    function renderPuntosCriticosLayer(intervenidosActivos) {
-        console.log('🎨 Renderizando capa de puntos críticos, intervenidos activos:', intervenidosActivos);
+    function renderPuntosCriticosLayer() {
+        console.log('🎨 Renderizando capa de puntos críticos');
         console.log('🗺️ Mapa disponible:', typeof map !== 'undefined' ? 'Sí' : 'No');
         console.log('📊 Datos disponibles:', puntosCriticosData.length);
         
@@ -994,8 +1009,10 @@
         const latlngs = [];
         console.log('🎯 Creando marcadores para', puntosCriticosData.length, 'puntos');
         for (const punto of puntosCriticosData) {
-            const color = (intervenidosActivos && puntosIntervenidosIds.includes(punto.name)) ? 'green' : 'red';
-            const iconUrl = color === 'green'
+            // Puntos intervenidos (1, 3, 6, 15) en verde, los demás en rojo
+            const puntosIntervenidos = ['1', '3', '6', '15'];
+            const color = puntosIntervenidos.includes(punto.name) ? 'green' : 'red';
+            const iconUrl = color === 'green' 
                 ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png'
                 : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
             console.log('🎯 Creando marcador para punto', punto.name, 'color:', color, 'en', punto.lat, punto.lng);
@@ -1053,12 +1070,8 @@
         // Esperar un poco más para asegurar que todo esté listo
         setTimeout(function() {
             const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-            const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
             
-            console.log('🔍 Buscando toggles:', {
-                puntosCriticos: !!togglePuntosCriticos,
-                puntosIntervenidos: !!togglePuntosIntervenidos
-            });
+            console.log('🔍 Buscando toggle de puntos críticos:', !!togglePuntosCriticos);
             
             // Función para limpiar estado de toggles
             function limpiarEstados() {
@@ -1071,9 +1084,6 @@
                         console.log('⚠️ Error removiendo capa:', error);
                     }
                 }
-                if (togglePuntosIntervenidos) {
-                    togglePuntosIntervenidos.checked = false;
-                }
             }
             
             if (togglePuntosCriticos) {
@@ -1084,11 +1094,6 @@
                 
                 togglePuntosCriticos.addEventListener('change', function(e) {
                     console.log('🔄 Toggle puntos críticos cambiado:', e.target.checked);
-                    
-                    // Limpiar estado del otro toggle
-                    if (togglePuntosIntervenidos) {
-                        togglePuntosIntervenidos.checked = false;
-                    }
                     
                     if (e.target.checked) {
                         if (puntosCriticosData.length === 0) {
@@ -1124,7 +1129,7 @@
                                         }
                                     }
                                     console.log('📍 Puntos críticos procesados:', puntosCriticosData.length);
-                                    renderPuntosCriticosLayer(false);
+                                    renderPuntosCriticosLayer();
                                 })
                                 .catch(error => {
                                     console.error('❌ Error cargando KML:', error);
@@ -1132,7 +1137,7 @@
                                 });
                         } else {
                             console.log('📍 Mostrando puntos críticos existentes');
-                            renderPuntosCriticosLayer(false);
+                            renderPuntosCriticosLayer();
                         }
                     } else {
                         console.log('❌ Ocultando puntos críticos');
@@ -1142,55 +1147,18 @@
             } else {
                 console.error('❌ Error: No se encontró el toggle de puntos críticos');
             }
-
-            if (togglePuntosIntervenidos) {
-                console.log('✅ Toggle puntos intervenidos encontrado');
-                
-                // Asegurar estado inicial
-                togglePuntosIntervenidos.checked = false;
-                
-                togglePuntosIntervenidos.addEventListener('change', function(e) {
-                    console.log('🔄 Toggle puntos intervenidos cambiado:', e.target.checked);
-                    
-                    // Solo permitir activar si el toggle principal está activo
-                    if (e.target.checked && !togglePuntosCriticos.checked) {
-                        console.log('⚠️ No se puede activar puntos intervenidos sin activar puntos críticos primero');
-                        e.target.checked = false;
-                        return;
-                    }
-                    
-                    if (e.target.checked) {
-                        if (puntosCriticosData.length > 0) {
-                            console.log('📍 Mostrando puntos críticos intervenidos');
-                            renderPuntosCriticosLayer(true);
-                        } else {
-                            console.log('⚠️ No hay datos de puntos críticos cargados');
-                            e.target.checked = false;
-                        }
-                    } else {
-                        if (puntosCriticosData.length > 0) {
-                            console.log('📍 Mostrando todos los puntos críticos');
-                            renderPuntosCriticosLayer(false);
-                        }
-                    }
-                });
-            } else {
-                console.error('❌ Error: No se encontró el toggle de puntos intervenidos');
-            }
         }, 100); // Pequeño delay para asegurar que todo esté listo
         
         // Fallback adicional para Railway - intentar nuevamente si falla
         setTimeout(function() {
-            if (!document.getElementById('toggle-puntos-criticos') || !document.getElementById('toggle-puntos-intervenidos')) {
-                console.log('⚠️ Fallback: Reintentando inicialización de toggles...');
+            if (!document.getElementById('toggle-puntos-criticos')) {
+                console.log('⚠️ Fallback: Reintentando inicialización de toggle...');
                 const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-                const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
                 
-                if (togglePuntosCriticos && togglePuntosIntervenidos) {
-                    console.log('✅ Fallback exitoso: Toggles encontrados');
+                if (togglePuntosCriticos) {
+                    console.log('✅ Fallback exitoso: Toggle encontrado');
                     // Asegurar estado inicial
                     togglePuntosCriticos.checked = false;
-                    togglePuntosIntervenidos.checked = false;
                 }
             }
         }, 500);
@@ -1203,15 +1171,10 @@
         // Esperar un poco más para asegurar que todo esté listo
         setTimeout(function() {
             const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
-            const togglePuntosIntervenidos = document.getElementById('toggle-puntos-intervenidos');
             
             if (togglePuntosCriticos) {
                 togglePuntosCriticos.checked = false;
                 console.log('✅ Toggle puntos críticos desactivado');
-            }
-            if (togglePuntosIntervenidos) {
-                togglePuntosIntervenidos.checked = false;
-                console.log('✅ Toggle puntos intervenidos desactivado');
             }
             
             // Limpiar cualquier capa existente de forma segura
@@ -1381,29 +1344,10 @@
             });
     }
 
-    // --- Listener para el checkbox y carga de datos ---
+    // --- Carga de datos ---
     let datosGenerales = null;
     document.addEventListener('DOMContentLoaded', function() {
         loadData(); // Cargar datos al inicio
-        // Listener para el checkbox de puntos intervenidos
-        document.getElementById('toggle-puntos-intervenidos').addEventListener('change', function(e) {
-            const tituloResultados = document.getElementById('titulo-resultados-encuestas');
-            if (e.target.checked) {
-                // Filtrar por columna 'Cuadrante o zona' con valores 1,2,3,4,5,6,7,8,17,22
-                const valoresValidos = ['1','2','3','4','5','6','7','8','17','22'];
-                const campoCuadrante = buscarCampo(datosGenerales, ['Cuadrante o zona', 'N', 'Cuadrante']);
-                if (campoCuadrante) {
-                    const filtrados = datosGenerales.filter(row => valoresValidos.includes(String(row[campoCuadrante]).trim()));
-                    renderGraficasResultados(filtrados);
-                } else {
-                    renderGraficasResultados([]); // Si no existe el campo, mostrar vacío
-                }
-                if (tituloResultados) tituloResultados.textContent = 'Resultados de los poligonos impactados';
-            } else {
-                renderGraficasResultados(datosGenerales);
-                if (tituloResultados) tituloResultados.textContent = 'Resultados generales de las encuestas';
-            }
-        });
     });
     </script>
     <script>
