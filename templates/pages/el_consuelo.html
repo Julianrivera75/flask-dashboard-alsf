@@ -1671,8 +1671,43 @@ document.addEventListener('DOMContentLoaded', function() {
     if(btnSecretaria) {
       btnSecretaria.addEventListener('click', function() {
         console.log('📥 Descargando documento de Secretaría Distrital de Gobierno');
-        // Usar la ruta específica de Flask para descargar el PDF
-        window.location.href = '/download/secretaria-gobierno-pdf';
+        
+        // Cambiar el texto del botón para mostrar que está descargando
+        const originalText = btnSecretaria.innerHTML;
+        btnSecretaria.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Descargando...';
+        btnSecretaria.disabled = true;
+        
+        // Usar fetch para manejar errores
+        fetch('/download/secretaria-gobierno-pdf')
+          .then(response => {
+            if (response.ok) {
+              return response.blob();
+            } else {
+              throw new Error('Error al descargar el archivo');
+            }
+          })
+          .then(blob => {
+            // Crear un enlace temporal para descargar
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Infografia_con_los_ojos_en_los_residuos.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            console.log('✅ Descarga completada exitosamente');
+          })
+          .catch(error => {
+            console.error('❌ Error en la descarga:', error);
+            alert('Error al descargar el archivo. Por favor, inténtalo de nuevo.');
+          })
+          .finally(() => {
+            // Restaurar el botón
+            btnSecretaria.innerHTML = originalText;
+            btnSecretaria.disabled = false;
+          });
       });
     }
     

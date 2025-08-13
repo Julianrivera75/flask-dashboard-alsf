@@ -2,7 +2,7 @@
 Aplicación principal Flask - Versión Modular
 """
 
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for, send_file
 import os
 import logging
 from datetime import datetime
@@ -152,6 +152,20 @@ def create_app(config_class=DevelopmentConfig):
             return jsonify({'data': raw_data, 'total': len(raw_data)})
         except Exception as e:
             return jsonify({'error': str(e), 'data': []}), 500
+    
+    @app.route('/download/secretaria-gobierno-pdf')
+    def download_secretaria_gobierno_pdf():
+        """Descargar el PDF de la Secretaría Distrital de Gobierno"""
+        try:
+            pdf_path = 'static/docs/Infografiia con los ojos en los residuos.pdf'
+            if os.path.exists(pdf_path):
+                return send_file(pdf_path, as_attachment=True, download_name='Infografia_con_los_ojos_en_los_residuos.pdf')
+            else:
+                logger.error(f"Archivo PDF no encontrado: {pdf_path}")
+                return jsonify({'error': 'Archivo no encontrado'}), 404
+        except Exception as e:
+            logger.error(f"Error al descargar PDF: {str(e)}")
+            return jsonify({'error': 'Error al descargar el archivo'}), 500
     
     # Rutas de GeoServer eliminadas por no estar en uso
     
