@@ -256,6 +256,7 @@
             }
         }
 
+        /* Estilos del menú hamburguesa */
         .menu-btn { 
             position: fixed;
             top: 1.5rem; 
@@ -274,6 +275,12 @@
             gap: 0.5rem;
             min-width: 120px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn:hover {
+            background: #c00226;
+            transform: scale(1.05);
         }
         
         .menu-btn-text {
@@ -282,6 +289,8 @@
             display: inline-block;
             white-space: nowrap;
         }
+        
+        /* Estilos del menú lateral */
         .side-menu { 
             position: fixed; 
             top: 0; 
@@ -294,24 +303,76 @@
             z-index: 1200; 
             display: flex; 
             flex-direction: column; 
-            transform: translateX(-100%);
         }
+        
         .side-menu.open { 
             left: 0; 
-            transform: translateX(0);
         }
-        .side-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem 1.2rem 1.5rem; background: var(--primary-red); color: var(--white); font-weight: 700; font-size: 1.2rem; }
-        .close-menu { background: transparent; border: none; color: var(--white); font-size: 1.5rem; cursor: pointer; }
-        .side-menu ul { list-style: none; padding: 0; margin: 0; }
-        .side-menu li { padding: 1rem 1.5rem; border-bottom: 1px solid var(--light-gray); color: var(--dark-gray); cursor: pointer; transition: background 0.2s; }
-        .side-menu li:hover { background: var(--light-gray); }
-        .menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.2); z-index: 1100; display: none; }
-        .menu-overlay.open { display: block; }
+        
+        .side-menu-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 1.2rem 1.5rem; 
+            background: var(--primary-red); 
+            color: var(--white); 
+            font-weight: 700; 
+            font-size: 1.2rem; 
+        }
+        
+        .side-menu ul { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+        
+        .side-menu li { 
+            padding: 1rem 1.5rem; 
+            border-bottom: 1px solid var(--light-gray); 
+            transition: background 0.2s; 
+        }
+        
+        .side-menu li:hover { 
+            background: var(--light-gray); 
+        }
+        
+        .side-menu a {
+            color: var(--dark-gray);
+            text-decoration: none;
+            display: block;
+            width: 100%;
+        }
+        
+        .side-menu a:hover {
+            color: var(--primary-red);
+        }
+        
+        /* Overlay del menú */
+        .menu-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            background: rgba(0,0,0,0.2); 
+            z-index: 1100; 
+            display: none; 
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .menu-overlay.open { 
+            display: block; 
+            opacity: 1;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) { 
             .header h1 { font-size: 2rem; } 
             .container { padding: 1rem; } 
             .controls { flex-direction: column; align-items: stretch; } 
             .stats-grid { grid-template-columns: 1fr; } 
+            
             .menu-btn { 
                 top: 1rem; 
                 left: 1rem; 
@@ -322,23 +383,16 @@
                 width: 48px;
                 height: 48px;
             } 
+            
             .menu-btn-text {
                 display: none;
             }
+            
             .side-menu { 
                 width: 80vw; 
                 min-width: 180px; 
                 max-width: 320px; 
-                left: -100%;
-                transform: translateX(-100%);
             }
-            .side-menu.open {
-                left: 0;
-                transform: translateX(0);
-            }
-        }
-        .side-menu ul li:hover {
-            background-color: var(--light-gray);
         }
     </style>
 </head>
@@ -352,7 +406,7 @@
         <!-- Overlay antes del menú lateral -->
         <div id="menu-overlay" class="menu-overlay"></div>
         <!-- Menú lateral -->
-        <nav id="side-menu" class="side-menu" style="left: -100%; transform: translateX(-100%);">
+        <nav id="side-menu" class="side-menu">
             <div class="side-menu-header">
                 <!-- <span>Navegación</span> -->
                 <!-- Botón de cerrar eliminado -->
@@ -1359,25 +1413,60 @@
         const sideMenu = document.getElementById('side-menu');
         const menuOverlay = document.getElementById('menu-overlay');
         
+        console.log('🔍 Inicializando menú hamburguesa...');
+        console.log('menuBtn:', menuBtn);
+        console.log('sideMenu:', sideMenu);
+        console.log('menuOverlay:', menuOverlay);
+        
         if (menuBtn && sideMenu && menuOverlay) {
+            console.log('✅ Elementos del menú encontrados correctamente');
+            
             function openMenu() {
+                console.log('🔄 Abriendo menú...');
                 sideMenu.classList.add('open');
                 menuOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden'; // Prevenir scroll
             }
+            
             function closeMenu() {
+                console.log('❌ Cerrando menú...');
                 sideMenu.classList.remove('open');
                 menuOverlay.classList.remove('open');
+                document.body.style.overflow = ''; // Restaurar scroll
             }
-            menuBtn.addEventListener('click', function() {
+            
+            // Event listener para el botón del menú
+            menuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Click en botón del menú');
+                
                 if (sideMenu.classList.contains('open')) {
                     closeMenu();
                 } else {
                     openMenu();
                 }
             });
+            
+            // Event listener para cerrar con el overlay
             menuOverlay.addEventListener('click', function() {
+                console.log('🖱️ Click en overlay - cerrando menú');
                 closeMenu();
             });
+            
+            // Cerrar menú con ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sideMenu.classList.contains('open')) {
+                    console.log('⌨️ Tecla ESC - cerrando menú');
+                    closeMenu();
+                }
+            });
+            
+        } else {
+            console.error('❌ Error: No se encontraron todos los elementos del menú');
+            console.log('menuBtn:', menuBtn);
+            console.log('sideMenu:', sideMenu);
+            console.log('menuOverlay:', menuOverlay);
         }
     });
     </script>
@@ -1977,5 +2066,5 @@ document.getElementById('toggle-bateria-social').addEventListener('change', func
 // Script para forzar carga de datos y mapas
 </script>
 <script src="/static/js/force-load.js"></script>
-</body>
-</html> 
+  </body>
+  </html> 
