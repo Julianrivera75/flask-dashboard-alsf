@@ -139,6 +139,20 @@ def create_app(config_class=DevelopmentConfig):
     
     # API de El Consuelo eliminada por no estar en uso
     
+    @app.route('/api/el-consuelo/data')
+    def api_el_consuelo_data():
+        """API para obtener datos de encuestas de El Consuelo"""
+        try:
+            # Obtener datos reales desde Google Sheets de El Consuelo
+            sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
+            credentials_file = 'credentials/credentials_consuelo.json'
+            consuelo_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var="GOOGLE_CREDENTIALS_CONSUELO_JSON")
+            raw_data = consuelo_connector.get_data(sheet_id)
+            
+            return jsonify({'data': raw_data, 'total': len(raw_data)})
+        except Exception as e:
+            return jsonify({'error': str(e), 'data': []}), 500
+    
     # Rutas de GeoServer eliminadas por no estar en uso
     
     @app.errorhandler(404)

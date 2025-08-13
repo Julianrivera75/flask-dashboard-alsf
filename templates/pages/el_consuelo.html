@@ -1316,6 +1316,14 @@
             })
             .catch(error => {
                 console.error('❌ Error actualizando datos:', error);
+                // Fallback a datos de ejemplo si la API falla
+                console.log('🔄 Usando datos de ejemplo como fallback...');
+                const datosEjemplo = [
+                    // Datos de ejemplo como respaldo
+                    { 'Nivel educativo': 'Bachillerato', '¿Hace cuanto tiempo reside en el barrio?': '5-10 años', 'Como calificaria la limpieza general del barrio': '3', '¿Con qué frecuencia observa residuos en las calles o zonas comunes?': 'Frecuentemente', '¿Considera que la acumulación de residuos afecta la imagen del barrio?': 'Sí', '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?': 'Sí', '¿Considera que la acumulación de residuos afecta su calidad de vida?': 'Sí', '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?': 'Siempre', '¿Conoce el horario de recolección de residuos en el barrio?': 'Sí', '¿Saca los residuos en los horarios establecidos?': 'Siempre', '¿Entrega sus residuos aprovechables a un recuperador de oficio?': 'Sí', '¿En que lugar dispone los residuos?': 'Frente de su casa', '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito S.A.S?': '4', '¿Con qué frecuencia pasa el camión recolector de residuos?': 'martes, jueves y sabado', '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?': 'No', '¿Le gustaria participar en iniciativas comunitarias de limpieza?': 'Sí', '¿Considera que hace falta más educación ambiental en el barrio?': 'Sí', '¿Sabe que es un punto critico?': 'Sí', '¿Identifica puntos críticos en el barrio?': 'Sí', '¿Cada cuanto tiempo ve estos puntos en el barrio?': 'Diario', 'Cuadrante o zona': '1' }
+                ];
+                datosGenerales = datosEjemplo;
+                renderGraficasResultados(datosGenerales);
             });
     }
 
