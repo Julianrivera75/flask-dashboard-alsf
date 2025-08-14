@@ -59,7 +59,7 @@ def create_app(config_class=DevelopmentConfig):
         """Ruta para autenticación"""
         if request.method == 'POST':
             password = request.form.get('password')
-            if password == 'ALFS2025*':  # Contraseña para acceder
+            if password == 'ALSF2025':  # Contraseña para acceder
                 session['authenticated'] = True
                 return redirect(url_for('san_bernardo'))
             else:
