@@ -163,7 +163,7 @@ function forceLoadBateriaSocial() {
 
 // Función para remover puntos críticos
 function forceRemovePuntosCriticos() {
-    console.log('❌ [Force-Load] Removiendo puntos críticos...');
+    console.log('🗑️ [Force-Load] Removiendo puntos críticos...');
     if (forceLoadLayers.puntosCriticos && forceLoadMap && typeof forceLoadMap.removeLayer === 'function') {
         forceLoadMap.removeLayer(forceLoadLayers.puntosCriticos);
         forceLoadLayers.puntosCriticos = null;
@@ -250,6 +250,10 @@ async function initializeForceLoad() {
         await waitForForceLoadMap();
         console.log('✅ [Force-Load] Mapa disponible, configurando...');
         
+        // CARGAR PUNTOS CRÍTICOS AUTOMÁTICAMENTE
+        console.log('🎯 [Force-Load] Cargando puntos críticos automáticamente...');
+        forceLoadPuntosCriticos();
+        
         // Configurar toggles
         setupForceLoadToggles();
         
@@ -260,6 +264,15 @@ async function initializeForceLoad() {
         console.error('❌ [Force-Load] Error en inicialización:', error);
         // Intentar configurar toggles de todas formas
         setupForceLoadToggles();
+        
+        // Intentar cargar puntos críticos de todas formas después de un delay
+        setTimeout(() => {
+            console.log('🔄 [Force-Load] Reintentando carga de puntos críticos...');
+            if (window.map && typeof window.map.addLayer === 'function') {
+                forceLoadMap = window.map;
+                forceLoadPuntosCriticos();
+            }
+        }, 3000);
     }
 }
 
@@ -294,6 +307,15 @@ async function main() {
         
         // Inicializar
         await initializeForceLoad();
+        
+        // Fallback adicional: intentar cargar puntos críticos después de 5 segundos
+        setTimeout(() => {
+            if (!forceLoadLayers.puntosCriticos && window.map) {
+                console.log('🔄 [Force-Load] Fallback: Cargando puntos críticos...');
+                forceLoadMap = window.map;
+                forceLoadPuntosCriticos();
+            }
+        }, 5000);
         
     } catch (error) {
         console.error('❌ [Force-Load] Error en inicialización principal:', error);

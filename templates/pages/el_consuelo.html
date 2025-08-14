@@ -1089,8 +1089,13 @@
             if (togglePuntosCriticos) {
                 console.log('✅ Toggle puntos críticos encontrado');
                 
-                // Asegurar estado inicial
-                togglePuntosCriticos.checked = false;
+                // ACTIVAR AUTOMÁTICAMENTE EL TOGGLE PARA MOSTRAR LOS MARCADORES
+                console.log('🎯 Activando automáticamente el toggle de puntos críticos...');
+                togglePuntosCriticos.checked = true;
+                
+                // Simular el evento change para cargar los marcadores
+                const event = new Event('change', { bubbles: true });
+                togglePuntosCriticos.dispatchEvent(event);
                 
                 togglePuntosCriticos.addEventListener('change', function(e) {
                     console.log('🔄 Toggle puntos críticos cambiado:', e.target.checked);
@@ -1164,7 +1169,7 @@
         }, 500);
     }); // Cierre del DOMContentLoaded
     
-    // Asegurar que los toggles estén desactivados al cargar la página
+    // Asegurar que los toggles estén activados al cargar la página para mostrar marcadores
     window.addEventListener('load', function() {
         console.log('🔄 Página cargada, verificando estado de toggles...');
         
@@ -1173,21 +1178,56 @@
             const togglePuntosCriticos = document.getElementById('toggle-puntos-criticos');
             
             if (togglePuntosCriticos) {
-                togglePuntosCriticos.checked = false;
-                console.log('✅ Toggle puntos críticos desactivado');
+                // ACTIVAR EL TOGGLE PARA MOSTRAR LOS MARCADORES
+                if (!togglePuntosCriticos.checked) {
+                    console.log('🎯 Activando toggle de puntos críticos en load...');
+                    togglePuntosCriticos.checked = true;
+                    
+                    // Simular el evento change para cargar los marcadores
+                    const event = new Event('change', { bubbles: true });
+                    togglePuntosCriticos.dispatchEvent(event);
+                }
+                console.log('✅ Toggle puntos críticos activado');
             }
             
-            // Limpiar cualquier capa existente de forma segura
-            if (puntosCriticosLayer && map) {
-                try {
-                    map.removeLayer(puntosCriticosLayer);
-                    puntosCriticosLayer = null;
-                    console.log('🧹 Capa de puntos críticos limpiada');
-                } catch (error) {
-                    console.log('⚠️ Error limpiando capa:', error);
+            // Verificar que los marcadores estén visibles
+            if (!puntosCriticosLayer && map) {
+                console.log('🔄 Marcadores no visibles, intentando cargar...');
+                // Intentar cargar los marcadores directamente
+                if (puntosCriticosData.length === 0) {
+                    // Cargar datos desde KML
+                    fetch('/static/data/puntos_criticos.kml')
+                        .then(response => response.text())
+                        .then(kmlText => {
+                            var parser = new DOMParser();
+                            var kml = parser.parseFromString(kmlText, 'text/xml');
+                            var placemarks = kml.getElementsByTagName('Placemark');
+                            puntosCriticosData = [];
+                            for (var i = 0; i < placemarks.length; i++) {
+                                try {
+                                    var name = placemarks[i].getElementsByTagName('name')[0].textContent.trim();
+                                    var coords = placemarks[i].getElementsByTagName('coordinates')[0].textContent.trim().split(',');
+                                    var lat = parseFloat(coords[1]);
+                                    var lng = parseFloat(coords[0]);
+                                    var description = '';
+                                    if (placemarks[i].getElementsByTagName('description')[0]) {
+                                        description = placemarks[i].getElementsByTagName('description')[0].textContent.trim();
+                                    }
+                                    puntosCriticosData.push({name, lat, lng, description});
+                                } catch (error) {
+                                    console.error('❌ Error procesando placemark', i, ':', error);
+                                }
+                            }
+                            renderPuntosCriticosLayer();
+                        })
+                        .catch(error => {
+                            console.error('❌ Error cargando KML:', error);
+                        });
+                } else {
+                    renderPuntosCriticosLayer();
                 }
             }
-        }, 200); // Delay más largo para asegurar que todo esté listo
+        }, 1000); // Delay más largo para asegurar que todo esté listo
     });
 
     // --- Agrupador genérico ---
@@ -2045,5 +2085,93 @@ document.getElementById('toggle-bateria-social').addEventListener('change', func
 // Script para forzar carga de datos y mapas
 </script>
 <script src="/static/js/force-load.js"></script>
+
+<!-- Script adicional para asegurar carga de marcadores -->
+<script>
+// Script de respaldo para cargar marcadores automáticamente
+console.log('🎯 [Backup] Iniciando script de respaldo para marcadores...');
+
+// Datos hardcodeados de puntos críticos
+const puntosCriticosBackup = [
+    {name: '1', lat: 4.58012, lng: -74.07175, description: 'Punto crítico 1 - Ordinarios, voluminosos y llantas'},
+    {name: '2', lat: 4.57981, lng: -74.07009, description: 'Punto crítico 2 - Ordinarios y escombro'},
+    {name: '3', lat: 4.58061, lng: -74.07126, description: 'Punto crítico 3 - Ordinarios y escombro'},
+    {name: '6', lat: 4.58111, lng: -74.07056, description: 'Punto crítico 6 - Ordinarios, escombros y llantas'},
+    {name: '7', lat: 4.58111, lng: -74.06871, description: 'Punto crítico 7 - Ordinarios y escombro'},
+    {name: '8', lat: 4.58131, lng: -74.0683, description: 'Punto crítico 8 - Ordinarios y voluminosos'},
+    {name: '9', lat: 4.58224, lng: -74.06815, description: 'Punto crítico 9 - Ordinarios y escombro'},
+    {name: '10', lat: 4.58224, lng: -74.06994, description: 'Punto crítico 10 - Ordinarios y voluminosos'},
+    {name: '11', lat: 4.58213, lng: -74.06958, description: 'Punto crítico 11 - Ordinarios y escombro'},
+    {name: '12', lat: 4.58178, lng: -74.07041, description: 'Punto crítico 12 - Ordinarios y voluminosos'},
+    {name: '13', lat: 4.58255, lng: -74.07025, description: 'Punto crítico 13 - Ordinarios y escombro'},
+    {name: '14', lat: 4.5836, lng: -74.06959, description: 'Punto crítico 14 - Ordinarios y voluminosos'},
+    {name: '15', lat: 4.58163, lng: -74.07131, description: 'Punto crítico 15 - Ordinarios'}
+];
+
+// Función para cargar marcadores de respaldo
+function cargarMarcadoresBackup() {
+    console.log('🎯 [Backup] Cargando marcadores de respaldo...');
+    
+    if (typeof map === 'undefined' || !map || typeof map.addLayer !== 'function') {
+        console.error('❌ [Backup] Mapa no disponible');
+        return;
+    }
+    
+    // Remover marcadores existentes si los hay
+    if (window.puntosCriticosBackupLayer) {
+        map.removeLayer(window.puntosCriticosBackupLayer);
+    }
+    
+    const markers = [];
+    const latlngs = [];
+    
+    puntosCriticosBackup.forEach(punto => {
+        const color = ['1', '3', '6', '15'].includes(punto.name) ? 'green' : 'red';
+        const iconUrl = color === 'green' 
+            ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png'
+            : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+        
+        const marker = L.marker([punto.lat, punto.lng], {
+            icon: L.divIcon({
+                className: 'custom-marker-' + color,
+                html: '<div style="position:relative; width:30px; height:41px;">' +
+                      '<img src="' + iconUrl + '" style="position:absolute; left:0; top:0; width:30px; height:41px;">' +
+                      '<span style="position:absolute; top:7px; left:0; width:30px; text-align:center; color:black; font-weight:bold; font-size:24px; text-shadow:1px 1px 2px #fff;">' + punto.name + '</span>' +
+                      '</div>',
+                iconSize: [30, 41],
+                iconAnchor: [15, 41],
+                popupAnchor: [1, -34]
+            })
+        });
+        
+        marker.bindPopup(punto.description);
+        markers.push(marker);
+        latlngs.push([punto.lat, punto.lng]);
+    });
+    
+    window.puntosCriticosBackupLayer = L.layerGroup(markers);
+    window.puntosCriticosBackupLayer.addTo(map);
+    
+    console.log('✅ [Backup] Marcadores de respaldo cargados:', markers.length, 'marcadores');
+}
+
+// Intentar cargar marcadores después de que la página esté completamente cargada
+window.addEventListener('load', function() {
+    console.log('🔄 [Backup] Página cargada, esperando mapa...');
+    
+    // Intentar múltiples veces con diferentes delays
+    setTimeout(() => cargarMarcadoresBackup(), 1000);
+    setTimeout(() => cargarMarcadoresBackup(), 3000);
+    setTimeout(() => cargarMarcadoresBackup(), 5000);
+});
+
+// También intentar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔄 [Backup] DOM listo, esperando mapa...');
+    setTimeout(() => cargarMarcadoresBackup(), 2000);
+});
+
+console.log('🎯 [Backup] Script de respaldo configurado');
+</script>
   </body>
   </html> 

@@ -17,6 +17,7 @@ Flask-WTF==1.2.1
 WTForms==3.1.1
 email-validator==2.1.0
 bcrypt==4.1.2
+Pillow==10.1.0
 
 # Dependencias para producción
 psycopg2-binary==2.9.9
