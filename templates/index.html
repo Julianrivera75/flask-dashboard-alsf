@@ -53,6 +53,16 @@
         <p style="margin: 0; font-size: 1.1em;">
             🔒 <strong>Nota:</strong> El formulario de reportes y el mapa requieren acceso administrativo
         </p>
+        {% if session.authenticated %}
+        <div style="margin-top: 15px;">
+            <button id="initDbBtn" onclick="initDatabase()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+                🗄️ Inicializar Base de Datos
+            </button>
+            <small style="display: block; margin-top: 5px; color: #ddd;">
+                💡 Use este botón si el formulario no funciona en Railway
+            </small>
+        </div>
+        {% endif %}
     </div>
     <!-- Header -->
     <header class="header">
@@ -241,6 +251,34 @@
             }
         }
         document.addEventListener('DOMContentLoaded', cargarIndicadoresPrincipales);
+        
+        // Función para inicializar la base de datos
+        async function initDatabase() {
+            const btn = document.getElementById('initDbBtn');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.textContent = '⏳ Inicializando...';
+                btn.disabled = true;
+                
+                const response = await fetch('/init-db');
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    console.log('Base de datos inicializada:', result);
+                } else {
+                    alert('❌ Error: ' + result.error);
+                    console.error('Error al inicializar BD:', result.error);
+                }
+            } catch (error) {
+                alert('❌ Error de conexión: ' + error.message);
+                console.error('Error de conexión:', error);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html> 

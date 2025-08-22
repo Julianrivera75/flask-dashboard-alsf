@@ -68,6 +68,82 @@ def create_app(config_class=config.DevelopmentConfig):
             logger.error(f"Error en ruta principal: {str(e)}")
             return render_template('error.html', error=str(e)), 500
     
+    @app.route('/init-db')
+    def init_database():
+        """Ruta para inicializar la base de datos en Railway"""
+        try:
+            with app.app_context():
+                # Crear todas las tablas
+                db.create_all()
+                
+                # Verificar si ya hay datos
+                from models import Responsable, TipoActividad, Entidad, Sector
+                
+                # Crear datos básicos si no existen
+                if not Responsable.query.first():
+                    # Crear responsables básicos
+                    responsables = [
+                        Responsable(nombre="Alcaldía Local Santa Fe", activo=True),
+                        Responsable(nombre="Secretaría de Gobierno", activo=True),
+                        Responsable(nombre="Secretaría de Seguridad", activo=True),
+                        Responsable(nombre="Secretaría de Salud", activo=True),
+                        Responsable(nombre="Secretaría de Integración Social", activo=True)
+                    ]
+                    for r in responsables:
+                        db.session.add(r)
+                    
+                    # Crear tipos de actividad básicos
+                    tipos_actividad = [
+                        TipoActividad(nombre="Operativo de Seguridad", activo=True),
+                        TipoActividad(nombre="Jornada de Salud", activo=True),
+                        TipoActividad(nombre="Actividad Social", activo=True),
+                        TipoActividad(nombre="Mantenimiento de Espacios", activo=True),
+                        TipoActividad(nombre="Otro", activo=True)
+                    ]
+                    for t in tipos_actividad:
+                        db.session.add(t)
+                    
+                    # Crear entidades básicas
+                    entidades = [
+                        Entidad(nombre="Alcaldía Mayor de Bogotá", activo=True),
+                        Entidad(nombre="Policía Nacional", activo=True),
+                        Entidad(nombre="Bomberos", activo=True),
+                        Entidad(nombre="Secretaría de Salud", activo=True),
+                        Entidad(nombre="Secretaría de Integración Social", activo=True),
+                        Entidad(nombre="OTRA", activo=True)
+                    ]
+                    for e in entidades:
+                        db.session.add(e)
+                    
+                    # Crear sectores básicos
+                    sectores = [
+                        Sector(nombre="Sector 1", activo=True),
+                        Sector(nombre="Sector 2", activo=True),
+                        Sector(nombre="Sector 3", activo=True)
+                    ]
+                    for s in sectores:
+                        db.session.add(s)
+                    
+                    db.session.commit()
+                    logger.info("Base de datos inicializada con datos básicos")
+                    return jsonify({
+                        'success': True,
+                        'message': 'Base de datos inicializada correctamente con datos básicos'
+                    })
+                else:
+                    logger.info("Base de datos ya contiene datos")
+                    return jsonify({
+                        'success': True,
+                        'message': 'Base de datos ya está inicializada'
+                    })
+                    
+        except Exception as e:
+            logger.error(f"Error al inicializar base de datos: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Error al inicializar base de datos: {str(e)}'
+            }), 500
+    
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         """Ruta para autenticación"""

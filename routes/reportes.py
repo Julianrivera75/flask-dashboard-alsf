@@ -100,14 +100,18 @@ def api_guardar_reporte():
         db.session.flush()  # Para obtener el ID del reporte
         
         # Agregar participantes
-        participantes_ids = request.form.getlist('participantes_ids')
+        participantes_ids = data.get('participantes_ids', [])
+        if isinstance(participantes_ids, str):
+            participantes_ids = [participantes_ids]
         for participante_id in participantes_ids:
             participante = Responsable.query.get(int(participante_id))
             if participante:
                 reporte.participantes.append(participante)
         
         # Agregar entidades
-        entidades_ids = request.form.getlist('entidades_ids')
+        entidades_ids = data.get('entidades_ids', [])
+        if isinstance(entidades_ids, str):
+            entidades_ids = [entidades_ids]
         for entidad_id in entidades_ids:
             entidad = Entidad.query.get(int(entidad_id))
             if entidad:
@@ -118,7 +122,7 @@ def api_guardar_reporte():
         otra_entidad = data.get('otra_entidad', '').strip()
         
         # Si se seleccionó "Otro" tipo de actividad y se especificó texto
-        if data['tipo_actividad_id'] == '21' and otro_tipo_actividad:
+        if str(data['tipo_actividad_id']) == '21' and otro_tipo_actividad:
             # Guardar el texto personalizado en observaciones o crear un campo específico
             if reporte.observaciones:
                 reporte.observaciones += f"\n\nTipo de actividad personalizado: {otro_tipo_actividad}"
