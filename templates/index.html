@@ -48,62 +48,7 @@
         </ul>
     </nav>
     
-    <!-- Mensaje informativo sobre acceso restringido -->
-    <div style="background: rgba(255, 255, 255, 0.1); margin: 20px; padding: 15px; border-radius: 10px; text-align: center; color: white;">
-        <p style="margin: 0; font-size: 1.1em;">
-            🔒 <strong>Nota:</strong> El formulario de reportes y el mapa requieren acceso administrativo
-        </p>
-        {% if session.authenticated %}
-        <div style="margin-top: 15px;">
-            <button id="initDbBtn" onclick="initDatabase()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🗄️ Inicializar Base de Datos
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón si el formulario no funciona en Railway
-            </small>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="testElConsueloAPI()" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🧪 Probar API El Consuelo
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón para probar si la API funciona
-            </small>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="testElConsueloDetailed()" style="background: #e67e22; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🔍 Diagnóstico Detallado El Consuelo
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón para diagnóstico completo de la API
-            </small>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="testElConsueloAPIMain()" style="background: #9b59b6; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🧪 Probar API Principal El Consuelo
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón para probar la API principal exactamente
-            </small>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="testSimpleConsuelo()" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🔥 Prueba Súper Simple El Consuelo
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón para prueba directa sin servicios
-            </small>
-        </div>
-        <div style="margin-top: 10px;">
-            <button onclick="verify439Consuelo()" style="background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 14px;">
-                🔍 Verificar 439 Registros El Consuelo
-            </button>
-            <small style="display: block; margin-top: 5px; color: #ddd;">
-                💡 Use este botón para verificar específicamente los 439 registros
-            </small>
-        </div>
-        {% endif %}
-    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -181,6 +126,7 @@
                         <div class="icon"><i class="fas fa-shield-alt"></i></div>
                         <h3 id="dias-sin-homicidios">-</h3>
                         <p id="dias-sin-homicidios-label">Días sin homicidio</p>
+                        <p id="fecha-base" style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">Desde: 21/08/2025</p>
                     </div>
                 </div>
             </div>
@@ -272,10 +218,21 @@
                 document.getElementById('personas-impactadas').textContent = '-';
                 document.getElementById('actividades-realizadas').textContent = '-';
             }
-            // Días sin homicidio (San Bernardo)
+            // Días sin homicidio (San Bernardo) - Misma lógica que san_bernardo.html
             try {
-                const dias = localStorage.getItem('diasSinHomicidios') || '-';
-                document.getElementById('dias-sin-homicidios').textContent = dias;
+                // Fecha base fija: 21 de agosto de 2025 (último homicidio)
+                const baseDate = '2025-08-21';
+                const today = new Date();
+                const base = new Date(baseDate);
+                const diffTime = today - base;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                // Si la fecha base es en el futuro, mostrar 0
+                if (diffDays < 0) {
+                    document.getElementById('dias-sin-homicidios').textContent = '0';
+                } else {
+                    document.getElementById('dias-sin-homicidios').textContent = diffDays;
+                }
             } catch (e) {
                 document.getElementById('dias-sin-homicidios').textContent = '-';
             }
@@ -301,270 +258,30 @@
         }
         document.addEventListener('DOMContentLoaded', cargarIndicadoresPrincipales);
         
-        // Función para probar la API de El Consuelo
-        async function testElConsueloAPI() {
-            try {
-                console.log('🧪 Probando API de El Consuelo...');
-                const response = await fetch('/api/el-consuelo/data');
-                const data = await response.json();
-                console.log('🧪 Resultado de prueba:', data);
-                
-                if (data && data.data) {
-                    alert(`✅ API funcionando: ${data.data.length} encuestas encontradas`);
-                } else {
-                    alert('⚠️ API responde pero sin datos');
-                }
-            } catch (error) {
-                alert('❌ Error en API: ' + error.message);
-                console.error('Error en prueba:', error);
+        // Función para actualizar la fecha base dinámicamente
+        function updateFechaBase() {
+            const fechaBaseElement = document.getElementById('fecha-base');
+            if (fechaBaseElement) {
+                fechaBaseElement.textContent = 'Desde: 21/08/2025';
             }
         }
         
-        // Función para diagnóstico detallado de El Consuelo
-        async function testElConsueloDetailed() {
-            try {
-                console.log('🔍 Iniciando diagnóstico detallado de El Consuelo...');
-                const response = await fetch('/test-el-consuelo');
-                const data = await response.json();
-                console.log('🔍 Resultado del diagnóstico:', data);
-                
-                if (data.success) {
-                    let message = `✅ Diagnóstico exitoso:\n\n`;
-                    message += `📊 Datos crudos: ${data.raw_data_count} registros\n`;
-                    message += `📊 Datos válidos: ${data.valid_data_count} registros\n`;
-                    message += `🔗 Conexión: ${data.connection}\n`;
-                    message += `📋 Sheet ID: ${data.config.sheet_id}\n`;
-                    message += `📁 Archivo existe: ${data.config.file_exists}\n`;
-                    message += `🔑 Variable de entorno: ${data.config.env_var_exists}\n`;
-                    
-                    if (data.headers) {
-                        message += `\n📋 Headers encontrados:\n`;
-                        message += data.headers.join(', ');
-                    }
-                    
-                    if (data.field_stats) {
-                        message += `\n📊 Estadísticas de campos:\n`;
-                        message += `Promedio: ${data.field_stats.avg_fields.toFixed(1)}\n`;
-                        message += `Mínimo: ${data.field_stats.min_fields}\n`;
-                        message += `Máximo: ${data.field_stats.max_fields}`;
-                    }
-                    
-                    if (data.sample_data) {
-                        message += `\n📋 Muestra del primer registro:\n`;
-                        message += JSON.stringify(data.sample_data, null, 2);
-                    }
-                    
-                    if (data.sample_processed) {
-                        message += `\n📋 Muestra procesada (primeros 5):\n`;
-                        message += JSON.stringify(data.sample_processed, null, 2);
-                    }
-                    
-                            // Mostrar en consola para mejor debugging
-        console.log('🔍 Diagnóstico completo:', data);
+        // Llamar a updateFechaBase cuando se cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            updateFechaBase();
+        });
         
-        alert(message);
-    } else {
-        let message = `❌ Error en diagnóstico:\n\n`;
-        message += `🚫 Error: ${data.error}\n`;
-        message += `📋 Sheet ID: ${data.config.sheet_id}\n`;
-        message += `📁 Archivo existe: ${data.config.file_exists}\n`;
-        message += `🔑 Variable de entorno: ${data.config.env_var_exists}\n`;
-        
-        if (data.traceback) {
-            console.error('🔍 Traceback completo:', data.traceback);
-        }
-        
-        alert(message);
-    }
-} catch (error) {
-    alert('❌ Error de conexión: ' + error.message);
-    console.error('Error en diagnóstico:', error);
-}
 
-        // Función para probar la API principal de El Consuelo
-        async function testElConsueloAPIMain() {
-            try {
-                console.log('🧪 Probando API principal de El Consuelo...');
-                const response = await fetch('/test-el-consuelo-api');
-                const data = await response.json();
-                console.log('🧪 Resultado de API principal:', data);
-                
-                if (data.success) {
-                    let message = `✅ API Principal funcionando:\n\n`;
-                    message += `📊 Total encuestas: ${data.total_encuestas}\n`;
-                    message += `🔧 Método usado: ${data.api_method}\n`;
-                    message += `📋 Campos disponibles: ${data.all_fields.length}\n`;
-                    
-                    if (data.available_important_fields.length > 0) {
-                        message += `\n📋 Campos importantes encontrados:\n`;
-                        message += data.available_important_fields.join(', ');
-                    }
-                    
-                    if (data.sample_record) {
-                        message += `\n📋 Muestra del primer registro:\n`;
-                        message += JSON.stringify(data.sample_record, null, 2);
-                    }
-                    
-                    // Mostrar en consola para mejor debugging
-                    console.log('🧪 API Principal completa:', data);
-                    
-                    alert(message);
-                } else {
-                    let message = `❌ Error en API Principal:\n\n`;
-                    message += `🚫 Error: ${data.error}\n`;
-                    message += `🔧 Método usado: ${data.api_method}\n`;
-                    
-                    if (data.traceback) {
-                        console.error('🧪 Traceback completo:', data.traceback);
-                    }
-                    
-                    alert(message);
-                }
-                    } catch (error) {
-            alert('❌ Error de conexión: ' + error.message);
-            console.error('Error en API Principal:', error);
-        }
-    }
-    
-    // Función para prueba súper simple de El Consuelo
-    async function testSimpleConsuelo() {
-        try {
-            console.log('🔥 Iniciando prueba súper simple de El Consuelo...');
-            const response = await fetch('/test-simple-consuelo');
-            const data = await response.json();
-            console.log('🔥 Resultado de prueba simple:', data);
-            
-            if (data.success) {
-                let message = `✅ Prueba Simple Exitosa:\n\n`;
-                message += `📋 Título de la hoja: ${data.sheet_title}\n`;
-                message += `📋 Título de la primera hoja: ${data.worksheet_title}\n`;
-                message += `📊 Total de filas: ${data.total_rows}\n`;
-                message += `📊 Total de columnas: ${data.total_columns}\n`;
-                message += `📊 Filas con datos: ${data.data_rows}\n`;
-                
-                if (data.headers && data.headers.length > 0) {
-                    message += `\n📋 Headers encontrados:\n`;
-                    message += data.headers.join(', ');
-                }
-                
-                if (data.first_data_row) {
-                    message += `\n📋 Primera fila de datos:\n`;
-                    message += data.first_data_row.join(', ');
-                }
-                
-                // Mostrar en consola para mejor debugging
-                console.log('🔥 Prueba Simple completa:', data);
-                
-                alert(message);
-            } else {
-                let message = `❌ Error en Prueba Simple:\n\n`;
-                message += `🚫 Error: ${data.error}\n`;
-                
-                if (data.traceback) {
-                    console.error('🔥 Traceback completo:', data.traceback);
-                }
-                
-                alert(message);
-            }
-        } catch (error) {
-            alert('❌ Error de conexión: ' + error.message);
-            console.error('Error en Prueba Simple:', error);
-        }
-    }
-    
-    // Función para verificar específicamente los 439 registros de El Consuelo
-    async function verify439Consuelo() {
-        try {
-            console.log('🔍 Verificando específicamente los 439 registros de El Consuelo...');
-            const response = await fetch('/verify-439-consuelo');
-            const data = await response.json();
-            console.log('🔍 Resultado de verificación 439:', data);
-            
-            if (data.success) {
-                let message = `🔍 Verificación de 439 Registros:\n\n`;
-                message += `📋 Título de la hoja: ${data.sheet_title}\n`;
-                message += `📋 Primera hoja: ${data.worksheet_title}\n`;
-                message += `📊 Registros esperados: ${data.expected_records}\n`;
-                message += `📊 Registros encontrados: ${data.actual_records}\n`;
-                message += `📊 Total filas en hoja: ${data.total_rows_in_sheet}\n`;
-                message += `📊 Filas vacías: ${data.empty_rows}\n`;
-                message += `📊 Columnas: ${data.headers_count}\n`;
-                
-                // Estado de la verificación
-                if (data.status === 'EXACTO') {
-                    message += `\n✅ ¡EXACTO! Encontrados ${data.actual_records} registros\n`;
-                } else if (data.status === 'MÁS_REGISTROS') {
-                    message += `\n⚠️ Más registros de lo esperado: ${data.actual_records}\n`;
-                } else {
-                    message += `\n❌ Menos registros de lo esperado: ${data.actual_records}\n`;
-                }
-                
-                if (data.headers && data.headers.length > 0) {
-                    message += `\n📋 Headers encontrados:\n`;
-                    message += data.headers.join(', ');
-                }
-                
-                if (data.sample_data && data.sample_data.length > 0) {
-                    message += `\n📋 Muestra de los primeros 5 registros:\n`;
-                    data.sample_data.forEach((item, index) => {
-                        message += `\n--- Registro ${item.row_number} ---\n`;
-                        Object.entries(item.data).forEach(([key, value]) => {
-                            if (value && value.trim()) {
-                                message += `${key}: ${value}\n`;
-                            }
-                        });
-                    });
-                }
-                
-                // Mostrar en consola para mejor debugging
-                console.log('🔍 Verificación 439 completa:', data);
-                
-                alert(message);
-            } else {
-                let message = `❌ Error en Verificación 439:\n\n`;
-                message += `🚫 Error: ${data.error}\n`;
-                message += `📊 Registros esperados: ${data.expected_records}\n`;
-                
-                if (data.traceback) {
-                    console.error('🔍 Traceback completo:', data.traceback);
-                }
-                
-                alert(message);
-            }
-        } catch (error) {
-            alert('❌ Error de conexión: ' + error.message);
-            console.error('Error en Verificación 439:', error);
-        }
-    }
-        }
         
-        // Función para inicializar la base de datos
-        async function initDatabase() {
-            const btn = document.getElementById('initDbBtn');
-            const originalText = btn.textContent;
-            
-            try {
-                btn.textContent = '⏳ Inicializando...';
-                btn.disabled = true;
-                
-                const response = await fetch('/init-db');
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert('✅ ' + result.message);
-                    console.log('Base de datos inicializada:', result);
-                } else {
-                    alert('❌ Error: ' + result.error);
-                    console.error('Error al inicializar BD:', result.error);
-                }
-            } catch (error) {
-                alert('❌ Error de conexión: ' + error.message);
-                console.error('Error de conexión:', error);
-            } finally {
-                btn.textContent = originalText;
-                btn.disabled = false;
-            }
-        }
+
+
+
+    
+
+    
+
+        
+
     </script>
 </body>
 </html> 

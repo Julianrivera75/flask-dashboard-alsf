@@ -277,15 +277,34 @@ def create_app(config_class=config.DevelopmentConfig):
     def api_el_consuelo_data():
         """API para obtener datos de encuestas de El Consuelo"""
         try:
-            # Obtener datos reales desde Google Sheets de El Consuelo
+            # Obtener datos directamente desde Google Sheets (sin credenciales)
             sheet_id = config.Config.EL_CONSUELO_SHEET_ID
-            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
-            consuelo_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var=config.Config.EL_CONSUELO_CREDENTIALS_ENV_VAR)
-            raw_data = consuelo_connector.get_data(sheet_id)
             
-            logger.info(f"Datos de El Consuelo obtenidos: {len(raw_data) if raw_data else 0} registros")
+            # Usar requests para obtener datos CSV directamente
+            import requests
+            sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv"
             
-            return jsonify({'data': raw_data, 'total': len(raw_data) if raw_data else 0})
+            logger.info(f"Conectando directamente a Google Sheets de El Consuelo: {sheet_url}")
+            
+            response = requests.get(sheet_url)
+            response.raise_for_status()
+            
+            # Procesar CSV
+            import csv
+            from io import StringIO
+            
+            csv_text = response.text
+            csv_io = StringIO(csv_text)
+            reader = csv.DictReader(csv_io)
+            
+            # Convertir a lista de diccionarios
+            raw_data = []
+            for row in reader:
+                raw_data.append(row)
+            
+            logger.info(f"Datos de El Consuelo obtenidos directamente: {len(raw_data)} registros")
+            
+            return jsonify({'data': raw_data, 'total': len(raw_data)})
         except Exception as e:
             logger.error(f"Error en API de El Consuelo: {str(e)}")
             return jsonify({'error': str(e), 'data': []}), 500
