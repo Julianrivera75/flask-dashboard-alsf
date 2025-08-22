@@ -421,8 +421,8 @@ def create_app(config_class=config.DevelopmentConfig):
             processed_row['Descripción de los compromisos'] = row.get('Descripción de los compromisos ', '')  # Notar el espacio al final
             processed_row['Resumen de actividades'] = row.get('Resultados ( Resumen del resultado obtenido de la intervención)', '')
             
-            # Mantener datos originales para referencia
-            processed_row.update(row)
+            # NO mantener datos originales para evitar duplicación
+            # processed_row.update(row)  # Esta línea estaba causando duplicación
             
             processed_data.append(processed_row)
         
