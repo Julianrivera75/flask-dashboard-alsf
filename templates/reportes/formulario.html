@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Reporte - ALSF</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px solid #e8f4fd;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+        
+        select, input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Estilos para los toggles de participantes */
+        .participantes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .participante-toggle {
+            position: relative;
+        }
+        
+        .participante-checkbox {
+            display: none;
+        }
+        
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .toggle-label:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .participante-checkbox:checked + .toggle-label {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-color: #2980b9;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .toggle-text {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .toggle-icon {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .participante-checkbox:checked + .toggle-label .toggle-icon {
+            opacity: 1;
+        }
+        
+        /* Estilos para los botones de control */
+        .participantes-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-btn {
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .select-all-btn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .select-all-btn:hover {
+            background: #229954;
+        }
+        
+        .deselect-all-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .deselect-all-btn:hover {
+            background: #c0392b;
+        }
+        
+        /* Estilos para las entidades (similar a participantes pero con icono diferente) */
+        .entidades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .entidad-toggle {
+            position: relative;
+        }
+        
+        .entidad-checkbox {
+            display: none;
+        }
+        
+        .entidad-toggle .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .entidad-toggle .toggle-label:hover {
+            background: #e9ecef;
+            border-color: #9b59b6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .entidad-checkbox:checked + .toggle-label {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            border-color: #8e44ad;
+            box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+        }
+        
+        .entidad-toggle .toggle-icon {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .entidad-checkbox:checked + .toggle-label .toggle-icon {
+            opacity: 1;
+        }
+        
+        /* Estilos para campos de texto dinámicos */
+        .otro-campo-container {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        .otro-campo-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            margin-top: 8px;
+        }
+        
+        .otro-campo-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .otro-campo-container label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .file-input-group {
+            border: 2px dashed #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-group:hover {
+            background: #e3f2fd;
+            border-color: #2980b9;
+        }
+        
+        .file-input-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            background: transparent;
+        }
+        
+        .file-preview {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .file-preview img {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 5px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .result-item label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .result-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+        }
+        
+        .btn-logout {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Formulario de Reporte ALSF</h1>
+            <p>Sistema de registro de actividades y operativos</p>
+            <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                <p style="margin: 0; font-size: 1.1em;">
+                    🔒 <strong>Área de Acceso Restringido</strong> - Solo personal autorizado puede crear reportes
+                </p>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <a href="/logout" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <form id="reporteForm">
+                <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+                <div class="form-section">
+                    <h3>👤 Información Básica</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="responsable_id">Responsable <span class="required">*</span></label>
+                            <select id="responsable_id" name="responsable_id" required>
+                                <option value="">Seleccione un responsable</option>
+                                {% for responsable in responsables %}
+                                <option value="{{ responsable.id }}">{{ responsable.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="tipo_actividad_id">Tipo de Actividad <span class="required">*</span></label>
+                        <select id="tipo_actividad_id" name="tipo_actividad_id" required>
+                            <option value="">Seleccione el tipo de actividad</option>
+                            {% for tipo in tipos_actividad %}
+                            <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <!-- Campo de texto dinámico para "Otro" tipo de actividad -->
+                        <div id="otro_tipo_actividad_container" class="otro-campo-container" style="display: none; margin-top: 15px;">
+                            <label for="otro_tipo_actividad">Especifique el tipo de actividad:</label>
+                            <input type="text" 
+                                   id="otro_tipo_actividad" 
+                                   name="otro_tipo_actividad" 
+                                   placeholder="Describa el tipo de actividad"
+                                   class="otro-campo-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="acompanamiento_juridico" name="acompanamiento_juridico" value="true" required>
+                            <label for="acompanamiento_juridico">¿En la jornada se contó con acompañamiento del área jurídica? <span class="required">*</span></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 2: PARTICIPANTES Y ENTIDADES -->
+                <div class="form-section">
+                    <h3>👥 Participantes y Entidades</h3>
+                    
+                    <div class="form-group full-width">
+                        <label>Participantes <span class="required">*</span></label>
+                        
+                        <!-- Botones de control -->
+                        <div class="participantes-controls">
+                            <button type="button" id="selectAllBtn" class="control-btn select-all-btn">
+                                ✅ Seleccionar Todos
+                            </button>
+                            <button type="button" id="deselectAllBtn" class="control-btn deselect-all-btn">
+                                ❌ Deseleccionar Todos
+                            </button>
+                        </div>
+                        
+                        <div class="participantes-grid">
+                            {% for responsable in responsables %}
+                            <div class="participante-toggle">
+                                <input type="checkbox" 
+                                       id="participante_{{ responsable.id }}" 
+                                       name="participantes_ids" 
+                                       value="{{ responsable.id }}" 
+                                       class="participante-checkbox">
+                                <label for="participante_{{ responsable.id }}" class="toggle-label">
+                                    <span class="toggle-text">{{ responsable.nombre }}</span>
+                                    <span class="toggle-icon">👤</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small>Seleccione los participantes que estuvieron presentes en la actividad</small>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>¿Con qué entidades contó? <span class="required">*</span></label>
+                        
+                        <!-- Botones de control para entidades -->
+                        <div class="entidades-controls">
+                            <button type="button" id="selectAllEntidadesBtn" class="control-btn select-all-btn">
+                                ✅ Seleccionar Todas
+                            </button>
+                            <button type="button" id="deselectAllEntidadesBtn" class="control-btn deselect-all-btn">
+                                ❌ Deseleccionar Todas
+                            </button>
+                        </div>
+                        
+                        <div class="entidades-grid">
+                            {% for entidad in entidades %}
+                            <div class="entidad-toggle">
+                                <input type="checkbox" 
+                                       id="entidad_{{ entidad.id }}" 
+                                       name="entidades_ids" 
+                                       value="{{ entidad.id }}" 
+                                       class="entidad-checkbox">
+                                <label for="entidad_{{ entidad.id }}" class="toggle-label">
+                                    <span class="toggle-text">{{ entidad.nombre }}</span>
+                                    <span class="toggle-icon">🏛️</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small>Seleccione las entidades que participaron en la actividad</small>
+                        
+                        <!-- Campo de texto dinámico para "Otra" entidad -->
+                        <div id="otra_entidad_container" class="otro-campo-container" style="display: none; margin-top: 15px;">
+                            <label for="otra_entidad">Especifique la entidad:</label>
+                            <input type="text" 
+                                   id="otra_entidad" 
+                                   name="otra_entidad" 
+                                   placeholder="Describa la entidad"
+                                   class="otro-campo-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 3: UBICACIÓN -->
+                <div class="form-section">
+                    <h3>📍 Ubicación</h3>
+                    
+                    <div class="form-group full-width">
+                        <label>Seleccione la ubicación en el mapa <span class="required">*</span></label>
+                        
+                        <!-- Estado de geolocalización -->
+                        <div id="locationStatus" style="margin-bottom: 10px; font-weight: bold; color: #f39c12;">
+                            📍 Detectando ubicación automáticamente...
+                        </div>
+                        
+
+                        
+                        <!-- Información de dirección -->
+                        <div id="addressInfo" style="margin-bottom: 10px; padding: 8px; background: #f8f9fa; border-radius: 5px; display: none; font-size: 0.9em;">
+                        </div>
+                        
+                        <div class="map-container" id="map"></div>
+                        <small>Haga clic en el mapa para seleccionar la ubicación exacta o use la detección automática</small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="latitud">Latitud</label>
+                            <input type="number" id="latitud" name="latitud" step="0.000001" min="4.0" max="5.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="longitud">Longitud</label>
+                            <input type="number" id="longitud" name="longitud" step="0.000001" min="-74.5" max="-73.5">
+                        </div>
+                    </div>
+                    
+
+                    
+                                                                                   <!-- Instrucciones de ubicación -->
+                     <div class="form-group full-width">
+                         <div style="background: #e8f4fd; border: 2px solid #3498db; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                             <h4 style="margin: 0 0 10px 0; color: #2980b9;">📍 Selección de Ubicación en el Mapa</h4>
+                             <p style="margin: 0; color: #34495e; font-size: 14px;">
+                                 <strong>Instrucciones:</strong><br>
+                                 🔴 <strong>IMPORTANTE:</strong> Solo puede seleccionar ubicaciones dentro de los polígonos rojos (Sectores Catastrales de Santa Fe)<br>
+                                 <strong>Opción 1 - Detección Automática:</strong><br>
+                                 1️⃣ Haga clic en "Detectar mi ubicación actual"<br>
+                                 2️⃣ Si está dentro de un polígono rojo, se posicionará automáticamente<br>
+                                 3️⃣ Si está fuera, deberá seleccionar manualmente<br>
+                                 <strong>Opción 2 - Selección Manual (RECOMENDADA):</strong><br>
+                                 4️⃣ <strong>Haga clic directamente en un polígono rojo</strong> para seleccionar ubicación<br>
+                                 5️⃣ El marcador azul se moverá automáticamente a esa posición<br>
+                                 6️⃣ La dirección y Sector Catastral se mostrarán automáticamente<br>
+                                 <em>💡 <strong>Consejo:</strong> Haga clic en el polígono rojo, no en el área blanca del mapa</em><br>
+                                 <em>🔍 <strong>Nota:</strong> Para ver el nombre del Sector Catastral, haga doble clic en el polígono</em><br>
+                                 <strong>Opción 3 - Coordenadas Manuales:</strong><br>
+                                 7️⃣ <strong>Edite las coordenadas</strong> en los campos de Latitud y Longitud<br>
+                                 8️⃣ <strong>Presione Enter o salga del campo</strong> para aplicar automáticamente<br>
+                                 9️⃣ <strong>Las coordenadas se validarán</strong> automáticamente contra los Sectores Catastrales
+                             </p>
+                         </div>
+                     </div>
+                     
+                                          <!-- Botones de ubicación -->
+                     <div class="form-group full-width" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                         <button type="button" id="detectLocationBtn" onclick="getCurrentLocation()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; flex: 1; min-width: 200px;">
+                             📍 Detectar mi ubicación actual
+                         </button>
+
+
+
+                     </div>
+                </div>
+                
+                <!-- SECCIÓN 4: RESULTADOS -->
+                <div class="form-section">
+                    <h3>📊 Resultados de la Actividad</h3>
+                    <p><small>Complete al menos uno de los siguientes campos:</small></p>
+                    
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <label for="cambuches_levantados"># Cambuches levantados</label>
+                            <input type="number" id="cambuches_levantados" name="cambuches_levantados" min="0" value="0">
+                        </div>
+                        
+                        <div class="result-item">
+                            <label for="armas_blancas_decomisadas"># Armas blancas decomisadas</label>
+                            <input type="number" id="armas_blancas_decomisadas" name="armas_blancas_decomisadas" min="0" value="0">
+                        </div>
+                        
+                        <div class="result-item">
+                            <label for="armas_fuego_decomisadas"># Armas de fuego decomisadas</label>
+                            <input type="number" id="armas_fuego_decomisadas" name="armas_fuego_decomisadas" min="0" value="0">
+                        </div>
+                        
+                        <div class="result-item">
+                            <label for="requisas"># Requisas</label>
+                            <input type="number" id="requisas" name="requisas" min="0" value="0">
+                        </div>
+                        
+                        <div class="result-item">
+                            <label for="sellamientos_establecimientos"># Sellamientos de establecimientos</label>
+                            <input type="number" id="sellamientos_establecimientos" name="sellamientos_establecimientos" min="0" value="0">
+                        </div>
+                        
+                        <div class="result-item">
+                            <label for="sensibilizaciones"># Sensibilizaciones</label>
+                            <input type="number" id="sensibilizaciones" name="sensibilizaciones" min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="otra_descripcion">Otra actividad (¿cuál?)</label>
+                        <input type="text" id="otra_descripcion" name="otra_descripcion" placeholder="Describa otra actividad realizada">
+                    </div>
+                </div>
+                
+                <!-- SECCIÓN 5: OBSERVACIONES -->
+                <div class="form-section">
+                    <h3>📝 Observaciones</h3>
+                    
+                    <div class="form-group full-width">
+                        <label for="observaciones">Observaciones adicionales</label>
+                        <textarea id="observaciones" name="observaciones" rows="4" placeholder="Información adicional o comentarios sobre la actividad (opcional)"></textarea>
+                    </div>
+                </div>
+                
+
+                
+                <!-- BOTÓN DE ENVÍO -->
+                <div class="form-section">
+                    <button type="submit" class="btn" id="submitBtn">
+                        📤 Enviar Reporte
+                    </button>
+                </div>
+            </form>
+            
+            <!-- LOADING -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Enviando reporte...</p>
+            </div>
+            
+            <!-- ALERTAS -->
+            <div class="alert alert-success" id="successAlert"></div>
+            <div class="alert alert-error" id="errorAlert"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let map, marker;
+        let currentLat = 4.710989; // Bogotá centro
+        let currentLng = -74.072092;
+        let sectoresLayer = null; // Variable global para almacenar la capa de sectores
+        let initialPositionSet = false; // Para controlar si ya se estableció la posición inicial
+        
+        // Inicializar mapa
+        function initMap() {
+            map = L.map('map').setView([currentLat, currentLng], 13);
+            
+            // Cargar mapa base de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Cargar KML de Sectores Catastrales usando omnivore
+            sectoresLayer = omnivore.kml('/static/data/SectoresCatastrales.kml', null, L.geoJson(null, {
+                style: function(feature) {
+                    return {
+                        color: '#e4032e',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: '#e4032e',
+                        fillOpacity: 0.1
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    if (feature.properties && feature.properties.name) {
+                        // Mostrar información del sector catastral
+                        const sectorName = feature.properties.name;
+                        layer.bindPopup('<strong>Sector Catastral:</strong> ' + sectorName);
+                        
+                        // Configurar eventos para permitir clic simple en el mapa
+                        layer.on('click', function(e) {
+                            // Prevenir que el popup se abra automáticamente
+                            e.originalEvent.preventDefault();
+                            e.originalEvent.stopPropagation();
+                            
+                            // Obtener las coordenadas del clic
+                            const clickLat = e.latlng.lat;
+                            const clickLng = e.latlng.lng;
+                            
+                            console.log('🔍 Clic en sector catastral:', sectorName, 'en:', [clickLat, clickLng]);
+                            
+                            // Mover el marcador directamente desde aquí
+                            if (marker) {
+                                console.log('🎯 Moviendo marcador desde clic en polígono a:', [clickLat, clickLng]);
+                                marker.setLatLng([clickLat, clickLng]);
+                                
+                                // Actualizar coordenadas
+                                updateCoordinates(clickLat, clickLng);
+                                
+                                // Actualizar estado
+                                const statusText = `✅ Ubicación seleccionada en ${sectorName}`;
+                                document.getElementById('locationStatus').textContent = statusText;
+                                document.getElementById('locationStatus').style.color = '#27ae60';
+                                
+                                // Obtener dirección
+                                getAddressFromCoordinates(clickLat, clickLng);
+                                
+                                // Mostrar notificación
+                                showTemporaryNotification(statusText, 'success');
+                                
+                                console.log('✅ Marcador movido exitosamente desde clic en polígono');
+                            } else {
+                                console.log('❌ ERROR: Marcador no está definido');
+                            }
+                        });
+                        
+                        // Permitir doble clic para mostrar el popup
+                        layer.on('dblclick', function(e) {
+                            e.originalEvent.preventDefault();
+                            e.originalEvent.stopPropagation();
+                            layer.openPopup();
+                        });
+                    }
+                }
+            }));
+            
+            // Agregar la capa KML al mapa
+            sectoresLayer.addTo(map);
+            
+            // Estado inicial mientras se cargan los polígonos
+            document.getElementById('locationStatus').textContent = '⏳ Cargando Sectores Catastrales de Santa Fe...';
+            document.getElementById('locationStatus').style.color = '#3498db';
+            
+            // Registrar el evento de clic en el mapa inmediatamente
+            // Remover cualquier evento previo para evitar duplicados
+            map.off('click');
+            map.on('click', handleMapClick);
+            console.log('✅ Evento de clic en el mapa registrado correctamente');
+            
+            // Esperar a que se carguen los polígonos y luego posicionar el marcador
+            setTimeout(function() {
+                // Buscar el centro del primer polígono válido
+                const polygonCenter = findFirstPolygonCenter();
+                
+                if (polygonCenter) {
+                    // Actualizar coordenadas globales
+                    currentLat = polygonCenter.lat;
+                    currentLng = polygonCenter.lng;
+                    
+                    // Crear marcador en el centro del polígono
+                    marker = L.marker([currentLat, currentLng], {
+                        draggable: false  // No arrastrable por defecto
+                    }).addTo(map);
+                    
+                    console.log('✅ Marcador creado y agregado al mapa:', marker);
+                    console.log('✅ Posición inicial del marcador:', marker.getLatLng());
+                    
+                    // Centrar el mapa en la nueva posición
+                    map.setView([currentLat, currentLng], 15);
+                    
+                    // Actualizar estado inicial
+                    let statusText = '✅ Ubicación inicial establecida dentro de Sectores Catastrales de Santa Fe';
+                    if (polygonCenter.sectorName) {
+                        statusText += ` (${polygonCenter.sectorName})`;
+                    }
+                    document.getElementById('locationStatus').textContent = statusText;
+                    document.getElementById('locationStatus').style.color = '#27ae60';
+                    
+                    console.log('✅ Marcador posicionado automáticamente en Sectores Catastrales de Santa Fe:', {
+                        lat: currentLat,
+                        lng: currentLng,
+                        sector: polygonCenter.sectorName,
+                        timestamp: new Date().toLocaleString()
+                    });
+                } else {
+                    // Fallback: usar posición por defecto
+                    marker = L.marker([currentLat, currentLng], {
+                        draggable: false  // No arrastrable por defecto
+                    }).addTo(map);
+                    
+                    document.getElementById('locationStatus').textContent = '⚠️ No se encontraron Sectores Catastrales de Santa Fe válidos. Use el mapa para seleccionar ubicación.';
+                    document.getElementById('locationStatus').style.color = '#f39c12';
+                }
+                
+                // El marcador no es arrastrable, solo se mueve con clics en el mapa
+                
+                // Actualizar coordenadas
+                updateCoordinates(currentLat, currentLng);
+                
+                // Marcar que ya se estableció la posición inicial
+                initialPositionSet = true;
+                
+            }, 1000); // Esperar 1 segundo para que se carguen los polígonos
+        }
+        
+        // Función para verificar si un punto está dentro de un polígono
+        function isPointInPolygon(point, polygon) {
+            console.log('🔍 Verificando punto en polígono - Punto Lat:', point.lat, 'Lng:', point.lng, 'Polígono puntos:', polygon.length);
+            if (polygon[0]) {
+                console.log('🔍 Primer punto del polígono - Lat:', polygon[0].lat, 'Lng:', polygon[0].lng);
+            }
+            if (polygon[polygon.length-1]) {
+                console.log('🔍 Último punto del polígono - Lat:', polygon[polygon.length-1].lat, 'Lng:', polygon[polygon.length-1].lng);
+            }
+            
+            // Verificar que el polígono tenga coordenadas válidas
+            if (!polygon || polygon.length < 3) {
+                console.log('❌ Polígono inválido:', polygon);
+                return false;
+            }
+            
+            // Algoritmo ray casting mejorado
+            let inside = false;
+            const x = point.lng;
+            const y = point.lat;
+            
+            // Primero verificar si el punto está dentro del bounding box del polígono
+            let minLat = Infinity, maxLat = -Infinity;
+            let minLng = Infinity, maxLng = -Infinity;
+            
+            for (let i = 0; i < polygon.length; i++) {
+                const lat = polygon[i].lat;
+                const lng = polygon[i].lng;
+                
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.log('❌ Coordenadas inválidas en polígono:', { lat, lng });
+                    continue;
+                }
+                
+                minLat = Math.min(minLat, lat);
+                maxLat = Math.max(maxLat, lat);
+                minLng = Math.min(minLng, lng);
+                maxLng = Math.max(maxLng, lng);
+            }
+            
+            // Si el punto está fuera del bounding box, no puede estar dentro
+            if (y < minLat || y > maxLat || x < minLng || x > maxLng) {
+                console.log('🔍 Punto fuera del bounding box del polígono');
+                return false;
+            }
+            
+            console.log('🔍 Punto dentro del bounding box, verificando con ray casting...');
+            
+            // Algoritmo ray casting
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const xi = polygon[i].lng;
+                const yi = polygon[i].lat;
+                const xj = polygon[j].lng;
+                const yj = polygon[j].lat;
+                
+                // Verificar que las coordenadas sean números válidos
+                if (isNaN(xi) || isNaN(yi) || isNaN(xj) || isNaN(yj)) {
+                    console.log('❌ Coordenadas inválidas en polígono:', { xi, yi, xj, yj });
+                    continue;
+                }
+                
+                // Verificar si el rayo horizontal desde el punto cruza la línea del polígono
+                const crossesLine = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (crossesLine) {
+                    inside = !inside;
+                    console.log(`🔍 Rayo cruza línea ${i}-${j} en x=${x}, y=${y}`);
+                    console.log(`🔍 Coordenadas línea: (${xi}, ${yi}) a (${xj}, ${yj})`);
+                }
+            }
+            
+            console.log('🔍 Resultado isPointInPolygon - inside:', inside, 'punto x:', x, 'y:', y);
+            console.log('🔍 Límites del polígono - Lat:', minLat, 'a', maxLat, 'Lng:', minLng, 'a', maxLng);
+            
+            return inside;
+        }
+        
+        // Función para encontrar el centro del primer polígono válido
+        function findFirstPolygonCenter() {
+            if (!sectoresLayer) return null;
+            
+            let firstPolygon = null;
+            
+            sectoresLayer.eachLayer(function(layer) {
+                if (firstPolygon) return; // Ya encontramos uno
+                
+                if (layer.getLatLngs && layer.getLatLngs().length > 0) {
+                    // Para polígonos simples
+                    const polygon = layer.getLatLngs()[0];
+                    if (polygon && polygon.length > 0) {
+                        firstPolygon = {
+                            polygon: polygon,
+                            layer: layer
+                        };
+                    }
+                } else if (layer.getLatLngs) {
+                    // Para polígonos complejos (múltiples anillos)
+                    const polygons = layer.getLatLngs();
+                    for (let i = 0; i < polygons.length; i++) {
+                        if (polygons[i] && polygons[i].length > 0) {
+                            firstPolygon = {
+                                polygon: polygons[i],
+                                layer: layer
+                            };
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            if (firstPolygon) {
+                // Calcular el centro del polígono
+                let centerLat = 0;
+                let centerLng = 0;
+                const polygon = firstPolygon.polygon;
+                
+                for (let i = 0; i < polygon.length; i++) {
+                    centerLat += polygon[i].lat;
+                    centerLng += polygon[i].lng;
+                }
+                
+                centerLat /= polygon.length;
+                centerLng /= polygon.length;
+                
+                return {
+                    lat: centerLat,
+                    lng: centerLng,
+                    sectorName: firstPolygon.layer.feature && firstPolygon.layer.feature.properties ? 
+                                firstPolygon.layer.feature.properties.name : ''
+                };
+            }
+            
+            return null;
+        }
+        
+        // Función para verificar si un punto está dentro de algún Sector Catastral de Santa Fe
+        function isPointInSectores(lat, lng) {
+            console.log('🔍 Verificando si el punto está dentro de Sectores Catastrales de Santa Fe - Lat:', lat, 'Lng:', lng);
+            
+            if (!sectoresLayer) {
+                console.log('❌ No hay capa de sectores cargada');
+                return { isInside: false, sectorName: '' };
+            }
+            
+            const point = { lat: lat, lng: lng };
+            
+            // Verificar cada polígono en la capa de sectores
+            let isInside = false;
+            let sectorName = '';
+            
+            console.log('🔍 Verificando polígonos...');
+            let polygonCount = 0;
+            sectoresLayer.eachLayer(function(layer) {
+                polygonCount++;
+                console.log(`🔍 Verificando polígono ${polygonCount} - Tipo:`, layer.constructor.name);
+                
+                if (layer.getLatLngs && layer.getLatLngs().length > 0) {
+                    // Para polígonos simples
+                    const polygon = layer.getLatLngs()[0];
+                    console.log(`🔍 Polígono simple ${polygonCount} - Puntos:`, polygon.length);
+                                            if (isPointInPolygon(point, polygon)) {
+                            isInside = true;
+                            if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
+                                sectorName = layer.feature.properties.name;
+                            }
+                            console.log(`✅ Punto está dentro del sector catastral ${polygonCount}`);
+                        }
+                } else if (layer.getLatLngs) {
+                    // Para polígonos complejos (múltiples anillos)
+                    const polygons = layer.getLatLngs();
+                    console.log(`🔍 Polígono complejo ${polygonCount} - Anillos:`, polygons.length);
+                    for (let i = 0; i < polygons.length; i++) {
+                        if (isPointInPolygon(point, polygons[i])) {
+                            isInside = true;
+                            if (layer.feature && layer.feature.properties && layer.feature.properties.name) {
+                                sectorName = layer.feature.properties.name;
+                            }
+                            console.log(`✅ Punto está dentro del sector catastral complejo ${polygonCount}, anillo ${i}`);
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            console.log(`🔍 Total de polígonos verificados: ${polygonCount}`);
+            
+            console.log('🔍 Resultado de verificación - isInside:', isInside, 'sectorName:', sectorName);
+            return { isInside, sectorName };
+        }
+        
+        // Validar que las coordenadas estén en un rango razonable para Bogotá
+        function validateCoordinates(lat, lng) {
+            // Rango aproximado para Bogotá y alrededores
+            const minLat = 4.0;  // Sur de Bogotá
+            const maxLat = 5.0;  // Norte de Bogotá
+            const minLng = -74.5; // Oeste de Bogotá
+            const maxLng = -73.5; // Este de Bogotá
+            
+            if (lat < minLat || lat > maxLat || lng < minLng || lng > maxLng) {
+                document.getElementById('locationStatus').textContent = '⚠️ Coordenadas fuera del rango de Bogotá';
+                document.getElementById('locationStatus').style.color = '#f39c12';
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Actualizar coordenadas en los campos
+        function updateCoordinates(lat, lng) {
+            document.getElementById('latitud').value = lat.toFixed(6);
+            document.getElementById('longitud').value = lng.toFixed(6);
+            
+            // Actualizar coordenadas globales
+            currentLat = lat;
+            currentLng = lng;
+            
+            // Validar coordenadas
+            validateCoordinates(lat, lng);
+            
+            // Obtener dirección para las nuevas coordenadas (con delay para evitar muchas llamadas)
+            clearTimeout(window.addressTimeout);
+            window.addressTimeout = setTimeout(() => {
+                getAddressFromCoordinates(lat, lng);
+            }, 1000);
+        }
+        
+        // Funcionalidad para los toggles de participantes
+        function setupParticipantesToggles() {
+            const checkboxes = document.querySelectorAll('.participante-checkbox');
+            const toggleLabels = document.querySelectorAll('.toggle-label');
+            
+            // Agregar contador de participantes seleccionados
+            const contador = document.createElement('div');
+            contador.id = 'participantes-contador';
+            contador.style.cssText = 'margin-top: 10px; font-weight: 600; color: #2c3e50; font-size: 14px;';
+            contador.innerHTML = 'Participantes seleccionados: <span id="contador-numero">0</span>';
+            
+            // Insertar contador después de la grilla de participantes
+            const participantesGrid = document.querySelector('.participantes-grid');
+            participantesGrid.parentNode.insertBefore(contador, participantesGrid.nextSibling);
+            
+            // Función para actualizar contador
+            function actualizarContador() {
+                const seleccionados = document.querySelectorAll('.participante-checkbox:checked').length;
+                document.getElementById('contador-numero').textContent = seleccionados;
+                
+                // Cambiar color del contador según la cantidad
+                if (seleccionados === 0) {
+                    contador.style.color = '#e74c3c';
+                } else if (seleccionados < 3) {
+                    contador.style.color = '#f39c12';
+                } else {
+                    contador.style.color = '#27ae60';
+                }
+            }
+            
+            // Event listeners para cada checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    actualizarContador();
+                    
+                    // Agregar efecto visual al toggle
+                    const label = this.nextElementSibling;
+                    if (this.checked) {
+                        label.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            label.style.transform = 'scale(1)';
+                        }, 150);
+                    }
+                });
+            });
+            
+            // Botones de seleccionar/deseleccionar todos
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            
+            selectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                actualizarContador();
+                
+                // Efecto visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            deselectAllBtn.addEventListener('click', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                actualizarContador();
+                
+                // Efecto visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // Inicializar contador
+            actualizarContador();
+        }
+        
+        // Funcionalidad para los toggles de entidades
+        function setupEntidadesToggles() {
+            const entidadCheckboxes = document.querySelectorAll('.entidad-checkbox');
+            
+            // Agregar contador de entidades seleccionadas
+            const contadorEntidades = document.createElement('div');
+            contadorEntidades.id = 'entidades-contador';
+            contadorEntidades.style.cssText = 'margin-top: 10px; font-weight: 600; color: #2c3e50; font-size: 14px;';
+            contadorEntidades.innerHTML = 'Entidades seleccionadas: <span id="contador-entidades-numero">0</span>';
+            
+            // Insertar contador después de la grilla de entidades
+            const entidadesGrid = document.querySelector('.entidades-grid');
+            entidadesGrid.parentNode.insertBefore(contadorEntidades, entidadesGrid.nextSibling);
+            
+            // Función para actualizar contador de entidades
+            function actualizarContadorEntidades() {
+                const seleccionadas = document.querySelectorAll('.entidad-checkbox:checked').length;
+                document.getElementById('contador-entidades-numero').textContent = seleccionadas;
+                
+                // Cambiar color del contador según la cantidad
+                if (seleccionadas === 0) {
+                    contadorEntidades.style.color = '#e74c3c';
+                } else if (seleccionadas < 3) {
+                    contadorEntidades.style.color = '#f39c12';
+                } else {
+                    contadorEntidades.style.color = '#27ae60';
+                }
+            }
+            
+            // Event listeners para cada checkbox de entidad
+            entidadCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    actualizarContadorEntidades();
+                    
+                    // Agregar efecto visual al toggle
+                    const label = this.nextElementSibling;
+                    if (this.checked) {
+                        label.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            label.style.transform = 'scale(1)';
+                        }, 150);
+                    }
+                });
+            });
+            
+            // Botones de seleccionar/deseleccionar todas las entidades
+            const selectAllEntidadesBtn = document.getElementById('selectAllEntidadesBtn');
+            const deselectAllEntidadesBtn = document.getElementById('deselectAllEntidadesBtn');
+            
+            selectAllEntidadesBtn.addEventListener('click', function() {
+                entidadCheckboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                actualizarContadorEntidades();
+                
+                // Efecto visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            deselectAllEntidadesBtn.addEventListener('click', function() {
+                entidadCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                actualizarContadorEntidades();
+                
+                // Efecto visual
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // Inicializar contador de entidades
+            actualizarContadorEntidades();
+        }
+        
+        // Previsualización de archivos
+
+        
+        // Envío del formulario
+        document.getElementById('reporteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validar que se haya seleccionado una ubicación
+            const lat = document.getElementById('latitud').value;
+            const lng = document.getElementById('longitud').value;
+            
+            if (!lat || !lng) {
+                showAlert('Debe seleccionar una ubicación en el mapa', 'error');
+                return;
+            }
+            
+            // Validar que al menos un participante esté seleccionado
+            const participantesSeleccionados = document.querySelectorAll('.participante-checkbox:checked');
+            if (participantesSeleccionados.length === 0) {
+                showAlert('Debe seleccionar al menos un participante', 'error');
+                return;
+            }
+            
+            // Validar que al menos una entidad esté seleccionada
+            const entidadesSeleccionadas = document.querySelectorAll('.entidad-checkbox:checked');
+            if (entidadesSeleccionadas.length === 0) {
+                showAlert('Debe seleccionar al menos una entidad', 'error');
+                return;
+            }
+            
+            // Validar campos dinámicos
+            const tipoActividadSeleccionado = document.getElementById('tipo_actividad_id').value;
+            if (tipoActividadSeleccionado === '21') { // "Otro"
+                const otroTipoActividad = document.getElementById('otro_tipo_actividad').value.trim();
+                if (!otroTipoActividad) {
+                    showAlert('Debe especificar el tipo de actividad', 'error');
+                    return;
+                }
+            }
+            
+            const otraEntidadCheckbox = document.getElementById('entidad_14');
+            if (otraEntidadCheckbox && otraEntidadCheckbox.checked) {
+                const otraEntidad = document.getElementById('otra_entidad').value.trim();
+                if (!otraEntidad) {
+                    showAlert('Debe especificar la entidad', 'error');
+                    return;
+                }
+            }
+            
+            // Mostrar loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                const data = {};
+                
+                // Convertir FormData a objeto JSON
+                for (let [key, value] of formData.entries()) {
+                    if (key.includes('ids')) {
+                        // Para arrays como participantes_ids y entidades_ids
+                        if (!data[key]) {
+                            data[key] = [];
+                        }
+                        data[key].push(value);
+                    } else {
+                        data[key] = value;
+                    }
+                }
+                
+                const response = await fetch('/api/guardar-reporte', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Reporte enviado exitosamente', 'success');
+                    this.reset();
+                    marker.setLatLng([currentLat, currentLng]);
+                    updateCoordinates(currentLat, currentLng);
+                } else {
+                    showAlert(result.error || 'Error al enviar el reporte', 'error');
+                }
+            } catch (error) {
+                showAlert('Error de conexión', 'error');
+                console.error('Error:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+        
+        // Mostrar alertas
+        function showAlert(message, type) {
+            const alert = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
+            alert.textContent = message;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+                // Función para detectar ubicación automáticamente con alta precisión
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                document.getElementById('locationStatus').textContent = '❌ Geolocalización no disponible en este navegador';
+                document.getElementById('locationStatus').style.color = '#e74c3c';
+                return;
+            }
+            
+            // Actualizar estado
+            document.getElementById('locationStatus').textContent = '🎯 Detectando ubicación con alta precisión...';
+            document.getElementById('locationStatus').style.color = '#3498db';
+            
+            // Mostrar indicador de carga
+            const detectBtn = document.getElementById('detectLocationBtn');
+            const originalText = detectBtn.textContent;
+            detectBtn.textContent = '⏳ Optimizando precisión...';
+            detectBtn.disabled = true;
+            
+            // Estrategia de múltiples intentos para máxima precisión
+            let attempts = 0;
+            const maxAttempts = 5;
+            let bestPosition = null;
+            let bestAccuracy = Infinity;
+            
+            function attemptLocation() {
+                attempts++;
+                
+                // Configuración ultra precisa
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 45000, // 45 segundos para mayor precisión
+                    maximumAge: 0 // Sin caché
+                };
+                
+                console.log(`🎯 Intento ${attempts} de ${maxAttempts} - Buscando máxima precisión`);
+                
+                document.getElementById('locationStatus').textContent = 
+                    `🎯 Intento ${attempts} de ${maxAttempts} - Optimizando precisión...`;
+                document.getElementById('locationStatus').style.color = '#3498db';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        
+                        console.log(`📍 Intento ${attempts} - Ubicación obtenida:`, {
+                            lat: lat,
+                            lng: lng,
+                            accuracy: accuracy,
+                            timestamp: new Date().toLocaleString()
+                        });
+                        
+                        // Verificar si la ubicación está dentro de un Sector Catastral de Santa Fe
+                        const sectorCheck = isPointInSectores(lat, lng);
+                        
+                        if (!sectorCheck.isInside) {
+                            console.warn(`⚠️ Intento ${attempts} - Ubicación fuera de Sectores Catastrales de Santa Fe`);
+                            
+                            if (attempts < maxAttempts) {
+                                // Continuar intentando
+                                setTimeout(() => {
+                                    attemptLocation();
+                                }, 2000);
+                            } else {
+                                // Todos los intentos fallaron
+                                document.getElementById('locationStatus').textContent = 
+                                    '❌ Todos los intentos detectaron ubicación fuera de los Sectores Catastrales de Santa Fe. Por favor, seleccione manualmente dentro de los polígonos rojos.';
+                                document.getElementById('locationStatus').style.color = '#e74c3c';
+                                
+                                detectBtn.textContent = originalText;
+                                detectBtn.disabled = false;
+                            }
+                            return;
+                        }
+                        
+                        // La ubicación está dentro de un Sector Catastral de Santa Fe
+                        // Verificar si es la mejor precisión hasta ahora
+                        if (accuracy < bestAccuracy) {
+                            bestPosition = position;
+                            bestAccuracy = accuracy;
+                            console.log(`✅ Intento ${attempts} - Nueva mejor precisión: ±${Math.round(accuracy)}m`);
+                        }
+                        
+                        // Si la precisión es excelente (menos de 10 metros), usar inmediatamente
+                        if (accuracy <= 10) {
+                            console.log('🎯 Precisión excelente alcanzada, usando ubicación inmediatamente');
+                            useBestPosition();
+                            return;
+                        }
+                        
+                        // Si hay más intentos disponibles, continuar
+                        if (attempts < maxAttempts) {
+                            document.getElementById('locationStatus').textContent = 
+                                `🎯 Intento ${attempts}: Precisión ±${Math.round(accuracy)}m. Continuando optimización...`;
+                            document.getElementById('locationStatus').style.color = '#f39c12';
+                            
+                            setTimeout(() => {
+                                attemptLocation();
+                            }, 3000); // Esperar 3 segundos entre intentos
+                        } else {
+                            // Usar la mejor posición encontrada
+                            useBestPosition();
+                        }
+                    },
+                    function(error) {
+                        console.error(`❌ Error en intento ${attempts}:`, error);
+                        
+                        if (attempts < maxAttempts) {
+                            document.getElementById('locationStatus').textContent = 
+                                `🎯 Intento ${attempts} falló. Reintentando...`;
+                            document.getElementById('locationStatus').style.color = '#f39c12';
+                            
+                            setTimeout(() => {
+                                attemptLocation();
+                            }, 2000);
+                        } else {
+                            handleGeolocationError(error);
+                            detectBtn.textContent = originalText;
+                            detectBtn.disabled = false;
+                        }
+                    },
+                    options
+                );
+            }
+            
+            // Función para usar la mejor posición encontrada
+            function useBestPosition() {
+                if (!bestPosition) {
+                    document.getElementById('locationStatus').textContent = 
+                        '❌ No se pudo obtener una ubicación válida. Por favor, seleccione manualmente.';
+                    document.getElementById('locationStatus').style.color = '#e74c3c';
+                    
+                    detectBtn.textContent = originalText;
+                    detectBtn.disabled = false;
+                    return;
+                }
+                
+                const lat = bestPosition.coords.latitude;
+                const lng = bestPosition.coords.longitude;
+                const accuracy = bestPosition.coords.accuracy;
+                
+                // Verificar nuevamente que esté dentro de un sector catastral
+                const sectorCheck = isPointInSectores(lat, lng);
+                
+                // Actualizar marcador y mapa
+                marker.setLatLng([lat, lng]);
+                map.setView([lat, lng], 18); // Zoom más cercano para mayor precisión
+                updateCoordinates(lat, lng);
+                
+                // Crear mensaje de estado con información detallada de precisión
+                let statusText = '✅ Ubicación detectada con alta precisión dentro de Sectores Catastrales de Santa Fe';
+                if (sectorCheck.sectorName) {
+                    statusText += ` (${sectorCheck.sectorName})`;
+                }
+                
+                // Clasificar la precisión
+                let precisionClass = '';
+                if (accuracy <= 5) {
+                    precisionClass = '🎯 Precisión Ultra Alta';
+                } else if (accuracy <= 10) {
+                    precisionClass = '🎯 Precisión Excelente';
+                } else if (accuracy <= 20) {
+                    precisionClass = '✅ Precisión Muy Buena';
+                } else if (accuracy <= 30) {
+                    precisionClass = '👍 Precisión Buena';
+                } else if (accuracy <= 50) {
+                    precisionClass = '⚠️ Precisión Aceptable';
+                } else {
+                    precisionClass = '⚠️ Precisión Baja';
+                }
+                
+                statusText += ` - ${precisionClass} (±${Math.round(accuracy)}m)`;
+                
+                document.getElementById('locationStatus').textContent = statusText;
+                document.getElementById('locationStatus').style.color = '#27ae60';
+                
+                // Obtener dirección
+                getAddressFromCoordinates(lat, lng);
+                
+                detectBtn.textContent = originalText;
+                detectBtn.disabled = false;
+                
+                console.log('✅ Ubicación automática finalizada con alta precisión:', {
+                    lat: lat,
+                    lng: lng,
+                    accuracy: accuracy,
+                    precisionClass: precisionClass,
+                    sector: sectorCheck.sectorName,
+                    attempts: attempts,
+                    timestamp: new Date().toLocaleString()
+                });
+            }
+            
+            // Función para manejar errores de geolocalización
+            function handleGeolocationError(error) {
+                let errorMessage = '❌ Error al detectar ubicación';
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = '❌ Permiso denegado. Habilite la geolocalización en su navegador';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = '❌ Información de ubicación no disponible';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = '❌ Tiempo de espera agotado. Intente nuevamente';
+                        break;
+                    default:
+                        errorMessage = '❌ Error desconocido al obtener ubicación';
+                        break;
+                }
+                
+                document.getElementById('locationStatus').textContent = errorMessage;
+                document.getElementById('locationStatus').style.color = '#e74c3c';
+                
+                console.error('❌ Error en detección automática:', error);
+            }
+            
+            // Iniciar el primer intento
+            attemptLocation();
+        }
+        
+        // Función para manejar clics fuera de los polígonos (área del mapa)
+        function handleMapClick(e) {
+            console.log('🎯 Clic detectado en el mapa (fuera de polígonos):', e.latlng);
+            
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // Verificar si el punto está dentro de un Sector Catastral de Santa Fe
+            console.log('🎯 Coordenadas del clic - Lat:', lat, 'Lng:', lng);
+            const sectorCheck = isPointInSectores(lat, lng);
+            
+            if (!sectorCheck.isInside) {
+                // El punto no está dentro de ningún Sector Catastral de Santa Fe
+                document.getElementById('locationStatus').textContent = '❌ Ubicación fuera de la localidad de Santa Fe. Haga clic dentro de los polígonos rojos para seleccionar ubicación válida.';
+                document.getElementById('locationStatus').style.color = '#e74c3c';
+                
+                console.log('❌ Ubicación fuera de Sectores Catastrales de Santa Fe - Lat:', lat, 'Lng:', lng, 'Resultado:', sectorCheck);
+                return;
+            }
+            
+            // El punto está dentro de un Sector Catastral de Santa Fe
+            console.log('🎯 Moviendo marcador desde clic en mapa a:', [lat, lng]);
+            
+            // Verificar que el marcador existe
+            if (!marker) {
+                console.log('❌ ERROR: El marcador no está definido');
+                return;
+            }
+            
+            // Mover el marcador
+            try {
+                marker.setLatLng([lat, lng]);
+                console.log('🎯 Marcador movido. Nueva posición:', marker.getLatLng());
+                
+                // Actualizar coordenadas
+                updateCoordinates(lat, lng);
+                
+                // Actualizar estado
+                let statusText = '✅ Ubicación seleccionada dentro de Sectores Catastrales de Santa Fe';
+                if (sectorCheck.sectorName) {
+                    statusText += ` (${sectorCheck.sectorName})`;
+                }
+                document.getElementById('locationStatus').textContent = statusText;
+                document.getElementById('locationStatus').style.color = '#27ae60';
+                
+                // Obtener dirección
+                getAddressFromCoordinates(lat, lng);
+                
+                // Mostrar notificación
+                showTemporaryNotification(statusText, 'success');
+                
+                console.log('✅ Marcador movido exitosamente desde clic en mapa');
+                
+            } catch (error) {
+                console.error('❌ ERROR al mover el marcador:', error);
+            }
+        }
+        
+
+        
+                // Función para actualizar ubicación (simplificada para selección manual)
+        function updateLocationWithPrecision(lat, lng, accuracy, position) {
+            // Actualizar coordenadas globales
+            currentLat = lat;
+            currentLng = lng;
+            
+            // Actualizar el mapa con la ubicación actual
+            map.setView([lat, lng], 18); // Zoom más cercano para mayor precisión
+            marker.setLatLng([lat, lng]);
+            updateCoordinates(lat, lng);
+            
+            // Verificar que la ubicación esté en Bogotá
+            const isInBogotaRange = lat >= 4.4 && lat <= 5.0 && lng >= -74.3 && lng <= -73.9;
+            
+            // Crear mensaje de estado
+            let statusText = '✅ Ubicación seleccionada';
+            let statusColor = '#27ae60';
+            
+            // Agregar información sobre la ubicación en Bogotá
+            if (isInBogotaRange) {
+                statusText += ' 📍 En Bogotá';
+            } else {
+                statusText += ' ⚠️ Fuera de Bogotá';
+                statusColor = '#e74c3c';
+            }
+            
+            document.getElementById('locationStatus').textContent = statusText;
+            document.getElementById('locationStatus').style.color = statusColor;
+            
+            // Log para debugging
+            console.log('📍 Ubicación actualizada:', {
+                lat: lat,
+                lng: lng,
+                isInBogotaRange: isInBogotaRange,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            // Obtener dirección usando coordenadas inversas
+            getAddressFromCoordinates(lat, lng);
+        }
+        
+
+        
+
+        
+        // Función para verificar y corregir ubicación
+        function verifyAndCorrectLocation() {
+            const currentLat = parseFloat(document.getElementById('latitud').value);
+            const currentLng = parseFloat(document.getElementById('longitud').value);
+            
+            if (isNaN(currentLat) || isNaN(currentLng)) {
+                alert('❌ No hay ubicación detectada. Primero detecte su ubicación.');
+                return;
+            }
+            
+            // Mostrar modal de verificación
+            showLocationVerificationModal(currentLat, currentLng);
+        }
+        
+        // Función para mostrar modal de verificación de ubicación
+        function showLocationVerificationModal(lat, lng) {
+            // Crear modal
+            const modal = document.createElement('div');
+            modal.id = 'locationVerificationModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 10000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            // Obtener dirección actual
+            getAddressFromCoordinates(lat, lng).then(address => {
+                modal.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <h3 style="margin-top: 0; color: #2c3e50;">📍 Verificar Ubicación Detectada</h3>
+                        
+                        <div style="margin: 20px 0;">
+                            <strong>Coordenadas actuales:</strong><br>
+                            Latitud: ${lat.toFixed(6)}<br>
+                            Longitud: ${lng.toFixed(6)}
+                        </div>
+                        
+                        <div style="margin: 20px 0;">
+                            <strong>Dirección detectada:</strong><br>
+                            <span id="currentAddress">${address || 'Cargando...'}</span>
+                        </div>
+                        
+                        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                            <strong>¿Esta ubicación es correcta?</strong><br>
+                            <small style="color: #666;">Si no es correcta, puede ajustar manualmente en el mapa</small>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                            <button onclick="confirmLocation()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                ✅ Sí, es correcta
+                            </button>
+                            <button onclick="adjustLocationManually()" style="background: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                🗺️ Ajustar en el mapa
+                            </button>
+                            <button onclick="closeLocationModal()" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            });
+        }
+        
+        // Función para confirmar ubicación
+        function confirmLocation() {
+            document.getElementById('locationStatus').textContent = '✅ Ubicación verificada y confirmada';
+            document.getElementById('locationStatus').style.color = '#27ae60';
+            closeLocationModal();
+        }
+        
+                    // Función para ajustar ubicación manualmente
+            function adjustLocationManually() {
+                closeLocationModal();
+                
+                // Mostrar instrucciones
+                document.getElementById('locationStatus').textContent = '🗺️ Haga clic en el mapa para ajustar la ubicación manualmente';
+                document.getElementById('locationStatus').style.color = '#f39c12';
+                
+                // Hacer el mapa más interactivo
+                map.dragging.enable();
+                
+                // Usar la función principal handleMapClick en lugar de crear un nuevo evento
+                // El evento ya está registrado en initMap()
+            }
+        
+        // Función para cerrar modal
+        function closeLocationModal() {
+            const modal = document.getElementById('locationVerificationModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Función para mostrar notificaciones temporales
+        function showTemporaryNotification(message, type = 'info') {
+            // Crear notificación
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: bold;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            
+            // Agregar al DOM
+            document.body.appendChild(notification);
+            
+            // Remover después de 3 segundos
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // Función para configurar la edición automática de coordenadas
+        function setupCoordinateInputs() {
+            const latInput = document.getElementById('latitud');
+            const lngInput = document.getElementById('longitud');
+            
+            // Función para validar y aplicar coordenadas
+            function validateAndApplyCoordinates() {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+                
+                // Solo validar si ambos campos tienen valores
+                if (isNaN(lat) || isNaN(lng)) {
+                    return;
+                }
+                
+                // Validar rango de Bogotá
+                if (lat < 4.0 || lat > 5.0 || lng < -74.5 || lng > -73.5) {
+                    showTemporaryNotification('❌ Las coordenadas deben estar dentro del rango de Bogotá', 'error');
+                    return;
+                }
+                
+                // Verificar si el punto está dentro de un Sector Catastral de Santa Fe
+                const sectorCheck = isPointInSectores(lat, lng);
+                
+                if (!sectorCheck.isInside) {
+                    showTemporaryNotification('❌ Las coordenadas están fuera de los Sectores Catastrales de Santa Fe', 'error');
+                    return;
+                }
+                
+                // Mover el marcador
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                    map.setView([lat, lng], 15); // Centrar el mapa en la nueva posición
+                    
+                    // Actualizar coordenadas globales
+                    currentLat = lat;
+                    currentLng = lng;
+                    
+                    // Actualizar estado
+                    let statusText = '✅ Coordenadas manuales aplicadas dentro de Sectores Catastrales de Santa Fe';
+                    if (sectorCheck.sectorName) {
+                        statusText += ` (${sectorCheck.sectorName})`;
+                    }
+                    document.getElementById('locationStatus').textContent = statusText;
+                    document.getElementById('locationStatus').style.color = '#27ae60';
+                    
+                    // Obtener dirección
+                    getAddressFromCoordinates(lat, lng);
+                    
+                    // Mostrar notificación de éxito
+                    showTemporaryNotification('✅ Coordenadas aplicadas exitosamente', 'success');
+                    
+                    console.log('✅ Coordenadas manuales aplicadas:', {
+                        lat: lat,
+                        lng: lng,
+                        sector: sectorCheck.sectorName,
+                        timestamp: new Date().toLocaleString()
+                    });
+                }
+            }
+            
+            // Event listener para latitud (cuando se pierde el foco)
+            latInput.addEventListener('blur', function() {
+                if (this.value && lngInput.value) {
+                    validateAndApplyCoordinates();
+                }
+            });
+            
+            // Event listener para longitud (cuando se pierde el foco)
+            lngInput.addEventListener('blur', function() {
+                if (this.value && latInput.value) {
+                    validateAndApplyCoordinates();
+                }
+            });
+            
+            // Event listener para Enter en ambos campos
+            latInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value && lngInput.value) {
+                    validateAndApplyCoordinates();
+                }
+            });
+            
+            lngInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value && latInput.value) {
+                    validateAndApplyCoordinates();
+                }
+            });
+        }
+        
+
+        
+        // Función para obtener dirección desde coordenadas (usando Nominatim)
+        function getAddressFromCoordinates(lat, lng) {
+            return new Promise((resolve, reject) => {
+                // Mostrar indicador de carga
+                document.getElementById('addressInfo').textContent = '📍 Obteniendo dirección...';
+                document.getElementById('addressInfo').style.display = 'block';
+                document.getElementById('addressInfo').style.color = '#f39c12';
+                
+                // Usar Nominatim con parámetros optimizados
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=16&addressdetails=1&accept-language=es`;
+                
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'User-Agent': 'ALSF-Formulario/1.0'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.display_name) {
+                        // Formatear la dirección de manera más legible
+                        let address = data.display_name;
+                        
+                        // Si hay componentes específicos, usarlos para una dirección más limpia
+                        if (data.address) {
+                            const addr = data.address;
+                            let cleanAddress = '';
+                            
+                            if (addr.road) cleanAddress += addr.road;
+                            if (addr.house_number) cleanAddress += ` ${addr.house_number}`;
+                            if (addr.suburb) cleanAddress += `, ${addr.suburb}`;
+                            if (addr.city_district) cleanAddress += `, ${addr.city_district}`;
+                            if (addr.city) cleanAddress += `, ${addr.city}`;
+                            
+                            if (cleanAddress) {
+                                address = cleanAddress;
+                            }
+                        }
+                        
+                        document.getElementById('addressInfo').textContent = `📍 Dirección: ${address}`;
+                        document.getElementById('addressInfo').style.color = '#27ae60';
+                        resolve(address);
+                    } else {
+                        document.getElementById('addressInfo').textContent = '📍 Dirección no disponible';
+                        document.getElementById('addressInfo').style.color = '#f39c12';
+                        resolve('Dirección no disponible');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener dirección:', error);
+                    document.getElementById('addressInfo').textContent = '📍 No se pudo obtener la dirección';
+                    document.getElementById('addressInfo').style.color = '#e74c3c';
+                    reject(error);
+                });
+            });
+        }
+        
+        // Funcionalidad para campos dinámicos
+        function setupCamposDinamicos() {
+            // Campo dinámico para "Otro" tipo de actividad
+            const tipoActividadSelect = document.getElementById('tipo_actividad_id');
+            const otroTipoActividadContainer = document.getElementById('otro_tipo_actividad_container');
+            const otroTipoActividadInput = document.getElementById('otro_tipo_actividad');
+            
+            tipoActividadSelect.addEventListener('change', function() {
+                if (this.value === '21') { // ID de "Otro"
+                    otroTipoActividadContainer.style.display = 'block';
+                    otroTipoActividadInput.required = true;
+                } else {
+                    otroTipoActividadContainer.style.display = 'none';
+                    otroTipoActividadInput.required = false;
+                    otroTipoActividadInput.value = '';
+                }
+            });
+            
+            // Campo dinámico para "Otra" entidad
+            const entidadCheckboxes = document.querySelectorAll('.entidad-checkbox');
+            const otraEntidadContainer = document.getElementById('otra_entidad_container');
+            const otraEntidadInput = document.getElementById('otra_entidad');
+            
+            entidadCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const otraEntidadCheckbox = document.getElementById('entidad_14'); // ID de "OTRA"
+                    
+                    if (otraEntidadCheckbox && otraEntidadCheckbox.checked) {
+                        otraEntidadContainer.style.display = 'block';
+                        otraEntidadInput.required = true;
+                    } else {
+                        otraEntidadContainer.style.display = 'none';
+                        otraEntidadInput.required = false;
+                        otraEntidadInput.value = '';
+                    }
+                });
+                });
+        }
+        
+        // Función de prueba para verificar que el clic funcione
+        function testMapClick() {
+            console.log('🧪 Probando funcionalidad de clic en mapa...');
+            console.log('📍 Marcador actual:', marker);
+            console.log('🗺️ Mapa:', map);
+            console.log('🔍 Capa de sectores:', sectoresLayer);
+            
+            // Simular un clic en el centro del mapa
+            const center = map.getCenter();
+            console.log('🎯 Centro del mapa:', center);
+            
+            // Crear un evento de clic simulado
+            const fakeEvent = {
+                latlng: center
+            };
+            
+            console.log('🎯 Simulando clic en:', fakeEvent.latlng);
+            handleMapClick(fakeEvent);
+        }
+        
+        // Función de prueba para mover el marcador directamente
+        function testMoveMarker() {
+            console.log('🧪 Probando movimiento directo del marcador...');
+            
+            if (!marker) {
+                console.log('❌ ERROR: No hay marcador definido');
+                return;
+            }
+            
+            // Obtener posición actual
+            const currentPos = marker.getLatLng();
+            console.log('📍 Posición actual del marcador:', currentPos);
+            
+            // Mover a una nueva posición (un poco al norte)
+            const newLat = currentPos.lat + 0.001;
+            const newLng = currentPos.lng + 0.001;
+            
+            console.log('🎯 Moviendo marcador a:', [newLat, newLng]);
+            
+            try {
+                marker.setLatLng([newLat, newLng]);
+                const newPos = marker.getLatLng();
+                console.log('✅ Marcador movido a:', newPos);
+                
+                // Actualizar coordenadas
+                updateCoordinates(newLat, newLng);
+                
+            } catch (error) {
+                console.error('❌ ERROR al mover marcador:', error);
+            }
+        }
+        
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            setupParticipantesToggles();
+            setupEntidadesToggles();
+            setupCamposDinamicos();
+            setupCoordinateInputs();
+            
+            // No detectar ubicación automáticamente, solo mostrar instrucciones
+            document.getElementById('locationStatus').textContent = '📍 Haga clic en el mapa dentro de los polígonos rojos para seleccionar ubicación, o use el botón para detección automática';
+            document.getElementById('locationStatus').style.color = '#3498db';
+        });
+    </script>
+</body>
+</html>

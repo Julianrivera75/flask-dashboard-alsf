@@ -11,6 +11,16 @@ class Config:
     GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID', '1v4duGwbae0AAHPAEXsGZPZqWI35JkgHyhHg4yHTIpPU')
     CREDENTIALS_FILE = 'credentials/credentials.json'
     
+    # Configuración específica para San Bernardo
+    SAN_BERNARDO_SHEET_ID = os.getenv('SAN_BERNARDO_SHEET_ID', '1v4duGwbae0AAHPAEXsGZPZqWI35JkgHyhHg4yHTIpPU')
+    SAN_BERNARDO_CREDENTIALS_FILE = 'credentials/credencials_sanbernardo.json'
+    SAN_BERNARDO_CREDENTIALS_ENV_VAR = 'GOOGLE_CREDENTIALS_SAN_BERNARDO_JSON'
+    
+    # Configuración específica para El Consuelo
+    EL_CONSUELO_SHEET_ID = os.getenv('EL_CONSUELO_SHEET_ID', '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM')
+    EL_CONSUELO_CREDENTIALS_FILE = 'credentials/credentials_consuelo.json'
+    EL_CONSUELO_CREDENTIALS_ENV_VAR = 'GOOGLE_CREDENTIALS_CONSUELO_JSON'
+    
     # Configuración de la aplicación
     APP_NAME = "Alcaldía Mayor de Bogotá - Dashboard"
     DEBUG = True
@@ -58,7 +68,8 @@ class Config:
 class DevelopmentConfig(Config):
     """Configuración para desarrollo"""
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///dev.db'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///dev.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):
     """Configuración para producción"""

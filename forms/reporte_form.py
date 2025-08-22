@@ -1,86 +1,131 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import StringField, TextAreaField, SelectField, FloatField, HiddenField
-from wtforms.validators import DataRequired, Length, NumberRange, Optional
-from models.reporte import Categoria
+from wtforms import (
+    StringField, TextAreaField, SelectField, FileField, 
+    BooleanField, IntegerField, SelectMultipleField
+)
+from wtforms.validators import DataRequired, Optional, NumberRange, ValidationError
 
 class ReporteForm(FlaskForm):
-    """Formulario para crear/editar reportes"""
+    """Formulario para crear reportes de actividades ALSF"""
     
-    # Campos principales
-    actividad = TextAreaField('Actividad', validators=[
-        DataRequired(message='La actividad es obligatoria'),
-        Length(min=10, max=1000, message='La actividad debe tener entre 10 y 1000 caracteres')
-    ])
+    # Responsable (obligatorio) - Listado desplegable
+    responsable_id = SelectField(
+        'Responsable *',
+        coerce=int,
+        validators=[DataRequired(message='Debe seleccionar un responsable')],
+        description='Seleccione el responsable de la actividad'
+    )
     
-    observaciones = TextAreaField('Observaciones', validators=[
-        Optional(),
-        Length(max=2000, message='Las observaciones no pueden exceder 2000 caracteres')
-    ])
     
-    # Categoría
-    categoria_id = SelectField('Categoría', coerce=int, validators=[
-        DataRequired(message='Debe seleccionar una categoría')
-    ])
     
-    # Georreferenciación
-    latitud = FloatField('Latitud', validators=[
-        DataRequired(message='La latitud es obligatoria'),
-        NumberRange(min=-90, max=90, message='La latitud debe estar entre -90 y 90')
-    ])
+    # Tipo de actividad (obligatorio) - Listado desplegable
+    tipo_actividad_id = SelectField(
+        'Tipo de Actividad *',
+        coerce=int,
+        validators=[DataRequired(message='Debe seleccionar un tipo de actividad')],
+        description='Seleccione el tipo de actividad realizada'
+    )
     
-    longitud = FloatField('Longitud', validators=[
-        DataRequired(message='La longitud es obligatoria'),
-        NumberRange(min=-180, max=180, message='La longitud debe estar entre -180 y 180')
-    ])
+    # Acompañamiento jurídico (obligatorio)
+    acompanamiento_juridico = BooleanField(
+        '¿En la jornada se contó con acompañamiento del área jurídica? *',
+        validators=[DataRequired(message='Debe indicar si contó con acompañamiento jurídico')],
+        description='Marque si contó con acompañamiento del área jurídica'
+    )
     
-    direccion = StringField('Dirección', validators=[
-        Optional(),
-        Length(max=300, message='La dirección no puede exceder 300 caracteres')
-    ])
+    # Participantes (múltiple selección) - Listado desplegable
+    participantes_ids = SelectMultipleField(
+        'Participantes *',
+        coerce=int,
+        validators=[DataRequired(message='Debe seleccionar al menos un participante')],
+        description='Seleccione todos los participantes de la actividad'
+    )
     
-    # Archivos
-    acta_pdf = FileField('Acta (PDF)', validators=[
-        FileRequired(message='El acta es obligatoria'),
-        FileAllowed(['pdf'], message='Solo se permiten archivos PDF')
-    ])
+    # Entidades (múltiple selección) - Listado desplegable
+    entidades_ids = SelectMultipleField(
+        '¿Con qué entidades contó? *',
+        coerce=int,
+        validators=[DataRequired(message='Debe seleccionar al menos una entidad')],
+        description='Seleccione todas las entidades que acompañaron la actividad'
+    )
     
-    foto_1 = FileField('Foto 1', validators=[
-        FileRequired(message='La primera foto es obligatoria'),
-        FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], message='Solo se permiten imágenes')
-    ])
+    # Observaciones
+    observaciones = TextAreaField(
+        'Observaciones',
+        validators=[Optional()],
+        description='Información adicional o comentarios sobre la actividad (opcional)'
+    )
     
-    foto_2 = FileField('Foto 2', validators=[
-        Optional(),
-        FileAllowed(['jpg', 'jpeg', 'png', 'gif', 'webp'], message='Solo se permiten imágenes')
-    ])
+    # RESULTADOS (al menos uno debe ser seleccionado)
+    cambuches_levantados = IntegerField(
+        '# Cambuches levantados',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    armas_blancas_decomisadas = IntegerField(
+        '# Armas blancas decomisadas',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    armas_fuego_decomisadas = IntegerField(
+        '# Armas de fuego decomisadas',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    requisas = IntegerField(
+        '# Requisas',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    sellamientos_establecimientos = IntegerField(
+        '# Sellamientos de establecimientos',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    sensibilizaciones = IntegerField(
+        '# Sensibilizaciones',
+        validators=[Optional(), NumberRange(min=0, message='El número debe ser mayor o igual a 0')],
+        default=0
+    )
+    
+    otra_descripcion = StringField(
+        'Otra (¿cuál?)',
+        validators=[Optional()],
+        description='Describa otra actividad realizada (opcional)'
+    )
+    
+
     
     def __init__(self, *args, **kwargs):
         super(ReporteForm, self).__init__(*args, **kwargs)
-        self.categoria_id.choices = self._get_categorias()
-    
-    def _get_categorias(self):
-        """Obtiene las categorías activas para el formulario"""
-        try:
-            categorias = Categoria.query.filter_by(activo=True).order_by(Categoria.orden, Categoria.nombre).all()
-            return [(cat.id, cat.nombre) for cat in categorias]
-        except Exception:
-            # Si hay error en la base de datos, retornar lista vacía
-            return []
+        # Las opciones se cargarán dinámicamente desde la base de datos
+        self.responsable_id.choices = []
+
+        self.tipo_actividad_id.choices = []
+        self.participantes_ids.choices = []
+        self.entidades_ids.choices = []
     
     def validate(self):
         """Validación personalizada del formulario"""
         if not super(ReporteForm, self).validate():
             return False
         
-        # Validar que las coordenadas estén en un rango razonable para Bogotá
-        # Bogotá está aproximadamente entre lat: 4.4-4.8 y lon: -74.2--73.9
-        if self.latitud.data < 4.0 or self.latitud.data > 5.0:
-            self.latitud.errors.append('La latitud debe estar en el rango de Bogotá (4.0-5.0)')
-            return False
+        # Validar que al menos un resultado tenga un valor mayor a 0
+        resultados = [
+            self.cambuches_levantados.data or 0,
+            self.armas_blancas_decomisadas.data or 0,
+            self.armas_fuego_decomisadas.data or 0,
+            self.requisas.data or 0,
+            self.sellamientos_establecimientos.data or 0,
+            self.sensibilizaciones.data or 0
+        ]
         
-        if self.longitud.data < -74.5 or self.longitud.data > -73.5:
-            self.longitud.errors.append('La longitud debe estar en el rango de Bogotá (-74.5 a -73.5)')
-            return False
+        if all(resultado == 0 for resultado in resultados) and not self.otra_descripcion.data:
+            raise ValidationError('Debe seleccionar al menos un resultado de la actividad')
         
         return True

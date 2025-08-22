@@ -2,7 +2,7 @@ import os
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from typing import Optional, Tuple, List, Dict
-from config.development import DevelopmentConfig
+import config
 from datetime import datetime
 import json  # <-- Agregado para parsear JSON desde variable de entorno
 
@@ -12,9 +12,9 @@ class GoogleSheetsConnector:
     """
     
     def __init__(self, credentials_file: str = None, credentials_env_var: str = None):
-        self.credentials_file = credentials_file or DevelopmentConfig.GOOGLE_SHEETS_CREDENTIALS_FILE
+        self.credentials_file = credentials_file or 'credentials/credentials.json'
         self.credentials_env_var = credentials_env_var or "GOOGLE_CREDENTIALS_JSON"
-        self.scopes = DevelopmentConfig.GOOGLE_SHEETS_SCOPES
+        self.scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']
         self.client = None
         self._cache = None
         self._last_update = None
@@ -24,34 +24,36 @@ class GoogleSheetsConnector:
         Conectar a Google Sheets usando credenciales de servicio
         """
         try:
-            print(f"Intentando conectar a Google Sheets...")
-            print(f"Archivo de credenciales: {self.credentials_file}")
-            print(f"Scopes: {self.scopes}")
+            print(f"🔌 Intentando conectar a Google Sheets...")
+            print(f"📁 Archivo de credenciales: {self.credentials_file}")
+            print(f"🔑 Variable de entorno: {self.credentials_env_var}")
+            print(f"🌐 Scopes: {self.scopes}")
             
             # Detectar si estamos en Railway
             running_on_railway = os.environ.get("RAILWAY_STATIC_URL") or os.environ.get("RAILWAY_ENVIRONMENT")
             credentials_json = os.environ.get(self.credentials_env_var)
+            
             if running_on_railway:
                 if not credentials_json:
-                    print(f"❌ ERROR: No se encontró la variable de entorno {self.credentials_env_var} en Railway. Por favor, configúrala con el JSON de credenciales.")
+                    print(f"❌ ERROR: No se encontró la variable de entorno {self.credentials_env_var} en Railway.")
                     return False
-                print(f"Usando credenciales desde variable de entorno {self.credentials_env_var} (Railway)")
+                print(f"🚂 Usando credenciales desde variable de entorno {self.credentials_env_var} (Railway)")
                 creds_dict = json.loads(credentials_json)
                 creds = ServiceAccountCredentials.from_json_keyfile_dict(
                     creds_dict, self.scopes
                 )
             else:
                 if credentials_json:
-                    print(f"Usando credenciales desde variable de entorno {self.credentials_env_var}")
+                    print(f"🔑 Usando credenciales desde variable de entorno {self.credentials_env_var}")
                     creds_dict = json.loads(credentials_json)
                     creds = ServiceAccountCredentials.from_json_keyfile_dict(
                         creds_dict, self.scopes
                     )
                 else:
-                    pass
                     if not os.path.exists(self.credentials_file):
                         print(f"❌ ERROR: El archivo de credenciales no existe: {self.credentials_file}")
                         return False
+                    print(f"📁 Usando credenciales desde archivo: {self.credentials_file}")
                     creds = ServiceAccountCredentials.from_json_keyfile_name(
                         self.credentials_file, self.scopes
                     )
@@ -92,22 +94,25 @@ class GoogleSheetsConnector:
         try:
             if not self.client:
                 if not self.connect():
-                    print("No se pudo conectar a Google Sheets")
+                    print("❌ No se pudo conectar a Google Sheets")
                     return None, None
             
+            print(f"📊 Abriendo hoja de cálculo con ID: {sheet_id}")
             # Abrir la hoja de cálculo
             sheet = self.client.open_by_key(sheet_id).sheet1
             
             # Obtener todos los valores
+            print("📥 Obteniendo datos de la hoja...")
             all_values = sheet.get_all_values()
             
             if not all_values:
-                print("La hoja está vacía")
+                print("⚠️ La hoja está vacía")
                 return None, None
             
             # La primera fila contiene los encabezados
             headers = all_values[0]
-            print(f"Encabezados de la hoja: {headers}")
+            print(f"📋 Encabezados de la hoja: {headers}")
+            
             # Crear lista de diccionarios con los datos
             data = []
             for row in all_values[1:]:  # Saltar la fila de encabezados
@@ -119,7 +124,7 @@ class GoogleSheetsConnector:
                 row_dict = dict(zip(headers, row))
                 data.append(row_dict)
             
-            print(f"Datos obtenidos de Google Sheets: {len(data)} registros")
+            print(f"✅ Datos obtenidos de Google Sheets: {len(data)} registros")
             return data, headers
             
         except Exception as e:

@@ -123,3 +123,5 @@ class FileService:
         if file_path.startswith('static/'):
             return '/' + file_path
         return file_path
+
+

@@ -42,6 +42,8 @@ logs/
 # Credentials (IMPORTANTE: No subir credenciales reales)
 credentials/*.json
 !credentials/*.example
+credentials_sanbernardo.json
+credentials/config_san_bernardo.env
 
 # OS
 .DS_Store

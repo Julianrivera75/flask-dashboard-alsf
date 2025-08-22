@@ -1,108 +1,151 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from models.user import db
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
-class Categoria(db.Model):
-    """Modelo para las categorías de reportes"""
-    __tablename__ = 'categorias'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False, unique=True)
-    descripcion = db.Column(db.Text)
-    activo = db.Column(db.Boolean, default=True)
-    orden = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Relación con reportes
-    reportes = db.relationship('Reporte', backref='categoria', lazy=True)
-    
-    def __repr__(self):
-        return f'<Categoria {self.nombre}>'
+# Las tablas de asociación se definirán después de que 'db' esté disponible
+# reporte_participantes = db.Table('reporte_participantes', ...)
+# reporte_entidades = db.Table('reporte_entidades', ...)
 
-class Reporte(db.Model):
-    """Modelo principal para los reportes"""
-    __tablename__ = 'reportes'
+def create_models(db):
+    """Función para crear todos los modelos después de que 'db' esté disponible"""
     
-    id = db.Column(db.Integer, primary_key=True)
+    # Tablas de asociación
+    reporte_participantes = db.Table('reporte_participantes',
+        db.Column('reporte_id', db.Integer, db.ForeignKey('reportes.id'), primary_key=True),
+        db.Column('responsable_id', db.Integer, db.ForeignKey('responsables.id'), primary_key=True)
+    )
     
-    # Campos del formulario
-    actividad = db.Column(db.Text, nullable=False)
-    observaciones = db.Column(db.Text)
+    reporte_entidades = db.Table('reporte_entidades',
+        db.Column('reporte_id', db.Integer, db.ForeignKey('reportes.id'), primary_key=True),
+        db.Column('entidad_id', db.Integer, db.ForeignKey('entidades.id'), primary_key=True)
+    )
     
-    # Georreferenciación
-    latitud = db.Column(db.Float, nullable=False)
-    longitud = db.Column(db.Float, nullable=False)
-    direccion = db.Column(db.String(300))
-    
-    # Relaciones
-    categoria_id = db.Column(db.Integer, db.ForeignKey('categorias.id'), nullable=False)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    
-    # Estado y metadatos
-    estado = db.Column(db.String(50), default='pendiente')  # pendiente, aprobado, rechazado
-    fecha_reporte = db.Column(db.DateTime, default=datetime.utcnow)
-    fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relaciones
-    archivos = db.relationship('ArchivoReporte', backref='reporte', lazy=True, cascade='all, delete-orphan')
-    
-    def __repr__(self):
-        return f'<Reporte {self.id}: {self.actividad[:50]}...>'
-    
-    def to_dict(self):
-        """Convierte el reporte a diccionario para JSON"""
-        return {
-            'id': self.id,
-            'actividad': self.actividad,
-            'observaciones': self.observaciones,
-            'latitud': self.latitud,
-            'longitud': self.longitud,
-            'direccion': self.direccion,
-            'categoria': self.categoria.nombre if self.categoria else None,
-            'estado': self.estado,
-            'fecha_reporte': self.fecha_reporte.isoformat() if self.fecha_reporte else None,
-            'archivos': [archivo.to_dict() for archivo in self.archivos]
-        }
+    class Responsable(db.Model):
+        __tablename__ = 'responsables'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        nombre = db.Column(db.String(100), nullable=False)
+        cargo = db.Column(db.String(100))
+        activo = db.Column(db.Boolean, default=True)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        def __repr__(self):
+            return f'<Responsable {self.nombre}>'
 
-class ArchivoReporte(db.Model):
-    """Modelo para archivos adjuntos (PDF y fotos)"""
-    __tablename__ = 'archivos_reportes'
+    class TipoActividad(db.Model):
+        __tablename__ = 'tipos_actividad'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        nombre = db.Column(db.String(100), nullable=False)
+        descripcion = db.Column(db.Text)
+        activo = db.Column(db.Boolean, default=True)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        def __repr__(self):
+            return f'<TipoActividad {self.nombre}>'
+
+
+
+    class Entidad(db.Model):
+        __tablename__ = 'entidades'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        nombre = db.Column(db.String(100), nullable=False)
+        tipo = db.Column(db.String(50))  # policía, ejército, etc.
+        activo = db.Column(db.Boolean, default=True)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        def __repr__(self):
+            return f'<Entidad {self.nombre}>'
+
+    class Sector(db.Model):
+        __tablename__ = 'sectores'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        nombre = db.Column(db.String(100), nullable=False)
+        descripcion = db.Column(db.Text)
+        orden = db.Column(db.Integer, default=0)
+        activo = db.Column(db.Boolean, default=True)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        def __repr__(self):
+            return f'<Sector {self.nombre}>'
+
+    class Reporte(db.Model):
+        __tablename__ = 'reportes'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        fecha_reporte = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+        responsable_id = db.Column(db.Integer, db.ForeignKey('responsables.id'), nullable=False)
+        latitud = db.Column(db.Float, nullable=False)
+        longitud = db.Column(db.Float, nullable=False)
+        sector_id = db.Column(db.Integer, db.ForeignKey('sectores.id'), nullable=False)
+
+        tipo_actividad_id = db.Column(db.Integer, db.ForeignKey('tipos_actividad.id'), nullable=False)
+        acompanamiento_juridico = db.Column(db.Boolean, default=False)
+        observaciones = db.Column(db.Text)
+        usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+        estado = db.Column(db.String(20), default='activo')  # activo, inactivo, eliminado
+        fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+        
+        # Relaciones
+        responsable = db.relationship('Responsable', backref='reportes')
+        sector = db.relationship('Sector', backref='reportes')
+
+        tipo_actividad = db.relationship('TipoActividad', backref='reportes')
+        usuario = db.relationship('User', backref='reportes', foreign_keys=[usuario_id])
+        
+        # Relaciones muchos a muchos
+        participantes = db.relationship('Responsable', secondary=reporte_participantes, backref='reportes_participante')
+        entidades = db.relationship('Entidad', secondary=reporte_entidades, backref='reportes_entidad')
+        
+        # Relación uno a muchos con resultados
+        resultados = db.relationship('ResultadoReporte', backref='reporte', lazy='dynamic')
+        
+        def __repr__(self):
+            return f'<Reporte {self.id} - {self.fecha_reporte}>'
+
+    class ResultadoReporte(db.Model):
+        __tablename__ = 'resultados_reporte'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        reporte_id = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False)
+        cambuches_levantados = db.Column(db.Integer, default=0)
+        armas_blancas_decomisadas = db.Column(db.Integer, default=0)
+        armas_fuego_decomisadas = db.Column(db.Integer, default=0)
+        requisas = db.Column(db.Integer, default=0)
+        sellamientos_establecimientos = db.Column(db.Integer, default=0)
+        sensibilizaciones = db.Column(db.Integer, default=0)
+        otra_descripcion = db.Column(db.String(200))
+        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        def __repr__(self):
+            return f'<ResultadoReporte {self.id} - Reporte {self.reporte_id}>'
+
+    class ArchivoReporte(db.Model):
+        __tablename__ = 'archivos_reporte'
+        
+        id = db.Column(db.Integer, primary_key=True)
+        reporte_id = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False)
+        nombre_archivo = db.Column(db.String(255), nullable=False)
+        ruta_archivo = db.Column(db.String(500), nullable=False)
+        tipo_archivo = db.Column(db.String(20), nullable=False)  # pdf, imagen_antes, imagen_despues
+        tamano = db.Column(db.Integer)  # en bytes
+        fecha_subida = db.Column(db.DateTime, default=datetime.utcnow)
+        
+        # Relación
+        reporte = db.relationship('Reporte', backref='archivos')
+        
+        def __repr__(self):
+            return f'<ArchivoReporte {self.nombre_archivo}>'
     
-    id = db.Column(db.Integer, primary_key=True)
-    
-    # Información del archivo
-    tipo_archivo = db.Column(db.String(20), nullable=False)  # 'pdf', 'foto'
-    nombre_original = db.Column(db.String(255), nullable=False)
-    nombre_archivo = db.Column(db.String(255), nullable=False)
-    ruta_archivo = db.Column(db.String(500), nullable=False)
-    url_publica = db.Column(db.String(500))  # Para cloud storage
-    
-    # Metadatos
-    tamaño_bytes = db.Column(db.BigInteger)
-    tipo_mime = db.Column(db.String(100))
-    dimensiones = db.Column(db.String(50))  # Para fotos: "1920x1080"
-    orden = db.Column(db.Integer, default=0)  # Para las fotos (1, 2)
-    
-    # Relaciones
-    reporte_id = db.Column(db.Integer, db.ForeignKey('reportes.id'), nullable=False)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    
-    # Timestamps
-    fecha_subida = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<ArchivoReporte {self.nombre_original}>'
-    
-    def to_dict(self):
-        """Convierte el archivo a diccionario para JSON"""
-        return {
-            'id': self.id,
-            'tipo_archivo': self.tipo_archivo,
-            'nombre_original': self.nombre_original,
-            'nombre_archivo': self.nombre_archivo,
-            'url': self.url_publica or self.ruta_archivo,
-            'tamaño_bytes': self.tamaño_bytes,
-            'dimensiones': self.dimensiones,
-            'orden': self.orden,
-            'fecha_subida': self.fecha_subida.isoformat() if self.fecha_subida else None
-        }
+    # Retornar todas las clases como un diccionario
+    return {
+        'Responsable': Responsable,
+        'TipoActividad': TipoActividad,
+        'Entidad': Entidad,
+        'Sector': Sector,
+        'Reporte': Reporte,
+        'ResultadoReporte': ResultadoReporte,
+        'ArchivoReporte': ArchivoReporte
+    }

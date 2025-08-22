@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alcaldía Local de Santa Fe - Indicadores Estratégicos</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -26,11 +36,24 @@
         <ul id="menu-options">
             <li><a href="/" class="active">Inicio</a></li>
             <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
-            <li><a href="/login"><i class="fas fa-lock"></i> Acceso Restringido</a></li>
+            {% if session.authenticated %}
+           <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+           {% else %}
+           <li><a href="/login"><i class="fas fa-lock"></i> Acceso Administrativo</a></li>
+           {% endif %}
+            <li><a href="/formulario-reporte"><i class="fas fa-clipboard-list"></i> Nuevo Reporte</a></li>
+            <li><a href="/mapa-reportes"><i class="fas fa-map"></i> Mapa de Reportes</a></li>
             <!-- <li><a href="/datos">Datos</a></li> -->
             <!-- <li><a href="/contacto">Contacto</a></li> -->
         </ul>
     </nav>
+    
+    <!-- Mensaje informativo sobre acceso restringido -->
+    <div style="background: rgba(255, 255, 255, 0.1); margin: 20px; padding: 15px; border-radius: 10px; text-align: center; color: white;">
+        <p style="margin: 0; font-size: 1.1em;">
+            🔒 <strong>Nota:</strong> El formulario de reportes y el mapa requieren acceso administrativo
+        </p>
+    </div>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -169,7 +192,7 @@
         async function cargarIndicadoresPrincipales() {
             // San Bernardo
             try {
-                const resSB = await fetch('/api/data');
+                const resSB = await fetch('/api/san-bernardo/data');
                 const dataSB = await resSB.json();
                 if (dataSB && dataSB.data && Array.isArray(dataSB.data)) {
                     // Personas impactadas
