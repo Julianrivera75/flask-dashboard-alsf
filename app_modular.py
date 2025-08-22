@@ -278,14 +278,128 @@ def create_app(config_class=config.DevelopmentConfig):
         """API para obtener datos de encuestas de El Consuelo"""
         try:
             # Obtener datos reales desde Google Sheets de El Consuelo
-            sheet_id = config.EL_CONSUELO_SHEET_ID
-            credentials_file = config.EL_CONSUELO_CREDENTIALS_FILE
-            consuelo_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var=config.EL_CONSUELO_CREDENTIALS_ENV_VAR)
+            sheet_id = config.Config.EL_CONSUELO_SHEET_ID
+            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
+            consuelo_connector = GoogleSheetsConnector(credentials_file=credentials_file, credentials_env_var=config.Config.EL_CONSUELO_CREDENTIALS_ENV_VAR)
             raw_data = consuelo_connector.get_data(sheet_id)
             
-            return jsonify({'data': raw_data, 'total': len(raw_data)})
+            logger.info(f"Datos de El Consuelo obtenidos: {len(raw_data) if raw_data else 0} registros")
+            
+            return jsonify({'data': raw_data, 'total': len(raw_data) if raw_data else 0})
         except Exception as e:
+            logger.error(f"Error en API de El Consuelo: {str(e)}")
             return jsonify({'error': str(e), 'data': []}), 500
+    
+    @app.route('/test-el-consuelo')
+    def test_el_consuelo():
+        """Ruta de prueba para diagnosticar problemas con El Consuelo"""
+        try:
+            logger.info("🧪 Iniciando prueba de El Consuelo...")
+            
+            # Verificar configuración
+            sheet_id = config.Config.EL_CONSUELO_SHEET_ID
+            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
+            credentials_env_var = config.Config.EL_CONSUELO_CREDENTIALS_ENV_VAR
+            
+            logger.info(f"📋 Configuración El Consuelo:")
+            logger.info(f"   - Sheet ID: {sheet_id}")
+            logger.info(f"   - Credentials File: {credentials_file}")
+            logger.info(f"   - Credentials Env Var: {credentials_env_var}")
+            
+            # Verificar si el archivo existe
+            import os
+            file_exists = os.path.exists(credentials_file)
+            env_var_exists = os.environ.get(credentials_env_var) is not None
+            
+            logger.info(f"   - Archivo existe: {file_exists}")
+            logger.info(f"   - Variable de entorno existe: {env_var_exists}")
+            
+            # Intentar conectar
+            consuelo_connector = GoogleSheetsConnector(
+                credentials_file=credentials_file, 
+                credentials_env_var=credentials_env_var
+            )
+            
+            if consuelo_connector.connect():
+                logger.info("✅ Conexión exitosa a Google Sheets")
+                
+                # Intentar obtener datos paso a paso
+                logger.info("📊 Intentando obtener datos paso a paso...")
+                
+                # 1. Obtener datos crudos
+                raw_data, headers = consuelo_connector.get_sheet_data(sheet_id)
+                logger.info(f"📊 Datos crudos obtenidos: {len(raw_data) if raw_data else 0} registros")
+                logger.info(f"📋 Headers obtenidos: {headers}")
+                
+                if raw_data and len(raw_data) > 0:
+                    logger.info(f"📋 Primer registro: {raw_data[0]}")
+                    logger.info(f"📋 Último registro: {raw_data[-1]}")
+                    
+                    # 2. Procesar datos (simular el procesamiento real)
+                    processed_data = []
+                    for i, row in enumerate(raw_data[:5]):  # Solo los primeros 5 para debug
+                        processed_row = {}
+                        for key, value in row.items():
+                            if key and value:  # Solo campos no vacíos
+                                processed_row[key] = value
+                        processed_data.append(processed_row)
+                        logger.info(f"📋 Registro procesado {i+1}: {len(processed_row)} campos")
+                    
+                    # 3. Verificar si hay datos válidos
+                    valid_data = [row for row in raw_data if any(row.values())]
+                    logger.info(f"📊 Datos válidos (con al menos un campo): {len(valid_data)}")
+                    
+                    # 4. Contar campos por registro
+                    if raw_data:
+                        field_counts = [len([v for v in row.values() if v]) for row in raw_data]
+                        avg_fields = sum(field_counts) / len(field_counts) if field_counts else 0
+                        logger.info(f"📊 Promedio de campos por registro: {avg_fields:.1f}")
+                        logger.info(f"📊 Mínimo campos: {min(field_counts) if field_counts else 0}")
+                        logger.info(f"📊 Máximo campos: {max(field_counts) if field_counts else 0}")
+                
+                return jsonify({
+                    'success': True,
+                    'config': {
+                        'sheet_id': sheet_id,
+                        'credentials_file': credentials_file,
+                        'credentials_env_var': credentials_env_var,
+                        'file_exists': file_exists,
+                        'env_var_exists': env_var_exists
+                    },
+                    'connection': 'success',
+                    'raw_data_count': len(raw_data) if raw_data else 0,
+                    'headers': headers,
+                    'valid_data_count': len([row for row in (raw_data or []) if any(row.values())]),
+                    'sample_data': raw_data[0] if raw_data else None,
+                    'sample_processed': processed_data if 'processed_data' in locals() else None,
+                    'field_stats': {
+                        'avg_fields': sum([len([v for v in row.values() if v]) for row in (raw_data or [])]) / len(raw_data) if raw_data else 0,
+                        'min_fields': min([len([v for v in row.values() if v]) for row in (raw_data or [])]) if raw_data else 0,
+                        'max_fields': max([len([v for v in row.values() if v]) for row in (raw_data or [])]) if raw_data else 0
+                    } if raw_data else None
+                })
+            else:
+                logger.error("❌ No se pudo conectar a Google Sheets")
+                return jsonify({
+                    'success': False,
+                    'error': 'No se pudo conectar a Google Sheets',
+                    'config': {
+                        'sheet_id': sheet_id,
+                        'credentials_file': credentials_file,
+                        'credentials_env_var': credentials_env_var,
+                        'file_exists': file_exists,
+                        'env_var_exists': env_var_exists
+                    }
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error en prueba de El Consuelo: {str(e)}")
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500
     
     def process_san_bernardo_data(raw_data):
         """
@@ -383,3 +497,419 @@ if __name__ == '__main__':
     debug = True
     
     app.run(host='127.0.0.1', port=port, debug=debug) 
+
+    @app.route('/test-el-consuelo-api')
+    def test_el_consuelo_api():
+        """Ruta de prueba que simula exactamente la API principal de El Consuelo"""
+        try:
+            logger.info("🧪 Probando API principal de El Consuelo...")
+            
+            # Simular exactamente lo que hace la API principal
+            sheet_id = config.Config.EL_CONSUELO_SHEET_ID
+            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
+            credentials_env_var = config.Config.EL_CONSUELO_CREDENTIALS_ENV_VAR
+            
+            logger.info(f"📋 Usando configuración: Sheet ID {sheet_id}")
+            
+            consuelo_connector = GoogleSheetsConnector(
+                credentials_file=credentials_file, 
+                credentials_env_var=credentials_env_var
+            )
+            
+            # Usar el método get_data() que es el que usa la API principal
+            raw_data = consuelo_connector.get_data(sheet_id)
+            
+            logger.info(f"📊 API principal - Datos obtenidos: {len(raw_data) if raw_data else 0} registros")
+            
+            # Simular el procesamiento que se hace en el frontend
+            if raw_data and len(raw_data) > 0:
+                # Contar encuestas (asumiendo que cada fila es una encuesta)
+                total_encuestas = len(raw_data)
+                
+                # Verificar estructura de datos
+                sample_record = raw_data[0]
+                logger.info(f"📋 Muestra del primer registro: {sample_record}")
+                
+                # Verificar si hay campos importantes
+                important_fields = ['Entidad', 'Población impactada', 'Fecha final de ejecución', 'Resumen de actividades']
+                available_fields = [field for field in important_fields if any(field in str(record) for record in raw_data[:5])]
+                
+                return jsonify({
+                    'success': True,
+                    'api_method': 'get_data()',
+                    'total_encuestas': total_encuestas,
+                    'data': raw_data,
+                    'sample_record': sample_record,
+                    'available_important_fields': available_fields,
+                    'all_fields': list(sample_record.keys()) if sample_record else [],
+                    'message': f'API principal funcionando: {total_encuestas} encuestas encontradas'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'api_method': 'get_data()',
+                    'total_encuestas': 0,
+                    'data': [],
+                    'error': 'No se obtuvieron datos de la API principal'
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error en prueba de API principal: {str(e)}")
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500 
+
+    @app.route('/test-simple-consuelo')
+    def test_simple_consuelo():
+        """Prueba súper simple: solo abrir la hoja y contar filas"""
+        try:
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            
+            logger.info("🧪 Prueba súper simple de El Consuelo...")
+            
+            # Configuración
+            sheet_id = config.Config.EL_CONSUELO_SHEET_ID
+            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
+            
+            logger.info(f"📋 Sheet ID: {sheet_id}")
+            logger.info(f"📁 Credentials: {credentials_file}")
+            
+            # Conectar directamente
+            scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+            creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_file, scopes)
+            client = gspread.authorize(creds)
+            
+            logger.info("✅ Conectado a Google Sheets")
+            
+            # Abrir la hoja
+            try:
+                sheet = client.open_by_key(sheet_id)
+                logger.info(f"✅ Hoja abierta: {sheet.title}")
+                
+                # Obtener la primera hoja
+                worksheet = sheet.sheet1
+                logger.info(f"✅ Primera hoja: {worksheet.title}")
+                
+                # Contar filas
+                all_values = worksheet.get_all_values()
+                total_rows = len(all_values)
+                total_columns = len(all_values[0]) if all_values else 0
+                
+                logger.info(f"📊 Total filas: {total_rows}")
+                logger.info(f"📊 Total columnas: {total_columns}")
+                
+                if all_values:
+                    headers = all_values[0]
+                    logger.info(f"📋 Headers: {headers}")
+                    
+                    # Contar filas con datos (no vacías)
+                    non_empty_rows = [row for row in all_values[1:] if any(cell.strip() for cell in row)]
+                    logger.info(f"📊 Filas con datos: {len(non_empty_rows)}")
+                    
+                    # Mostrar primera fila de datos
+                    if non_empty_rows:
+                        first_data_row = non_empty_rows[0]
+                        logger.info(f"📋 Primera fila de datos: {first_data_row}")
+                
+                return jsonify({
+                    'success': True,
+                    'sheet_title': sheet.title,
+                    'worksheet_title': worksheet.title,
+                    'total_rows': total_rows,
+                    'total_columns': total_columns,
+                    'data_rows': len(non_empty_rows) if 'non_empty_rows' in locals() else 0,
+                    'headers': headers if 'headers' in locals() else [],
+                    'first_data_row': first_data_row if 'first_data_row' in locals() else None
+                })
+                
+            except Exception as sheet_error:
+                logger.error(f"❌ Error abriendo la hoja: {str(sheet_error)}")
+                return jsonify({
+                    'success': False,
+                    'error': f'Error abriendo hoja: {str(sheet_error)}',
+                    'sheet_id': sheet_id
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error en prueba simple: {str(e)}")
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500 
+
+    @app.route('/verify-439-consuelo')
+    def verify_439_consuelo():
+        """Verificar específicamente si hay 439 registros en El Consuelo"""
+        try:
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            
+            logger.info("🔍 Verificando específicamente los 439 registros de El Consuelo...")
+            
+            # Configuración específica de El Consuelo
+            sheet_id = config.Config.EL_CONSUELO_SHEET_ID
+            credentials_file = config.Config.EL_CONSUELO_CREDENTIALS_FILE
+            
+            logger.info(f"📋 Sheet ID de El Consuelo: {sheet_id}")
+            logger.info(f"📁 Credenciales de El Consuelo: {credentials_file}")
+            
+            # Conectar usando las credenciales de El Consuelo
+            scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+            creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_file, scopes)
+            client = gspread.authorize(creds)
+            
+            logger.info("✅ Conectado usando credenciales de El Consuelo")
+            
+            # Abrir la hoja específica de El Consuelo
+            sheet = client.open_by_key(sheet_id)
+            logger.info(f"✅ Hoja de El Consuelo abierta: {sheet.title}")
+            
+            # Obtener la primera hoja
+            worksheet = sheet.sheet1
+            logger.info(f"✅ Primera hoja: {worksheet.title}")
+            
+            # Obtener todos los valores
+            all_values = worksheet.get_all_values()
+            total_rows = len(all_values)
+            
+            logger.info(f"📊 Total de filas en la hoja: {total_rows}")
+            
+            if total_rows > 0:
+                headers = all_values[0]
+                data_rows = all_values[1:]  # Excluir headers
+                
+                # Contar filas con datos (no completamente vacías)
+                non_empty_rows = [row for row in data_rows if any(cell.strip() for cell in row)]
+                empty_rows = [row for row in data_rows if not any(cell.strip() for cell in row)]
+                
+                logger.info(f"📊 Filas con datos: {len(non_empty_rows)}")
+                logger.info(f"📊 Filas vacías: {len(empty_rows)}")
+                logger.info(f"📊 Headers: {len(headers)} columnas")
+                
+                # Verificar si hay exactamente 439 registros
+                expected_count = 439
+                actual_count = len(non_empty_rows)
+                
+                if actual_count == expected_count:
+                    logger.info(f"✅ ¡EXACTO! Encontrados {actual_count} registros (esperados {expected_count})")
+                    status = "EXACTO"
+                elif actual_count > expected_count:
+                    logger.info(f"⚠️ Más registros de lo esperado: {actual_count} (esperados {expected_count})")
+                    status = "MÁS_REGISTROS"
+                else:
+                    logger.info(f"❌ Menos registros de lo esperado: {actual_count} (esperados {expected_count})")
+                    status = "MENOS_REGISTROS"
+                
+                # Mostrar muestra de datos
+                sample_data = []
+                for i, row in enumerate(non_empty_rows[:5]):  # Primeros 5 registros
+                    row_dict = dict(zip(headers, row))
+                    sample_data.append({
+                        'row_number': i + 1,
+                        'data': row_dict
+                    })
+                
+                return jsonify({
+                    'success': True,
+                    'sheet_title': sheet.title,
+                    'worksheet_title': worksheet.title,
+                    'expected_records': expected_count,
+                    'actual_records': actual_count,
+                    'total_rows_in_sheet': total_rows,
+                    'headers_count': len(headers),
+                    'empty_rows': len(empty_rows),
+                    'status': status,
+                    'headers': headers,
+                    'sample_data': sample_data,
+                    'message': f'Encontrados {actual_count} registros de {expected_count} esperados'
+                })
+            else:
+                logger.warning("⚠️ La hoja está completamente vacía")
+                return jsonify({
+                    'success': False,
+                    'error': 'La hoja está completamente vacía',
+                    'total_rows': 0,
+                    'expected_records': 439
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error verificando 439 registros: {str(e)}")
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc(),
+                'expected_records': 439
+            }), 500 
+
+    @app.route('/api/el-consuelo/data-correct')
+    def api_el_consuelo_data_correct():
+        """API para obtener datos de El Consuelo usando las credenciales correctas"""
+        try:
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            
+            logger.info("🔄 Obteniendo datos de El Consuelo con credenciales correctas...")
+            
+            # Usar las credenciales específicas que funcionan
+            credentials_file = 'credentials/alcaldialocalsantafe-8a418c83a2a4.json'
+            sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
+            
+            logger.info(f"📁 Credenciales: {credentials_file}")
+            logger.info(f"📋 Sheet ID: {sheet_id}")
+            
+            # Conectar directamente usando las credenciales correctas
+            scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+            creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_file, scopes)
+            client = gspread.authorize(creds)
+            
+            logger.info("✅ Conectado usando credenciales correctas")
+            
+            # Abrir la hoja específica
+            sheet = client.open_by_key(sheet_id)
+            worksheet = sheet.sheet1
+            
+            logger.info(f"✅ Hoja abierta: {sheet.title}")
+            logger.info(f"✅ Primera hoja: {worksheet.title}")
+            
+            # Obtener todos los valores
+            all_values = worksheet.get_all_values()
+            total_rows = len(all_values)
+            
+            logger.info(f"📊 Total de filas en la hoja: {total_rows}")
+            
+            if total_rows > 1:  # Más de 1 porque la primera fila son headers
+                headers = all_values[0]
+                data_rows = all_values[1:]  # Excluir headers
+                
+                # Contar filas con datos (no completamente vacías)
+                non_empty_rows = [row for row in data_rows if any(cell.strip() for cell in row)]
+                
+                logger.info(f"📊 Filas con datos: {len(non_empty_rows)}")
+                logger.info(f"📊 Headers: {len(headers)} columnas")
+                
+                # Crear lista de diccionarios con los datos
+                data = []
+                for row in non_empty_rows:
+                    # Asegurar que la fila tenga la misma longitud que los headers
+                    while len(row) < len(headers):
+                        row.append('')
+                    
+                    # Crear diccionario con headers como claves
+                    row_dict = dict(zip(headers, row))
+                    data.append(row_dict)
+                
+                logger.info(f"✅ Datos procesados: {len(data)} registros")
+                
+                return jsonify({
+                    'data': data, 
+                    'total': len(data),
+                    'success': True,
+                    'message': f'Datos obtenidos usando credenciales correctas: {len(data)} registros'
+                })
+            else:
+                logger.warning("⚠️ La hoja está vacía o solo tiene headers")
+                return jsonify({
+                    'data': [], 
+                    'total': 0,
+                    'success': False,
+                    'error': 'La hoja está vacía o solo tiene headers'
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error obteniendo datos de El Consuelo: {str(e)}")
+            import traceback
+            return jsonify({
+                'error': str(e),
+                'traceback': traceback.format_exc(),
+                'data': [],
+                'success': False
+            }), 500 
+
+    @app.route('/test-credentials-simple')
+    def test_credentials_simple():
+        """Prueba súper simple de las credenciales alcaldialocalsantafe-8a418c83a2a4.json"""
+        try:
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            import os
+            
+            logger.info("🧪 Prueba súper simple de credenciales...")
+            
+            # Verificar que el archivo existe
+            credentials_file = 'credentials/alcaldialocalsantafe-8a418c83a2a4.json'
+            file_exists = os.path.exists(credentials_file)
+            
+            logger.info(f"📁 Archivo existe: {file_exists}")
+            logger.info(f"📁 Ruta completa: {os.path.abspath(credentials_file)}")
+            
+            if not file_exists:
+                return jsonify({
+                    'success': False,
+                    'error': f'El archivo {credentials_file} no existe',
+                    'file_exists': False
+                }), 500
+            
+            # Intentar conectar
+            scopes = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+            creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_file, scopes)
+            client = gspread.authorize(creds)
+            
+            logger.info("✅ Conectado exitosamente")
+            
+            # Intentar abrir la hoja
+            sheet_id = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM'
+            sheet = client.open_by_key(sheet_id)
+            
+            logger.info(f"✅ Hoja abierta: {sheet.title}")
+            
+            # Obtener la primera hoja
+            worksheet = sheet.sheet1
+            logger.info(f"✅ Primera hoja: {worksheet.title}")
+            
+            # Contar filas
+            all_values = worksheet.get_all_values()
+            total_rows = len(all_values)
+            
+            logger.info(f"📊 Total de filas: {total_rows}")
+            
+            if total_rows > 0:
+                headers = all_values[0]
+                data_rows = all_values[1:] if total_rows > 1 else []
+                
+                # Contar filas con datos
+                non_empty_rows = [row for row in data_rows if any(cell.strip() for cell in row)]
+                
+                logger.info(f"📊 Filas con datos: {len(non_empty_rows)}")
+                logger.info(f"📊 Headers: {len(headers)} columnas")
+                
+                return jsonify({
+                    'success': True,
+                    'sheet_title': sheet.title,
+                    'worksheet_title': worksheet.title,
+                    'total_rows': total_rows,
+                    'data_rows': len(non_empty_rows),
+                    'headers_count': len(headers),
+                    'message': f'Conexión exitosa: {len(non_empty_rows)} registros encontrados'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'La hoja está vacía',
+                    'total_rows': 0
+                }), 500
+                
+        except Exception as e:
+            logger.error(f"❌ Error en prueba simple: {str(e)}")
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500 

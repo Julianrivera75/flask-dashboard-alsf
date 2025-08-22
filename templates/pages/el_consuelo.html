@@ -43,6 +43,8 @@
             box-sizing: border-box;
         }
 
+
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--white);
@@ -437,12 +439,13 @@
             <div>
                 <h2><i class="fas fa-dashboard"></i> Dashboard de Indicadores</h2>
                 <p>Monitoreo de actividades y participación en el Barrio El Consuelo</p>
-            </div>
-            <button class="refresh-btn" onclick="loadData()">
-                <i class="fas fa-sync-alt"></i>
-                Actualizar Datos
-            </button>
-        </div>
+
+                          </div>
+              <button class="refresh-btn" onclick="checkAvailableFields()" style="background: #e67e22; margin-left: 10px;">
+                  <i class="fas fa-list"></i>
+                  Ver Campos Disponibles
+              </button>
+          </div>
 
         <!-- Indicador principal arriba del mapa -->
         <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: stretch;">
@@ -1258,27 +1261,78 @@
 
     // --- Renderizador de gráficas ---
     function renderGraficasResultados(data) {
-        // 1. Nivel educativo
-        const nivelCounts = agruparPorCampo(data, 'Nivel educativo');
+        // 1. Nivel educativo - Usar específicamente la columna K (índice 10)
+        const fields = Object.keys(data[0] || {});
+        const columnaK = fields[10]; // Columna K (índice 10)
+        
+        console.log('🔍 Usando columna K para Nivel educativo:', columnaK);
+        
+        if (columnaK) {
+            const nivelCounts = agruparPorCampo(data, columnaK);
+            console.log('📊 Datos de Nivel educativo (columna K):', nivelCounts);
+            
             Plotly.newPlot('nivelPie', [{
             values: Object.values(nivelCounts),
             labels: Object.keys(nivelCounts),
                 type: 'pie',
                 marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-                textinfo: 'percent',
-                insidetextorientation: 'radial'
-        }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+                textinfo: 'percent+label',
+                insidetextorientation: 'radial',
+                textfont: {size: 12, color: '#333'},
+                hoverinfo: 'label+percent+value'
+            }], {
+                margin: {t: 20, b: 20, l: 20, r: 20}, 
+                showlegend: true, 
+                height: 320,
+                legend: {x: 0.5, y: -0.1, orientation: 'h'}
+            }, {responsive: true});
+                } else {
+            console.error('❌ No se encontró la columna K para Nivel educativo');
+            // Mostrar gráfica vacía o con mensaje de error
+            Plotly.newPlot('nivelPie', [{
+                values: [1],
+                labels: ['Columna K no disponible'],
+                type: 'pie',
+                marker: {colors: ['#ccc']},
+                textinfo: 'label'
+            }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+        }
 
-        // 2. Tiempo en el barrio
-        const tiempoCounts = agruparPorCampo(data, '¿Hace cuanto tiempo reside en el barrio?');
+        // 2. Tiempo en el barrio - Usar específicamente la columna L (índice 11)
+        const columnaL = fields[11]; // Columna L (índice 11)
+        
+        console.log('🔍 Usando columna L para Tiempo en el barrio:', columnaL);
+        
+        if (columnaL) {
+            const tiempoCounts = agruparPorCampo(data, columnaL);
+            console.log('📊 Datos de Tiempo en el barrio (columna L):', tiempoCounts);
+            
             Plotly.newPlot('tiempoPie', [{
-            values: Object.values(tiempoCounts),
-            labels: Object.keys(tiempoCounts),
+                values: Object.values(tiempoCounts),
+                labels: Object.keys(tiempoCounts),
                 type: 'pie',
                 marker: {colors: ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE']},
-                textinfo: 'percent',
-                insidetextorientation: 'radial'
-        }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+                textinfo: 'percent+label',
+                insidetextorientation: 'radial',
+                textfont: {size: 12, color: '#333'},
+                hoverinfo: 'label+percent+value'
+            }], {
+                margin: {t: 20, b: 20, l: 20, r: 20}, 
+                showlegend: true, 
+                height: 320,
+                legend: {x: 0.5, y: -0.1, orientation: 'h'}
+            }, {responsive: true});
+        } else {
+            console.error('❌ No se encontró la columna L para Tiempo en el barrio');
+            // Mostrar gráfica vacía o con mensaje de error
+            Plotly.newPlot('tiempoPie', [{
+                values: [1],
+                labels: ['Columna L no disponible'],
+                type: 'pie',
+                marker: {colors: ['#ccc']},
+                textinfo: 'label'
+            }], {margin: {t: 0, b: 0, l: 0, r: 0}, showlegend: false, height: 320}, {responsive: true});
+        }
 
         // Helper para barras horizontales
         function renderBar(id, counts, colors, xTitle, yTitle, marginL=150) {
@@ -1305,86 +1359,519 @@
         }
         const colores = ['#fab62d', '#e4032e', '#4ECDC4', '#333333', '#96CEB4', '#BB8FCE'];
 
-        // 3. Limpieza general
-        renderBar('limpiezaBar', agruparPorCampo(data, 'Como calificaria la limpieza general del barrio'), colores, 'Número de respuestas', 'Calificación', 80);
-        // 4. Frecuencia residuos
-        renderBar('residuosBar', agruparPorCampo(data, '¿Con qué frecuencia observa residuos en las calles o zonas comunes?'), colores, 'Número de respuestas', 'Frecuencia');
-        // 5. Afecta imagen del barrio
-        renderBar('tiempoBar', agruparPorCampo(data, '¿Considera que la acumulación de residuos afecta la imagen del barrio?'), colores, 'Número de respuestas', 'Respuesta');
-        // 6. Residuos y seguridad
-        renderBar('seguridadBar', agruparPorCampo(data, '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?'), colores, 'Número de respuestas', 'Respuesta', 200);
-        // 7. Calidad de vida
-        renderBar('calidadVidaBar', agruparPorCampo(data, '¿Considera que la acumulación de residuos afecta su calidad de vida?'), colores, 'Número de respuestas', 'Respuesta', 200);
-        // 8. Separación de residuos
-        renderBar('separacionBar', agruparPorCampo(data, '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?'), colores, 'Número de respuestas', 'Respuesta', 200);
-        // 9. Conoce horario recolección
-        renderBar('horarioBar', agruparPorCampo(data, '¿Conoce el horario de recolección de residuos en el barrio?'), colores, 'Número de respuestas', 'Respuesta', 200);
-        // 10. Saca residuos en horarios
-        renderBar('sacaHorariosBar', agruparPorCampo(data, '¿Saca los residuos en los horarios establecidos?'), colores, 'Número de respuestas', 'Respuesta', 200);
-        // 11. Entrega a recuperador
-        renderBar('recuperadorBar', agruparPorCampo(data, '¿Entrega sus residuos aprovechables a un recuperador de oficio?'), colores, 'Cantidad de respuestas', '', 150);
-        // 12. Lugar de disposición
-        const campoLugar = buscarCampo(data, [
-            '¿En qué lugar dispone los residuos?',
-            'En qué lugar dispone los residuos',
-            '¿En que lugar dispone los residuos?', // <-- nombre exacto del Sheets
-            'En que lugar dispone los residuos',
-        ]);
-        if (campoLugar) renderBar('lugarBar', agruparPorCampo(data, campoLugar), colores, 'Cantidad de respuestas', '', 150);
-        // 13. Calificación del servicio
-        renderBar('servicioBar', agruparPorCampo(data, '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito S.A.S?'), colores, 'Cantidad de respuestas', '', 150);
-        // 14. Frecuencia camión recolector
-        renderBar('frecuenciaCamionBar', agruparPorCampo(data, '¿Con qué frecuencia pasa el camión recolector de residuos?'), colores, 'Cantidad de respuestas', '', 150);
-        // 15. Participación en campañas
-        renderBar('participacionBar', agruparPorCampo(data, '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?'), colores, 'Cantidad de respuestas', '', 150);
-        // 16. Iniciativas comunitarias
-        const campoIniciativas = buscarCampo(data, [
-            '¿Le gustaría participar en iniciativas comunitarias de limpieza?',
-            'Le gustaría participar en iniciativas comunitarias de limpieza',
-            '¿Le gustaria participar en iniciativas comunitarias de limpieza?',
-            'Le gustaria participar en iniciativas comunitarias de limpieza',
-        ]);
-        if (campoIniciativas) renderBar('iniciativasBar', agruparPorCampo(data, campoIniciativas), colores, 'Cantidad de respuestas', '', 150);
-        // 17. Educación ambiental
-        renderBar('educacionBar', agruparPorCampo(data, '¿Considera que hace falta más educación ambiental en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
-        // 18. Sabe punto crítico
-        const campoPuntoCritico = buscarCampo(data, [
-            '¿Sabe que es un punto crítico?',
-            'Sabe que es un punto crítico',
-            '¿Sabe que es un punto critico?',
-            'Sabe que es un punto critico',
-        ]);
-        if (campoPuntoCritico) renderBar('puntoCriticoBar', agruparPorCampo(data, campoPuntoCritico), colores, 'Cantidad de respuestas', '', 150);
-        // 19. Identifica puntos críticos
-        renderBar('identificaBar', agruparPorCampo(data, '¿Identifica puntos críticos en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
-        // 20. Tiempo puntos críticos
-        renderBar('tiempoPuntosBar', agruparPorCampo(data, '¿Cada cuanto tiempo ve estos puntos en el barrio?'), colores, 'Cantidad de respuestas', '', 150);
+        // 3. Limpieza general - Usar específicamente la columna O (índice 14)
+        const columnaO = fields[14]; // Columna O (índice 14)
+        
+        console.log('🔍 Usando columna O para Limpieza general del barrio:', columnaO);
+        
+        if (columnaO) {
+            const limpiezaCounts = agruparPorCampo(data, columnaO);
+            console.log('📊 Datos de Limpieza general del barrio (columna O):', limpiezaCounts);
+            renderBar('limpiezaBar', limpiezaCounts, colores, 'Número de respuestas', 'Calificación', 80);
+        } else {
+            console.error('❌ No se encontró la columna O para Limpieza general del barrio');
+        }
+        // 4. Frecuencia residuos - Usar específicamente la columna P (índice 15)
+        const columnaP = fields[15]; // Columna P (índice 15)
+        
+        console.log('🔍 Usando columna P para Frecuencia de residuos:', columnaP);
+        
+        if (columnaP) {
+            const residuosCounts = agruparPorCampo(data, columnaP);
+            console.log('📊 Datos de Frecuencia de residuos (columna P):', residuosCounts);
+            renderBar('residuosBar', residuosCounts, colores, 'Número de respuestas', 'Frecuencia');
+        } else {
+            console.error('❌ No se encontró la columna P para Frecuencia de residuos');
+        }
+        // 5. Afecta imagen del barrio - Usar específicamente la columna Q (índice 16)
+        const columnaQ = fields[16]; // Columna Q (índice 16)
+        
+        console.log('🔍 Usando columna Q para Afecta imagen del barrio:', columnaQ);
+        
+        if (columnaQ) {
+            const imagenCounts = agruparPorCampo(data, columnaQ);
+            console.log('📊 Datos de Afecta imagen del barrio (columna Q):', imagenCounts);
+            renderBar('tiempoBar', imagenCounts, colores, 'Número de respuestas', 'Respuesta');
+        } else {
+            console.error('❌ No se encontró la columna Q para Afecta imagen del barrio');
+        }
+        // 6. Residuos y seguridad - Usar específicamente la columna R (índice 17)
+        const columnaR = fields[17]; // Columna R (índice 17)
+        
+        console.log('🔍 Usando columna R para Residuos y seguridad:', columnaR);
+        
+        if (columnaR) {
+            const seguridadCounts = agruparPorCampo(data, columnaR);
+            console.log('📊 Datos de Residuos y seguridad (columna R):', seguridadCounts);
+            renderBar('seguridadBar', seguridadCounts, colores, 'Número de respuestas', 'Respuesta', 200);
+        } else {
+            console.error('❌ No se encontró la columna R para Residuos y seguridad');
+        }
+        // 7. Calidad de vida - Usar específicamente la columna S (índice 18)
+        const columnaS = fields[18]; // Columna S (índice 18)
+        
+        console.log('🔍 Usando columna S para Calidad de vida:', columnaS);
+        
+        if (columnaS) {
+            const calidadVidaCounts = agruparPorCampo(data, columnaS);
+            console.log('📊 Datos de Calidad de vida (columna S):', calidadVidaCounts);
+            renderBar('calidadVidaBar', calidadVidaCounts, colores, 'Número de respuestas', 'Respuesta', 200);
+        } else {
+            console.error('❌ No se encontró la columna S para Calidad de vida');
+        }
+        // 8. Separación de residuos - Usar específicamente la columna T (índice 19)
+        const columnaT = fields[19]; // Columna T (índice 19)
+        
+        console.log('🔍 Usando columna T para Separación de residuos:', columnaT);
+        
+        if (columnaT) {
+            const separacionCounts = agruparPorCampo(data, columnaT);
+            console.log('📊 Datos de Separación de residuos (columna T):', separacionCounts);
+            renderBar('separacionBar', separacionCounts, colores, 'Número de respuestas', 'Respuesta', 200);
+        } else {
+            console.error('❌ No se encontró la columna T para Separación de residuos');
+        }
+        // 9. Conoce horario recolección - Usar específicamente la columna U (índice 20)
+        const columnaU = fields[20]; // Columna U (índice 20)
+        
+        console.log('🔍 Usando columna U para Conoce horario recolección:', columnaU);
+        
+        if (columnaU) {
+            const horarioCounts = agruparPorCampo(data, columnaU);
+            console.log('📊 Datos de Conoce horario recolección (columna U):', horarioCounts);
+            renderBar('horarioBar', horarioCounts, colores, 'Número de respuestas', 'Respuesta', 200);
+        } else {
+            console.error('❌ No se encontró la columna U para Conoce horario recolección');
+        }
+        // 10. Saca residuos en horarios - Usar específicamente la columna V (índice 21)
+        const columnaV = fields[21]; // Columna V (índice 21)
+        
+        console.log('🔍 Usando columna V para Saca residuos en horarios:', columnaV);
+        
+        if (columnaV) {
+            const sacaHorariosCounts = agruparPorCampo(data, columnaV);
+            console.log('📊 Datos de Saca residuos en horarios (columna V):', sacaHorariosCounts);
+            renderBar('sacaHorariosBar', sacaHorariosCounts, colores, 'Número de respuestas', 'Respuesta', 200);
+        } else {
+            console.error('❌ No se encontró la columna V para Saca residuos en horarios');
+        }
+        // 11. Entrega a recuperador - Usar específicamente la columna W (índice 22)
+        const columnaW = fields[22]; // Columna W (índice 22)
+        
+        console.log('🔍 Usando columna W para Entrega a recuperador:', columnaW);
+        
+        if (columnaW) {
+            const recuperadorCounts = agruparPorCampo(data, columnaW);
+            console.log('📊 Datos de Entrega a recuperador (columna W):', recuperadorCounts);
+            renderBar('recuperadorBar', recuperadorCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna W para Entrega a recuperador');
+        }
+        // 12. Lugar de disposición - Usar específicamente la columna X (índice 23)
+        const columnaX = fields[23]; // Columna X (índice 23)
+        
+        console.log('🔍 Usando columna X para Lugar de disposición:', columnaX);
+        
+        if (columnaX) {
+            const lugarCounts = agruparPorCampo(data, columnaX);
+            console.log('📊 Datos de Lugar de disposición (columna X):', lugarCounts);
+            renderBar('lugarBar', lugarCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna X para Lugar de disposición');
+        }
+        // 13. Calificación del servicio - Usar específicamente la columna Z (índice 25)
+        const columnaZ = fields[25]; // Columna Z (índice 25)
+        
+        console.log('🔍 Usando columna Z para Calificación del servicio:', columnaZ);
+        
+        if (columnaZ) {
+            const servicioCounts = agruparPorCampo(data, columnaZ);
+            console.log('📊 Datos de Calificación del servicio (columna Z):', servicioCounts);
+            renderBar('servicioBar', servicioCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna Z para Calificación del servicio');
+        }
+        // 14. Frecuencia camión recolector - Usar específicamente la columna AA (índice 26)
+        const columnaAA = fields[26]; // Columna AA (índice 26)
+        
+        console.log('🔍 Usando columna AA para Frecuencia camión recolector:', columnaAA);
+        
+        if (columnaAA) {
+            const frecuenciaCamionCounts = agruparPorCampo(data, columnaAA);
+            console.log('📊 Datos de Frecuencia camión recolector (columna AA):', frecuenciaCamionCounts);
+            renderBar('frecuenciaCamionBar', frecuenciaCamionCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AA para Frecuencia camión recolector');
+        }
+        // 15. Participación en campañas - Usar específicamente la columna AB (índice 27)
+        const columnaAB = fields[27]; // Columna AB (índice 27)
+        
+        console.log('🔍 Usando columna AB para Participación en campañas:', columnaAB);
+        
+        if (columnaAB) {
+            const participacionCounts = agruparPorCampo(data, columnaAB);
+            console.log('📊 Datos de Participación en campañas (columna AB):', participacionCounts);
+            renderBar('participacionBar', participacionCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AB para Participación en campañas');
+        }
+        // 16. Iniciativas comunitarias - Usar específicamente la columna AC (índice 28)
+        const columnaAC = fields[28]; // Columna AC (índice 28)
+        
+        console.log('🔍 Usando columna AC para Iniciativas comunitarias:', columnaAC);
+        
+        if (columnaAC) {
+            const iniciativasCounts = agruparPorCampo(data, columnaAC);
+            console.log('📊 Datos de Iniciativas comunitarias (columna AC):', iniciativasCounts);
+            renderBar('iniciativasBar', iniciativasCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AC para Iniciativas comunitarias');
+        }
+        // 17. Educación ambiental - Usar específicamente la columna AD (índice 29)
+        const columnaAD = fields[29]; // Columna AD (índice 29)
+        
+        console.log('🔍 Usando columna AD para Educación ambiental:', columnaAD);
+        
+        if (columnaAD) {
+            const educacionCounts = agruparPorCampo(data, columnaAD);
+            console.log('📊 Datos de Educación ambiental (columna AD):', educacionCounts);
+            renderBar('educacionBar', educacionCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AD para Educación ambiental');
+        }
+        // 18. Sabe punto crítico - Usar específicamente la columna AE (índice 30)
+        const columnaAE = fields[30]; // Columna AE (índice 30)
+        
+        console.log('🔍 Usando columna AE para Sabe punto crítico:', columnaAE);
+        
+        if (columnaAE) {
+            const puntoCriticoCounts = agruparPorCampo(data, columnaAE);
+            console.log('📊 Datos de Sabe punto crítico (columna AE):', puntoCriticoCounts);
+            renderBar('puntoCriticoBar', puntoCriticoCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AE para Sabe punto crítico');
+        }
+        // 19. Identifica puntos críticos - Usar específicamente la columna AF (índice 31)
+        const columnaAF = fields[31]; // Columna AF (índice 31)
+        
+        console.log('🔍 Usando columna AF para Identifica puntos críticos:', columnaAF);
+        
+        if (columnaAF) {
+            const identificaCounts = agruparPorCampo(data, columnaAF);
+            console.log('📊 Datos de Identifica puntos críticos (columna AF):', identificaCounts);
+            renderBar('identificaBar', identificaCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AF para Identifica puntos críticos');
+        }
+        // 20. Tiempo puntos críticos - Usar específicamente la columna AG (índice 32)
+        const columnaAG = fields[32]; // Columna AG (índice 32)
+        
+        console.log('🔍 Usando columna AG para Tiempo puntos críticos:', columnaAG);
+        
+        if (columnaAG) {
+            const tiempoPuntosCounts = agruparPorCampo(data, columnaAG);
+            console.log('📊 Datos de Tiempo puntos críticos (columna AG):', tiempoPuntosCounts);
+            renderBar('tiempoPuntosBar', tiempoPuntosCounts, colores, 'Cantidad de respuestas', '', 150);
+        } else {
+            console.error('❌ No se encontró la columna AG para Tiempo puntos críticos');
+        }
     }
 
     // --- Función para cargar datos ---
     function loadData() {
-        console.log('🔄 Actualizando datos...');
-        fetch('/api/el-consuelo/data')
-            .then(res => res.json())
-            .then(json => {
-                if (json.data) {
-                    datosGenerales = json.data;
+        console.log('🔄 Conectando directamente a Google Sheets...');
+        
+        // ID de la hoja de El Consuelo
+        const SHEET_ID = '1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM';
+        
+        // URL de la API pública de Google Sheets (formato CSV) - hoja específica
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1505983812`;
+        
+        console.log('📋 URL de la hoja:', SHEET_URL);
+        console.log('🎯 Objetivo: Obtener exactamente 439 registros');
+        
+        // Usar fetch para obtener los datos CSV
+        fetch(SHEET_URL)
+            .then(response => {
+                console.log('📡 Respuesta de Google Sheets:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(csvText => {
+                console.log('📊 CSV recibido, procesando...');
+                console.log('📊 Longitud del CSV:', csvText.length);
+                
+                // Convertir CSV a JSON
+                const data = parseCSV(csvText);
+                console.log('📊 Datos convertidos a JSON:', data);
+                
+                if (data && data.length > 0) {
+                    datosGenerales = data;
                     renderGraficasResultados(datosGenerales);
-                    console.log('✅ Datos actualizados correctamente');
+                    console.log(`✅ Datos reales cargados directamente: ${data.length} registros`);
+                    
+                    // Actualizar el contador en la página
+                    const contadorElement = document.querySelector('.stat-card h3');
+                    if (contadorElement) {
+                        contadorElement.textContent = data.length;
+                        console.log('📊 Contador actualizado a:', data.length);
+                    }
+                } else {
+                    throw new Error('No se encontraron datos en la hoja');
                 }
             })
             .catch(error => {
-                console.error('❌ Error actualizando datos:', error);
-                // Fallback a datos de ejemplo si la API falla
+                console.error('❌ Error cargando datos directamente:', error);
                 console.log('🔄 Usando datos de ejemplo como fallback...');
-                const datosEjemplo = [
+                
                     // Datos de ejemplo como respaldo
-                    { 'Nivel educativo': 'Bachillerato', '¿Hace cuanto tiempo reside en el barrio?': '5-10 años', 'Como calificaria la limpieza general del barrio': '3', '¿Con qué frecuencia observa residuos en las calles o zonas comunes?': 'Frecuentemente', '¿Considera que la acumulación de residuos afecta la imagen del barrio?': 'Sí', '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?': 'Sí', '¿Considera que la acumulación de residuos afecta su calidad de vida?': 'Sí', '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?': 'Siempre', '¿Conoce el horario de recolección de residuos en el barrio?': 'Sí', '¿Saca los residuos en los horarios establecidos?': 'Siempre', '¿Entrega sus residuos aprovechables a un recuperador de oficio?': 'Sí', '¿En que lugar dispone los residuos?': 'Frente de su casa', '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito S.A.S?': '4', '¿Con qué frecuencia pasa el camión recolector de residuos?': 'martes, jueves y sabado', '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?': 'No', '¿Le gustaria participar en iniciativas comunitarias de limpieza?': 'Sí', '¿Considera que hace falta más educación ambiental en el barrio?': 'Sí', '¿Sabe que es un punto critico?': 'Sí', '¿Identifica puntos críticos en el barrio?': 'Sí', '¿Cada cuanto tiempo ve estos puntos en el barrio?': 'Diario', 'Cuadrante o zona': '1' }
+                const datosEjemplo = [
+                    { 'Nivel educativo': 'Bachillerato', '¿Hace cuanto tiempo reside en el barrio?': '5-10 años', 'Como calificaria la limpieza general del barrio': '3', '¿Con qué frecuencia observa residuos en las calles o zonas comunes?': 'Frecuentemente', '¿Considera que la acumulación de residuos afecta la imagen del barrio?': 'Sí', '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?': 'Sí', '¿Considera que la acumulación de residuos afecta su calidad de vida?': 'Sí', '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?': 'Siempre', '¿Conoce el horario de recolección de residuos en el barrio?': 'Sí', '¿Saca los residuos en los horarios establecidos?': 'Siempre', '¿Entrega sus residuos aprovechables a un recuperador de oficio?': 'Sí', '¿En que lugar dispone los residuos?': 'Frente de su casa', '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito A.S?': '4', '¿Con qué frecuencia pasa el camión recolector de residuos?': 'martes, jueves y sabado', '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?': 'No', '¿Le gustaria participar en iniciativas comunitarias de limpieza?': 'Sí', '¿Considera que hace falta más educación ambiental en el barrio?': 'Sí', '¿Sabe que es un punto critico?': 'Sí', '¿Identifica puntos críticos en el barrio?': 'Sí', '¿Cada cuanto tiempo ve estos puntos en el barrio?': 'Diario', 'Cuadrante o zona': '1' },
+                    { 'Nivel educativo': 'Técnico', '¿Hace cuanto tiempo reside en el barrio?': 'Más de 10 años', 'Como calificaria la limpieza general del barrio': '2', '¿Con qué frecuencia observa residuos en las calles o zonas comunes?': 'Siempre', '¿Considera que la acumulación de residuos afecta la imagen del barrio?': 'Sí', '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?': 'Sí', '¿Considera que la acumulación de residuos afecta su calidad de vida?': 'Sí', '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?': 'A veces', '¿Conoce el horario de recolección de residuos en el barrio?': 'No', '¿Saca los residuos en los horarios establecidos?': 'A veces', '¿Entrega sus residuos aprovechables a un recuperador de oficio?': 'No', '¿En que lugar dispone los residuos?': 'Esquina de la cuadra', '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito A.S?': '2', '¿Con qué frecuencia pasa el camión recolector de residuos?': 'martes, jueves y sabado', '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?': 'Sí', '¿Le gustaria participar en iniciativas comunitarias de limpieza?': 'Sí', '¿Considera que hace falta más educación ambiental en el barrio?': 'Sí', '¿Sabe que es un punto critico?': 'No', '¿Identifica puntos críticos en el barrio?': 'Sí', '¿Cada cuanto tiempo ve estos puntos en el barrio?': 'Día de por medio', 'Cuadrante o zona': '3' },
+                    { 'Nivel educativo': 'Universitario', '¿Hace cuanto tiempo reside en el barrio?': '1-5 años', 'Como calificaria la limpieza general del barrio': '4', '¿Con qué frecuencia observa residuos en las calles o zonas comunes?': 'A veces', '¿Considera que la acumulación de residuos afecta la imagen del barrio?': 'No', '¿Considera que el tema de residuos esta relacionado con el tema de seguridad del barrio?': 'No', '¿Considera que la acumulación de residuos afecta su calidad de vida?': 'No', '¿Separa los residuos en su casa (orgánicos, reciclables, no reciclables)?': 'Siempre', '¿Conoce el horario de recolección de residuos en el barrio?': 'Sí', '¿Saca los residuos en los horarios establecidos?': 'Siempre', '¿Entrega sus residuos aprovechables a un recuperador de oficio?': 'Sí', '¿En que lugar dispone los residuos?': 'Frente de su casa', '¿Cómo calificaría la operación del servicio de aseo de Promoambiental Distrito A.S?': '5', '¿Con qué frecuencia pasa el camión recolector de residuos?': 'martes, jueves y sabado', '¿Ha participado en alguna campaña de limpieza o educación ambiental en su barrio?': 'Sí', '¿Le gustaria participar en iniciativas comunitarias de limpieza?': 'Sí', '¿Considera que hace falta más educación ambiental en el barrio?': 'No', '¿Sabe que es un punto critico?': 'Sí', '¿Identifica puntos críticos en el barrio?': 'No', '¿Cada cuanto tiempo ve estos puntos en el barrio?': 'Semanal', 'Cuadrante o zona': '6' }
                 ];
                 datosGenerales = datosEjemplo;
                 renderGraficasResultados(datosGenerales);
+                
+                // Actualizar el contador con datos de ejemplo
+                const contadorElement = document.querySelector('.stat-card h3');
+                if (contadorElement) {
+                    contadorElement.textContent = datosEjemplo.length;
+                    console.log('📊 Contador actualizado a datos de ejemplo:', datosEjemplo.length);
+                }
             });
     }
+    
+    // --- Función para convertir CSV a JSON ---
+    function parseCSV(csvText) {
+        try {
+            // Dividir por líneas
+            const lines = csvText.split('\n');
+            
+            if (lines.length < 2) {
+                console.warn('⚠️ CSV muy corto, necesita al menos headers y una fila de datos');
+                return [];
+            }
+            
+            // Primera línea son los headers
+            const headers = lines[0].split(',').map(header => 
+                header.replace(/"/g, '').trim()
+            );
+            
+            console.log('📋 Headers encontrados:', headers);
+            
+            // Procesar las filas de datos (excluir la primera línea de headers)
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) { // Solo procesar líneas no vacías
+                    // Dividir la línea por comas, pero respetar comillas
+                    const values = parseCSVLine(line);
+                    
+                    // Verificar que la fila tenga datos reales (no solo espacios o valores vacíos)
+                    const hasRealData = values.some(value => value && value.trim() !== '');
+                    
+                    if (hasRealData) {
+                        // Crear objeto con headers como claves
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index] || '';
+                        });
+                        
+                        // Verificar que la primera columna (Id) tenga un valor numérico válido
+                        const firstColumnValue = values[0] ? values[0].trim() : '';
+                        const hasValidFirstColumn = firstColumnValue && !isNaN(firstColumnValue) && firstColumnValue !== '';
+                        
+                        // Solo incluir si tiene un ID válido en la primera columna
+                        if (hasValidFirstColumn) {
+                            data.push(row);
+                            console.log(`✅ Fila ${i} incluida - ID: ${firstColumnValue}`);
+                        } else {
+                            console.log(`❌ Fila ${i} excluida - ID inválido: "${firstColumnValue}"`);
+                        }
+                    }
+                }
+            }
+            
+            console.log(`📊 RESUMEN FINAL:`);
+            console.log(`📊 Total de líneas en CSV: ${lines.length}`);
+            console.log(`📊 Líneas con datos válidos: ${data.length}`);
+            console.log(`📊 Líneas excluidas: ${lines.length - data.length - 1}`); // -1 por el header
+            console.log(`📊 Resultado esperado: 439 registros`);
+            console.log(`📊 Resultado actual: ${data.length} registros`);
+            console.log(`📊 Diferencia: ${data.length - 439} registros`);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ Error parseando CSV:', error);
+            return [];
+        }
+    }
+    
+    // --- Función para parsear línea CSV respetando comillas ---
+    function parseCSVLine(line) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                result.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        // Agregar el último valor
+        result.push(current.trim());
+        
+        return result;
+    }
+    
+
+    
+    // --- Función para verificar el conteo de datos ---
+    function testDataCount() {
+        console.log('🔍 Verificando conteo de datos...');
+        
+        if (!datosGenerales) {
+            console.log('❌ No hay datos cargados');
+            alert('❌ No hay datos cargados. Primero carga los datos reales.');
+            return;
+        }
+        
+        console.log(`📊 Total de registros en datosGenerales: ${datosGenerales.length}`);
+        
+        // Contar registros con ID válido
+        const validRecords = datosGenerales.filter(record => {
+            const id = record['Id'] || record['id'] || record[Object.keys(record)[0]];
+            return id && id.toString().trim() !== '' && !isNaN(id);
+        });
+        
+        console.log(`📊 Registros con ID válido: ${validRecords.length}`);
+        
+        // Mostrar los primeros 5 registros para verificar
+        console.log('📋 Primeros 5 registros:');
+        datosGenerales.slice(0, 5).forEach((record, index) => {
+            const id = record['Id'] || record['id'] || record[Object.keys(record)[0]];
+            console.log(`  ${index + 1}. ID: "${id}" - Nombre: "${record['Nombre'] || record['nombre'] || 'N/A'}"`);
+        });
+        
+        // Mostrar resumen
+        const message = `📊 RESUMEN:\n` +
+                       `Total de registros: ${datosGenerales.length}\n` +
+                       `Registros con ID válido: ${validRecords.length}\n` +
+                       `Objetivo: 439\n` +
+                       `Diferencia: ${datosGenerales.length - 439}`;
+        
+        alert(message);
+    }
+    
+    // --- Función para verificar campos disponibles ---
+    function checkAvailableFields() {
+        console.log('🔍 Verificando campos disponibles...');
+        
+        if (!datosGenerales || datosGenerales.length === 0) {
+            console.log('❌ No hay datos cargados');
+            alert('❌ No hay datos cargados. Primero carga los datos reales.');
+            return;
+        }
+        
+        const firstRecord = datosGenerales[0];
+        const fields = Object.keys(firstRecord);
+        
+        console.log('📋 Todos los campos disponibles:');
+        fields.forEach((field, index) => {
+            console.log(`  ${index + 1}. "${field}"`);
+        });
+        
+        // Buscar campos relacionados con nivel educativo
+        const nivelFields = fields.filter(field => 
+            field.toLowerCase().includes('nivel') || 
+            field.toLowerCase().includes('educativo') ||
+            field.toLowerCase().includes('educación')
+        );
+        
+        console.log('🎓 Campos relacionados con nivel educativo:', nivelFields);
+        
+        // Mostrar valores únicos del campo de nivel educativo (columna K)
+        if (nivelFields.length > 0) {
+            const nivelField = nivelFields[0];
+            const uniqueValues = [...new Set(datosGenerales.map(record => record[nivelField]).filter(val => val && val.trim() !== ''))];
+            console.log(`📊 Valores únicos en "${nivelField}":`, uniqueValues);
+            
+            // Contar cada valor
+            const counts = {};
+            datosGenerales.forEach(record => {
+                const value = record[nivelField];
+                if (value && value.trim() !== '') {
+                    counts[value] = (counts[value] || 0) + 1;
+                }
+            });
+            console.log(`📊 Conteo de valores en "${nivelField}":`, counts);
+        }
+        
+        // Mostrar información específica sobre columnas K, L, M, O, P, Q, R, S, T, U, V, W, X, Z, AA, AB, AC, AD, AE, AF y AG
+        console.log('🔍 Información específica sobre columnas:');
+        console.log(`Columna K (índice 10): "${fields[10] || 'No disponible'}"`);
+        console.log(`Columna L (índice 11): "${fields[11] || 'No disponible'}"`);
+        console.log(`Columna M (índice 12): "${fields[12] || 'No disponible'}"`);
+        console.log(`Columna O (índice 14): "${fields[14] || 'No disponible'}"`);
+        console.log(`Columna P (índice 15): "${fields[15] || 'No disponible'}"`);
+        console.log(`Columna Q (índice 16): "${fields[16] || 'No disponible'}"`);
+        console.log(`Columna R (índice 17): "${fields[17] || 'No disponible'}"`);
+        console.log(`Columna S (índice 18): "${fields[18] || 'No disponible'}"`);
+        console.log(`Columna T (índice 19): "${fields[19] || 'No disponible'}"`);
+        console.log(`Columna U (índice 20): "${fields[20] || 'No disponible'}"`);
+        console.log(`Columna V (índice 21): "${fields[21] || 'No disponible'}"`);
+        console.log(`Columna W (índice 22): "${fields[22] || 'No disponible'}"`);
+        console.log(`Columna X (índice 23): "${fields[23] || 'No disponible'}"`);
+        console.log(`Columna Z (índice 25): "${fields[25] || 'No disponible'}"`);
+        console.log(`Columna AA (índice 26): "${fields[26] || 'No disponible'}"`);
+        console.log(`Columna AB (índice 27): "${fields[27] || 'No disponible'}"`);
+        console.log(`Columna AC (índice 28): "${fields[28] || 'No disponible'}"`);
+        console.log(`Columna AD (índice 29): "${fields[29] || 'No disponible'}"`);
+        console.log(`Columna AE (índice 30): "${fields[30] || 'No disponible'}"`);
+        console.log(`Columna AF (índice 31): "${fields[31] || 'No disponible'}"`);
+        console.log(`Columna AG (índice 32): "${fields[32] || 'No disponible'}"`);
+        
+        // Mostrar algunos valores de ejemplo de las columnas K, L, M, O, P, Q, R, S, T, U, V, W, X, Z, AA, AB, AC, AD, AE, AF y AG
+        if (datosGenerales.length > 0) {
+            console.log('📊 Valores de ejemplo:');
+            console.log(`Columna K (${fields[10]}):`, datosGenerales.slice(0, 3).map(record => record[fields[10]]));
+            console.log(`Columna L (${fields[11]}):`, datosGenerales.slice(0, 3).map(record => record[fields[11]]));
+            console.log(`Columna M (${fields[12]}):`, datosGenerales.slice(0, 3).map(record => record[fields[12]]));
+            console.log(`Columna O (${fields[14]}):`, datosGenerales.slice(0, 3).map(record => record[fields[14]]));
+            console.log(`Columna P (${fields[15]}):`, datosGenerales.slice(0, 3).map(record => record[fields[15]]));
+            console.log(`Columna Q (${fields[16]}):`, datosGenerales.slice(0, 3).map(record => record[fields[16]]));
+            console.log(`Columna R (${fields[17]}):`, datosGenerales.slice(0, 3).map(record => record[fields[17]]));
+            console.log(`Columna S (${fields[18]}):`, datosGenerales.slice(0, 3).map(record => record[fields[18]]));
+            console.log(`Columna T (${fields[19]}):`, datosGenerales.slice(0, 3).map(record => record[fields[19]]));
+            console.log(`Columna U (${fields[20]}):`, datosGenerales.slice(0, 3).map(record => record[fields[20]]));
+            console.log(`Columna V (${fields[21]}):`, datosGenerales.slice(0, 3).map(record => record[fields[21]]));
+            console.log(`Columna W (${fields[22]}):`, datosGenerales.slice(0, 3).map(record => record[fields[22]]));
+            console.log(`Columna X (${fields[23]}):`, datosGenerales.slice(0, 3).map(record => record[fields[23]]));
+            console.log(`Columna Z (${fields[25]}):`, datosGenerales.slice(0, 3).map(record => record[fields[25]]));
+            console.log(`Columna AA (${fields[26]}):`, datosGenerales.slice(0, 3).map(record => record[fields[26]]));
+            console.log(`Columna AB (${fields[27]}):`, datosGenerales.slice(0, 3).map(record => record[fields[27]]));
+            console.log(`Columna AC (${fields[28]}):`, datosGenerales.slice(0, 3).map(record => record[fields[28]]));
+            console.log(`Columna AD (${fields[29]}):`, datosGenerales.slice(0, 3).map(record => record[fields[29]]));
+            console.log(`Columna AE (${fields[30]}):`, datosGenerales.slice(0, 3).map(record => record[fields[30]]));
+            console.log(`Columna AF (${fields[31]}):`, datosGenerales.slice(0, 3).map(record => record[fields[31]]));
+            console.log(`Columna AG (${fields[32]}):`, datosGenerales.slice(0, 3).map(record => record[fields[32]]));
+        }
+        
+        alert(`📋 Campos disponibles: ${fields.length}\n🎓 Campos de nivel educativo: ${nivelFields.join(', ')}\n\nColumna K: "${fields[10] || 'N/A'}"\nColumna L: "${fields[11] || 'N/A'}"\nColumna M: "${fields[12] || 'N/A'}"\nColumna O: "${fields[14] || 'N/A'}"\nColumna P: "${fields[15] || 'N/A'}"\nColumna Q: "${fields[16] || 'N/A'}"\nColumna R: "${fields[17] || 'N/A'}"\nColumna S: "${fields[18] || 'N/A'}"\nColumna T: "${fields[19] || 'N/A'}"\nColumna U: "${fields[20] || 'N/A'}"\nColumna V: "${fields[21] || 'N/A'}"\nColumna W: "${fields[22] || 'N/A'}"\nColumna X: "${fields[23] || 'N/A'}"\nColumna Z: "${fields[25] || 'N/A'}"\nColumna AA: "${fields[26] || 'N/A'}"\nColumna AB: "${fields[27] || 'N/A'}"\nColumna AC: "${fields[28] || 'N/A'}"\nColumna AD: "${fields[29] || 'N/A'}"\nColumna AE: "${fields[30] || 'N/A'}"\nColumna AF: "${fields[31] || 'N/A'}"\nColumna AG: "${fields[32] || 'N/A'}"\n\nRevisa la consola para más detalles.`);
+    }
+    
+
 
     // --- Carga de datos ---
     let datosGenerales = null;
