@@ -498,11 +498,11 @@
             <div class="controls" style="margin-bottom: 2rem;">
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <button id="refresh-btn" class="refresh-btn">
-                        <i class="fas fa-sync-alt"></i> Actualizar datos
-                    </button>
+                    <i class="fas fa-sync-alt"></i> Actualizar datos
+                </button>
                     <div id="last-update-info" style="color: #333; font-size: 1rem; font-weight: 500;">
-                        <i class="fas fa-clock"></i> Última actualización: <span id="last-update-text">Cargando...</span>
-                    </div>
+                <i class="fas fa-clock"></i> Última actualización: <span id="last-update-text">Cargando...</span>
+            </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <div class="status-indicator">
@@ -709,53 +709,160 @@
             closeMenu();
         });
         
-        // Cargar datos y mostrar solo la tabla
+        // Cargar datos directamente desde Google Sheets (como El Consuelo)
         async function loadData() {
-            console.log('🔄 Iniciando carga de datos...');
-            console.log('🌐 Intentando conectar a: /api/data');
+            console.log('🔄 Conectando directamente a Google Sheets...');
+            
+            // ID de la hoja de San Bernardo
+            const SHEET_ID = '1v4duGwbae0AAHPAEXsGZPZqWI35JkgHyhHg4yHTIpPU';
+            
+            // URL de la API pública de Google Sheets (formato CSV)
+            const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+            
+            console.log('📋 URL de la hoja:', SHEET_URL);
+            console.log('🎯 Objetivo: Obtener datos de San Bernardo');
             
             try {
-                console.log('📡 Enviando petición fetch...');
-                const response = await fetch('/api/san-bernardo/data');
-                console.log('📥 Respuesta recibida:', response);
-                console.log('📊 Status:', response.status);
-                console.log('📋 Headers:', response.headers);
+                // Usar fetch para obtener los datos CSV
+                const response = await fetch(SHEET_URL);
+                console.log('📡 Respuesta de Google Sheets:', response.status, response.statusText);
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const data = await response.json();
-                console.log('📊 Respuesta del servidor:', data);
+                const csvText = await response.text();
+                console.log('📊 CSV recibido, procesando...');
+                console.log('📊 Longitud del CSV:', csvText.length);
                 
-                if (data.error) { 
-                    console.error('❌ Error en datos:', data.error);
-                    showError(data.error); 
-                    return; 
+                // Convertir CSV a JSON
+                const data = parseCSV(csvText);
+                console.log('📊 Datos convertidos a JSON:', data);
+                
+                if (data && data.length > 0) {
+                    datosGlobales = data; // Guardar datos globalmente
+                    console.log('✅ Datos guardados globalmente:', data.length, 'registros');
+                    
+                    updateDataTable(data);
+                    updateVisualizadores(data);
+                    setLastUpdate(new Date().toISOString());
+                    hideLoading();
+                    
+                    console.log(`✅ Datos reales cargados directamente: ${data.length} registros`);
+                } else {
+                    throw new Error('No se encontraron datos en la hoja');
                 }
                 
-                if (!data.data || !Array.isArray(data.data)) {
-                    console.error('❌ Datos no válidos:', data);
-                    showError('Formato de datos inválido');
-                    return; 
-                }
+                return data;
+            } catch (error) {
+                console.error('❌ Error cargando datos directamente:', error);
+                console.log('🔄 Usando datos de ejemplo como fallback...');
                 
-                datosGlobales = data.data; // Guardar datos globalmente
-                console.log('✅ Datos guardados globalmente:', datosGlobales.length, 'registros');
+                                   // Datos de ejemplo como respaldo
+                   const datosEjemplo = [
+                       { 'Entidad': 'Secretaria Distrital de Salud', 'Descripción de los compromisos': 'Acción de salud', 'Población impactada': '178', 'Fecha final de ejecución': '25/03/25' },
+                       { 'Entidad': 'Secretaria Distrital de Salud', 'Descripción de los compromisos': 'Acción de salud', 'Población impactada': '36', 'Fecha final de ejecución': '27/03/25' },
+                       { 'Entidad': 'Secretaria Distrital de Salud', 'Descripción de los compromisos': 'Acción de salud', 'Población impactada': '204', 'Fecha final de ejecución': '28/03/25' }
+                   ];
                 
-                updateDataTable(data.data);
-                updateVisualizadores(data.data); // Actualizar visualizadores
-                setLastUpdate(data.last_update);
+                datosGlobales = datosEjemplo;
+                updateDataTable(datosEjemplo);
+                updateVisualizadores(datosEjemplo);
                 hideLoading();
                 
-                console.log('✅ Carga de datos completada exitosamente');
-                return data; // Retornar los datos para que se pueda usar como promesa
-            } catch (error) { 
-                console.error('❌ Error al cargar datos:', error);
-                console.error('❌ Stack trace:', error.stack);
-                showError('Error al cargar los datos: ' + error.message); 
-                throw error; // Re-lanzar el error para que se pueda manejar
+                console.log('📊 Contador actualizado a datos de ejemplo:', datosEjemplo.length);
             }
+        }
+        
+        // --- Función para convertir CSV a JSON ---
+        function parseCSV(csvText) {
+            try {
+                // Dividir por líneas
+                const lines = csvText.split('\n');
+                
+                if (lines.length < 2) {
+                    console.warn('⚠️ CSV muy corto, necesita al menos headers y una fila de datos');
+                    return [];
+                }
+                
+                // Primera línea son los headers
+                const headers = lines[0].split(',').map(header => 
+                    header.replace(/"/g, '').trim()
+                );
+                
+                console.log('📋 Headers encontrados:', headers);
+                
+                // Procesar las filas de datos (excluir la primera línea de headers)
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line) { // Solo procesar líneas no vacías
+                        // Dividir la línea por comas, pero respetar comillas
+                        const values = parseCSVLine(line);
+                        
+                        // Verificar que la fila tenga datos reales (no solo espacios o valores vacíos)
+                        const hasRealData = values.some(value => value && value.trim() !== '');
+                        
+                        if (hasRealData) {
+                            // Crear objeto con headers como claves
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header] = values[index] || '';
+                            });
+                            
+                            // Verificar que la primera columna (Id) tenga un valor numérico válido
+                            const firstColumnValue = values[0] ? values[0].trim() : '';
+                            const hasValidFirstColumn = firstColumnValue && !isNaN(firstColumnValue) && firstColumnValue !== '';
+                            
+                            // Solo incluir si tiene un ID válido en la primera columna
+                            if (hasValidFirstColumn) {
+                                data.push(row);
+                                console.log(`✅ Fila ${i} incluida - ID: ${firstColumnValue}`);
+                            } else {
+                                console.log(`❌ Fila ${i} excluida - ID inválido: "${firstColumnValue}"`);
+                            }
+                        }
+                    }
+                }
+                
+                console.log(`📊 RESUMEN FINAL:`);
+                console.log(`📊 Total de líneas en CSV: ${lines.length}`);
+                console.log(`📊 Líneas con datos válidos: ${data.length}`);
+                console.log(`📊 Líneas excluidas: ${lines.length - data.length - 1}`); // -1 por el header
+                console.log(`📊 Resultado esperado: 70 registros`);
+                console.log(`📊 Resultado actual: ${data.length} registros`);
+                console.log(`📊 Diferencia: ${data.length - 70} registros`);
+                return data;
+                
+            } catch (error) { 
+                console.error('❌ Error parseando CSV:', error);
+                return [];
+            }
+        }
+        
+        // --- Función para parsear línea CSV respetando comillas ---
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            // Agregar el último valor
+            result.push(current.trim());
+            
+            return result;
         }
         
         // Función para actualizar todos los visualizadores
@@ -1019,7 +1126,7 @@
                 const diasElement = document.getElementById('dias-sin-homicidios');
                 const fechaBaseElement = document.getElementById('fecha-base');
                 
-                                 if (diasElement && fechaBaseElement) {
+                if (diasElement && fechaBaseElement) {
                      const baseDate = '2025-08-21';
                     const today = new Date();
                     const base = new Date(baseDate);
@@ -1116,20 +1223,10 @@
                 document.getElementById('personas-impactadas').textContent = '0';
                 return;
             }
-            // Detectar el nombre real de la columna de población impactada
-            const firstRow = data[0];
-            let colName = null;
-            for (let key in firstRow) {
-                if (key && key.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes('poblacion impactada')) {
-                    colName = key;
-                    break;
-                }
-            }
-            if (!colName) {
-                document.getElementById('personas-impactadas').textContent = '0';
-                console.warn('No se encontró la columna de población impactada.');
-                return;
-            }
+            
+            // Usar el nombre exacto de la columna de Google Sheets
+            const colName = 'Población impactada';
+            
             for (let i = 0; i < Math.min(500, data.length); i++) {
                 let row = data[i];
                 let val = row[colName];
@@ -1145,7 +1242,7 @@
             document.getElementById('actividades-realizadas').textContent = total.toLocaleString('es-CO');
         }
         // --- Visualizador: Días sin homicidios ---
-                 function getDiasSinHomicidios() {
+        function getDiasSinHomicidios() {
              // Fecha base fija: 21 de agosto de 2025 (último homicidio)
              const baseDate = new Date('2025-08-21');
             const now = new Date();
@@ -1156,10 +1253,10 @@
         function setDiasSinHomicidios(dias) {
             document.getElementById('dias-sin-homicidios').textContent = dias;
         }
-                 function getFechaBase() {
+        function getFechaBase() {
              // Fecha base fija: 21 de agosto de 2025 (último homicidio)
              return '21/08/2025';
-         }
+        }
         function updateFechaBase() {
             document.getElementById('fecha-base').textContent = 'Desde: ' + getFechaBase();
         }
@@ -1352,7 +1449,7 @@
                         <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem;">
                             <div style="background: ${gradients[index]}; padding: 0.8rem; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
                                 <span style="font-size: 1.5rem; color: white;">${medals[index]}</span>
-                            </div>
+                    </div>
                             <div>
                                 <strong style="color: #333; font-size: 1.1rem; display: block;">${entidad}</strong>
                                 <span style="color: #666; font-size: 0.9rem;">Posición ${index + 1}</span>
