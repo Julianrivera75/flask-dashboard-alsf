@@ -147,8 +147,30 @@ def create_app(config_class=config.DevelopmentConfig):
                 
                 # Hacer commit solo si se agregaron nuevos datos
                 if any([responsables_agregados, tipos_agregados, entidades_agregadas, sectores_agregados]):
-                    db.session.commit()
-                    logger.info(f"✅ Base de datos actualizada: {responsables_agregados} responsables, {tipos_agregados} tipos, {entidades_agregadas} entidades, {sectores_agregados} sectores agregados")
+                    try:
+                        db.session.commit()
+                        logger.info(f"✅ Base de datos actualizada: {responsables_agregados} responsables, {tipos_agregados} tipos, {entidades_agregadas} entidades, {sectores_agregados} sectores agregados")
+                    except Exception as commit_error:
+                        logger.error(f"❌ Error en commit: {commit_error}")
+                        db.session.rollback()
+                        # Intentar crear al menos opciones básicas
+                        try:
+                            if not Responsable.query.first():
+                                responsable = Responsable(nombre="Responsable General", activo=True)
+                                db.session.add(responsable)
+                            
+                            if not TipoActividad.query.first():
+                                tipo = TipoActividad(nombre="Actividad General", activo=True)
+                                db.session.add(tipo)
+                            
+                            if not Entidad.query.first():
+                                entidad = Entidad(nombre="Entidad General", activo=True)
+                                db.session.add(entidad)
+                            
+                            db.session.commit()
+                            logger.info("✅ Opciones básicas creadas como fallback")
+                        except Exception as fallback_error:
+                            logger.error(f"❌ Error en fallback: {fallback_error}")
                 else:
                     logger.info("✅ Base de datos ya está completa, no se agregaron nuevos datos")
                 
