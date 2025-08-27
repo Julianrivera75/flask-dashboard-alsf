@@ -69,69 +69,95 @@ def create_app(config_class=config.DevelopmentConfig):
             return render_template('error.html', error=str(e)), 500
     
     def init_database():
-        """Función para inicializar la base de datos"""
+        """Función para inicializar la base de datos de manera inteligente"""
         try:
             with app.app_context():
                 # Crear todas las tablas
                 db.create_all()
                 
-                # Verificar si ya hay datos
+                # Importar modelos
                 from models import Responsable, TipoActividad, Entidad, Sector
                 
-                # Crear datos básicos si no existen
-                if not Responsable.query.first():
-                    # Crear responsables básicos
-                    responsables = [
-                        Responsable(nombre="Alcaldía Local Santa Fe", activo=True),
-                        Responsable(nombre="Secretaría de Gobierno", activo=True),
-                        Responsable(nombre="Secretaría de Seguridad", activo=True),
-                        Responsable(nombre="Secretaría de Salud", activo=True),
-                        Responsable(nombre="Secretaría de Integración Social", activo=True)
-                    ]
-                    for r in responsables:
-                        db.session.add(r)
-                    
-                    # Crear tipos de actividad básicos
-                    tipos_actividad = [
-                        TipoActividad(nombre="Operativo de Seguridad", activo=True),
-                        TipoActividad(nombre="Jornada de Salud", activo=True),
-                        TipoActividad(nombre="Actividad Social", activo=True),
-                        TipoActividad(nombre="Mantenimiento de Espacios", activo=True),
-                        TipoActividad(nombre="Otro", activo=True)
-                    ]
-                    for t in tipos_actividad:
-                        db.session.add(t)
-                    
-                    # Crear entidades básicas
-                    entidades = [
-                        Entidad(nombre="Alcaldía Mayor de Bogotá", activo=True),
-                        Entidad(nombre="Policía Nacional", activo=True),
-                        Entidad(nombre="Bomberos", activo=True),
-                        Entidad(nombre="Secretaría de Salud", activo=True),
-                        Entidad(nombre="Secretaría de Integración Social", activo=True),
-                        Entidad(nombre="OTRA", activo=True)
-                    ]
-                    for e in entidades:
-                        db.session.add(e)
-                    
-                    # Crear sectores básicos
-                    sectores = [
-                        Sector(nombre="Sector 1", activo=True),
-                        Sector(nombre="Sector 2", activo=True),
-                        Sector(nombre="Sector 3", activo=True)
-                    ]
-                    for s in sectores:
-                        db.session.add(s)
-                    
+                logger.info("🔄 Inicializando base de datos de manera inteligente...")
+                
+                # 1. RESPONSABLES - Solo agregar los que falten
+                responsables_existentes = {r.nombre.lower() for r in Responsable.query.all()}
+                responsables_basicos = [
+                    # Opciones básicas sin secretarías ni alcaldía local
+                    # Agregar aquí solo las opciones que realmente necesites
+                ]
+                
+                responsables_agregados = 0
+                for nombre in responsables_basicos:
+                    if nombre.lower() not in responsables_existentes:
+                        responsable = Responsable(nombre=nombre, activo=True)
+                        db.session.add(responsable)
+                        responsables_agregados += 1
+                        logger.info(f"➕ Agregado responsable: {nombre}")
+                
+                # 2. TIPOS DE ACTIVIDAD - Solo agregar los que falten
+                tipos_existentes = {t.nombre.lower() for t in TipoActividad.query.all()}
+                tipos_basicos = [
+                    # Opciones básicas sin los tipos no deseados
+                    # Agregar aquí solo los tipos que realmente necesites
+                ]
+                
+                tipos_agregados = 0
+                for nombre in tipos_basicos:
+                    if nombre.lower() not in tipos_existentes:
+                        tipo = TipoActividad(nombre=nombre, activo=True)
+                        db.session.add(tipo)
+                        tipos_agregados += 1
+                        logger.info(f"➕ Agregado tipo de actividad: {nombre}")
+                
+                # 3. ENTIDADES - Solo agregar las que falten
+                entidades_existentes = {e.nombre.lower() for e in Entidad.query.all()}
+                entidades_basicas = [
+                    "Alcaldía Mayor de Bogotá",
+                    "Policía Nacional",
+                    "Bomberos",
+                    "Secretaría de Salud",
+                    "Secretaría de Integración Social",
+                    "OTRA"
+                ]
+                
+                entidades_agregadas = 0
+                for nombre in entidades_basicas:
+                    if nombre.lower() not in entidades_existentes:
+                        entidad = Entidad(nombre=nombre, activo=True)
+                        db.session.add(entidad)
+                        entidades_agregadas += 1
+                        logger.info(f"➕ Agregada entidad: {nombre}")
+                
+                # 4. SECTORES - Solo agregar los que falten
+                sectores_existentes = {s.nombre.lower() for s in Sector.query.all()}
+                sectores_basicos = [
+                    "Sector 1",
+                    "Sector 2", 
+                    "Sector 3"
+                ]
+                
+                sectores_agregados = 0
+                for nombre in sectores_basicos:
+                    if nombre.lower() not in sectores_existentes:
+                        sector = Sector(nombre=nombre, activo=True)
+                        db.session.add(sector)
+                        sectores_agregados += 1
+                        logger.info(f"➕ Agregado sector: {nombre}")
+                
+                # Hacer commit solo si se agregaron nuevos datos
+                if any([responsables_agregados, tipos_agregados, entidades_agregadas, sectores_agregados]):
                     db.session.commit()
-                    logger.info("Base de datos inicializada con datos básicos")
-                    return True
+                    logger.info(f"✅ Base de datos actualizada: {responsables_agregados} responsables, {tipos_agregados} tipos, {entidades_agregadas} entidades, {sectores_agregados} sectores agregados")
                 else:
-                    logger.info("Base de datos ya contiene datos")
-                    return True
+                    logger.info("✅ Base de datos ya está completa, no se agregaron nuevos datos")
+                
+                return True
                     
         except Exception as e:
-            logger.error(f"Error al inicializar base de datos: {str(e)}")
+            logger.error(f"❌ Error al inicializar base de datos: {str(e)}")
+            if 'db' in locals() and hasattr(db, 'session'):
+                db.session.rollback()
             return False
 
     @app.route('/init-db')
@@ -147,6 +173,70 @@ def create_app(config_class=config.DevelopmentConfig):
             return jsonify({
                 'success': False,
                 'error': 'Error al inicializar la base de datos'
+            }), 500
+
+    @app.route('/clean-db')
+    def clean_database():
+        """Ruta para limpiar opciones no deseadas de la base de datos"""
+        try:
+            with app.app_context():
+                from models import Responsable, TipoActividad, Entidad, Sector
+                
+                logger.info("🧹 Limpiando opciones no deseadas de la base de datos...")
+                
+                # Opciones a eliminar - RESPONSABLES
+                responsables_a_eliminar = [
+                    "Alcaldía Local Santa Fe",
+                    "Secretaría de Gobierno",
+                    "Secretaría de Seguridad", 
+                    "Secretaría de Salud",
+                    "Secretaría de Integración Social"
+                ]
+                
+                # Opciones a eliminar - TIPOS DE ACTIVIDAD
+                tipos_a_eliminar = [
+                    "Operativo de Seguridad",
+                    "Jornada de Salud",
+                    "Actividad Social",
+                    "Mantenimiento de Espacios"
+                ]
+                
+                # Eliminar responsables no deseados
+                responsables_eliminados = 0
+                for nombre in responsables_a_eliminar:
+                    responsable = Responsable.query.filter_by(nombre=nombre).first()
+                    if responsable:
+                        db.session.delete(responsable)
+                        responsables_eliminados += 1
+                        logger.info(f"🗑️ Eliminado responsable: {nombre}")
+                
+                # Eliminar tipos de actividad no deseados
+                tipos_eliminados = 0
+                for nombre in tipos_a_eliminar:
+                    tipo = TipoActividad.query.filter_by(nombre=nombre).first()
+                    if tipo:
+                        db.session.delete(tipo)
+                        tipos_eliminados += 1
+                        logger.info(f"🗑️ Eliminado tipo de actividad: {nombre}")
+                
+                # Hacer commit de los cambios
+                db.session.commit()
+                
+                total_eliminados = responsables_eliminados + tipos_eliminados
+                logger.info(f"✅ Limpieza completada: {responsables_eliminados} responsables y {tipos_eliminados} tipos eliminados")
+                
+                return jsonify({
+                    'success': True,
+                    'message': f'Limpieza completada: {total_eliminados} opciones eliminadas ({responsables_eliminados} responsables, {tipos_eliminados} tipos)'
+                })
+                
+        except Exception as e:
+            logger.error(f"❌ Error al limpiar base de datos: {str(e)}")
+            if 'db' in locals() and hasattr(db, 'session'):
+                db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': f'Error al limpiar base de datos: {str(e)}'
             }), 500
     
     @app.route('/login', methods=['GET', 'POST'])

@@ -32,60 +32,74 @@ def formulario_reporte():
         except Exception as db_error:
             logging.warning(f"Error al crear tablas: {db_error}")
         
-        # Verificar si hay datos básicos
-        if not Responsable.query.first():
-            logging.info("Inicializando base de datos con datos básicos...")
-            
-            # Crear responsables básicos
-            responsables = [
-                Responsable(nombre="Alcaldía Local Santa Fe", activo=True),
-                Responsable(nombre="Secretaría de Gobierno", activo=True),
-                Responsable(nombre="Secretaría de Seguridad", activo=True),
-                Responsable(nombre="Secretaría de Salud", activo=True),
-                Responsable(nombre="Secretaría de Integración Social", activo=True)
-            ]
-            for r in responsables:
-                db.session.add(r)
-            
-            # Crear tipos de actividad básicos
-            tipos_actividad = [
-                TipoActividad(nombre="Operativo de Seguridad", activo=True),
-                TipoActividad(nombre="Jornada de Salud", activo=True),
-                TipoActividad(nombre="Actividad Social", activo=True),
-                TipoActividad(nombre="Mantenimiento de Espacios", activo=True),
-                TipoActividad(nombre="Otro", activo=True)
-            ]
-            for t in tipos_actividad:
-                db.session.add(t)
-            
-            # Crear entidades básicas
-            entidades = [
-                Entidad(nombre="Alcaldía Mayor de Bogotá", activo=True),
-                Entidad(nombre="Policía Nacional", activo=True),
-                Entidad(nombre="Bomberos", activo=True),
-                Entidad(nombre="Secretaría de Salud", activo=True),
-                Entidad(nombre="Secretaría de Integración Social", activo=True),
-                Entidad(nombre="OTRA", activo=True)
-            ]
-            for e in entidades:
-                db.session.add(e)
-            
-            # Crear sectores básicos
-            sectores = [
-                Sector(nombre="Sector 1", activo=True),
-                Sector(nombre="Sector 2", activo=True),
-                Sector(nombre="Sector 3", activo=True)
-            ]
-            for s in sectores:
-                db.session.add(s)
-            
-            try:
-                db.session.commit()
-                logging.info("Base de datos inicializada correctamente")
-            except Exception as commit_error:
-                logging.error(f"Error al hacer commit: {commit_error}")
-                db.session.rollback()
-                # Continuar con datos vacíos si falla el commit
+        # Verificar si hay datos básicos y agregar solo los que falten
+        logging.info("Verificando y completando datos básicos...")
+        
+        # 1. RESPONSABLES - Solo agregar los que falten
+        responsables_existentes = {r.nombre.lower() for r in Responsable.query.all()}
+        responsables_basicos = [
+            # Opciones básicas sin secretarías ni alcaldía local
+            # Agregar aquí solo las opciones que realmente necesites
+        ]
+        
+        for nombre in responsables_basicos:
+            if nombre.lower() not in responsables_existentes:
+                responsable = Responsable(nombre=nombre, activo=True)
+                db.session.add(responsable)
+                logging.info(f"Agregado responsable: {nombre}")
+        
+        # 2. TIPOS DE ACTIVIDAD - Solo agregar los que falten
+        tipos_existentes = {t.nombre.lower() for t in TipoActividad.query.all()}
+        tipos_basicos = [
+            # Opciones básicas sin los tipos no deseados
+            # Agregar aquí solo los tipos que realmente necesites
+        ]
+        
+        for nombre in tipos_basicos:
+            if nombre.lower() not in tipos_existentes:
+                tipo = TipoActividad(nombre=nombre, activo=True)
+                db.session.add(tipo)
+                logging.info(f"Agregado tipo de actividad: {nombre}")
+        
+        # 3. ENTIDADES - Solo agregar las que falten
+        entidades_existentes = {e.nombre.lower() for e in Entidad.query.all()}
+        entidades_basicas = [
+            "Alcaldía Mayor de Bogotá",
+            "Policía Nacional",
+            "Bomberos",
+            "Secretaría de Salud",
+            "Secretaría de Integración Social",
+            "OTRA"
+        ]
+        
+        for nombre in entidades_basicas:
+            if nombre.lower() not in entidades_existentes:
+                entidad = Entidad(nombre=nombre, activo=True)
+                db.session.add(entidad)
+                logging.info(f"Agregada entidad: {nombre}")
+        
+        # 4. SECTORES - Solo agregar los que falten
+        sectores_existentes = {s.nombre.lower() for s in Sector.query.all()}
+        sectores_basicos = [
+            "Sector 1",
+            "Sector 2", 
+            "Sector 3"
+        ]
+        
+        for nombre in sectores_basicos:
+            if nombre.lower() not in sectores_existentes:
+                sector = Sector(nombre=nombre, activo=True)
+                db.session.add(sector)
+                logging.info(f"Agregado sector: {nombre}")
+        
+        # Hacer commit solo si se agregaron nuevos datos
+        try:
+            db.session.commit()
+            logging.info("Base de datos verificada y completada correctamente")
+        except Exception as commit_error:
+            logging.error(f"Error al hacer commit: {commit_error}")
+            db.session.rollback()
+            # Continuar con datos existentes si falla el commit
         
         # Obtener todas las opciones para los dropdowns
         responsables = Responsable.query.filter_by(activo=True).order_by(Responsable.nombre).all()

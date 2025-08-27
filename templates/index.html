@@ -290,6 +290,42 @@
                 return false;
             }
         }
+        
+        // Función para limpiar opciones no deseadas
+        async function limpiarOpcionesNoDeseadas() {
+            try {
+                console.log('🧹 Limpiando opciones no deseadas...');
+                const response = await fetch('/clean-db');
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Limpieza completada:', data.message);
+                    alert('Limpieza completada: ' + data.message);
+                } else {
+                    console.error('❌ Error al limpiar:', data.error);
+                    alert('Error al limpiar: ' + data.error);
+                }
+            } catch (error) {
+                console.error('❌ Error al limpiar:', error);
+                alert('Error al limpiar: ' + error.message);
+            }
+        }
     </script>
+    
+    <!-- Botón para limpiar opciones no deseadas -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+        <button onclick="limpiarOpcionesNoDeseadas()" 
+                style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); 
+                       color: white; 
+                       border: none; 
+                       padding: 12px 20px; 
+                       border-radius: 25px; 
+                       cursor: pointer; 
+                       font-weight: 600; 
+                       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                       transition: all 0.3s ease;">
+            <i class="fas fa-trash"></i> Limpiar Opciones No Deseadas
+        </button>
+    </div>
 </body>
 </html> 
