@@ -22,6 +22,71 @@ def login_required(f):
 def formulario_reporte():
     """Muestra el formulario de reporte"""
     try:
+        # Verificar si la base de datos está inicializada
+        from models import Responsable, TipoActividad, Entidad, Sector
+        from app_modular import db
+        
+        # Intentar crear las tablas si no existen
+        try:
+            db.create_all()
+        except Exception as db_error:
+            logging.warning(f"Error al crear tablas: {db_error}")
+        
+        # Verificar si hay datos básicos
+        if not Responsable.query.first():
+            logging.info("Inicializando base de datos con datos básicos...")
+            
+            # Crear responsables básicos
+            responsables = [
+                Responsable(nombre="Alcaldía Local Santa Fe", activo=True),
+                Responsable(nombre="Secretaría de Gobierno", activo=True),
+                Responsable(nombre="Secretaría de Seguridad", activo=True),
+                Responsable(nombre="Secretaría de Salud", activo=True),
+                Responsable(nombre="Secretaría de Integración Social", activo=True)
+            ]
+            for r in responsables:
+                db.session.add(r)
+            
+            # Crear tipos de actividad básicos
+            tipos_actividad = [
+                TipoActividad(nombre="Operativo de Seguridad", activo=True),
+                TipoActividad(nombre="Jornada de Salud", activo=True),
+                TipoActividad(nombre="Actividad Social", activo=True),
+                TipoActividad(nombre="Mantenimiento de Espacios", activo=True),
+                TipoActividad(nombre="Otro", activo=True)
+            ]
+            for t in tipos_actividad:
+                db.session.add(t)
+            
+            # Crear entidades básicas
+            entidades = [
+                Entidad(nombre="Alcaldía Mayor de Bogotá", activo=True),
+                Entidad(nombre="Policía Nacional", activo=True),
+                Entidad(nombre="Bomberos", activo=True),
+                Entidad(nombre="Secretaría de Salud", activo=True),
+                Entidad(nombre="Secretaría de Integración Social", activo=True),
+                Entidad(nombre="OTRA", activo=True)
+            ]
+            for e in entidades:
+                db.session.add(e)
+            
+            # Crear sectores básicos
+            sectores = [
+                Sector(nombre="Sector 1", activo=True),
+                Sector(nombre="Sector 2", activo=True),
+                Sector(nombre="Sector 3", activo=True)
+            ]
+            for s in sectores:
+                db.session.add(s)
+            
+            try:
+                db.session.commit()
+                logging.info("Base de datos inicializada correctamente")
+            except Exception as commit_error:
+                logging.error(f"Error al hacer commit: {commit_error}")
+                db.session.rollback()
+                # Continuar con datos vacíos si falla el commit
+        
         # Obtener todas las opciones para los dropdowns
         responsables = Responsable.query.filter_by(activo=True).order_by(Responsable.nombre).all()
         tipos_actividad = TipoActividad.query.filter_by(activo=True).order_by(TipoActividad.nombre).all()
@@ -33,7 +98,16 @@ def formulario_reporte():
                              entidades=entidades)
     except Exception as e:
         logging.error(f"Error en formulario_reporte: {e}")
-        flash('Error al cargar el formulario', 'error')
+        flash('Error al cargar el formulario. Inicializando base de datos...', 'warning')
+        # Intentar inicializar la base de datos automáticamente
+        try:
+            from app_modular import init_database
+            init_database()
+            flash('Base de datos inicializada. Intenta nuevamente.', 'success')
+        except Exception as init_error:
+            logging.error(f"Error al inicializar automáticamente: {init_error}")
+            flash('Error al inicializar la base de datos automáticamente.', 'error')
+        
         return redirect(url_for('index'))
 
 @reportes_bp.route('/api/responsables')
@@ -79,8 +153,10 @@ def api_guardar_reporte():
         # Obtener datos del formulario
         data = request.get_json()
         
-        # Crear el reporte
+        # Crear el reporte con fecha explícita
+        from datetime import datetime
         reporte = Reporte(
+            fecha_reporte=datetime.now(),  # Fecha actual explícita
             responsable_id=int(data['responsable_id']),
             latitud=float(data['latitud']),
             longitud=float(data['longitud']),
@@ -187,15 +263,44 @@ def api_reportes():
         
         reportes_data = []
         for reporte in reportes.items:
+            # Obtener participantes
+            participantes = []
+            if reporte.participantes:
+                participantes = [{'id': p.id, 'nombre': p.nombre} for p in reporte.participantes]
+            
+            # Obtener entidades
+            entidades = []
+            if reporte.entidades:
+                entidades = [{'id': e.id, 'nombre': e.nombre} for e in reporte.entidades]
+            
+            # Obtener resultados
+            resultados = []
+            if reporte.resultados:
+                for resultado in reporte.resultados:
+                    resultados.append({
+                        'cambuches_levantados': resultado.cambuches_levantados,
+                        'armas_blancas_decomisadas': resultado.armas_blancas_decomisadas,
+                        'armas_fuego_decomisadas': resultado.armas_fuego_decomisadas,
+                        'requisas': resultado.requisas,
+                        'sellamientos_establecimientos': resultado.sellamientos_establecimientos,
+                        'sensibilizaciones': resultado.sensibilizaciones,
+                        'otra_descripcion': resultado.otra_descripcion
+                    })
+            
             reporte_dict = {
                 'id': reporte.id,
                 'fecha_reporte': reporte.fecha_reporte.isoformat() if reporte.fecha_reporte else None,
                 'responsable': reporte.responsable.nombre if reporte.responsable else None,
                 'tipo_actividad': reporte.tipo_actividad.nombre if reporte.tipo_actividad else None,
-    
+                'tipo_actividad_id': reporte.tipo_actividad.id if reporte.tipo_actividad else None,
+                'acompanamiento_juridico': reporte.acompanamiento_juridico,
+                'observaciones': reporte.observaciones,
                 'latitud': reporte.latitud,
                 'longitud': reporte.longitud,
-                'estado': reporte.estado
+                'estado': reporte.estado,
+                'participantes': participantes,
+                'entidades': entidades,
+                'resultados': resultados
             }
             reportes_data.append(reporte_dict)
         

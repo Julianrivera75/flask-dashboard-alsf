@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alcaldía Local de Santa Fe - Indicadores Estratégicos</title>
+    <title>BogotaneidApp Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe</title>
     
     <!-- Google Analytics 4 -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -56,7 +56,7 @@
                 <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; vertical-align: middle;">
             </div>
             <div class="header-title">
-                <h1>Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe</h1>
+                <h1>BogotaneidApp Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe</h1>
             </div>
             <div class="header-empty"></div>
                 </div>
@@ -271,17 +271,25 @@
             updateFechaBase();
         });
         
-
-        
-
-
-
-    
-
-    
-
-        
-
+        // Función para inicializar la base de datos automáticamente
+        async function inicializarBaseDatosAutomaticamente() {
+            try {
+                console.log('🔄 Inicializando base de datos automáticamente...');
+                const response = await fetch('/init-db');
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Base de datos inicializada automáticamente');
+                    return true;
+                } else {
+                    console.error('❌ Error al inicializar BD automáticamente:', data.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Error al inicializar BD automáticamente:', error);
+                return false;
+            }
+        }
     </script>
 </body>
 </html> 

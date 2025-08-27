@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Reportes - ALSF</title>
+    <title>Mapa de Sectores Catastrales - ALSF</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
@@ -148,15 +148,66 @@
         .btn-logout:hover {
             background-color: #c82333;
         }
+        
+        /* Estilos para las etiquetas de sectores */
+        .sector-label {
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        /* Leyenda del mapa */
+        .map-legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        
+        /* Estilos para marcadores de reportes */
+        .reporte-marker {
+            background: #e74c3c;
+            border: 3px solid #c0392b;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            cursor: pointer;
+        }
+        
+        .reporte-marker:hover {
+            transform: scale(1.3);
+            transition: transform 0.3s ease;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
             <div class="header">
-            <h1>🗺️ Mapa de Reportes ALSF</h1>
-            <p>Visualización geográfica de todas las actividades reportadas</p>
+            <h1>🗺️ Mapa de Sectores Catastrales ALSF</h1>
+            <p>Visualización geográfica de la división territorial por sectores catastrales</p>
             <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
                 <p style="margin: 0; font-size: 1.1em;">
-                    🔒 <strong>Área de Acceso Restringido</strong> - Solo personal autorizado puede visualizar reportes
+                    🔒 <strong>Área de Acceso Restringido</strong> - Solo personal autorizado puede visualizar sectores
                 </p>
             </div>
             <div style="text-align: right; margin-top: 20px;">
@@ -178,49 +229,83 @@
     <div class="controls">
         <div class="stats">
             <div class="stat-card">
+                <h3 id="total-sectores">0</h3>
+                <p>Total de Sectores</p>
+            </div>
+            <div class="stat-card">
                 <h3 id="total-reportes">0</h3>
                 <p>Total de Reportes</p>
             </div>
             <div class="stat-card">
-                <h3 id="pendientes">0</h3>
-                <p>Pendientes</p>
+                <h3 id="reportes-filtrados">0</h3>
+                <p>Reportes Filtrados</p>
             </div>
             <div class="stat-card">
-                <h3 id="con-fotos">0</h3>
-                <p>Con Fotos</p>
+                <h3 id="barrio-seleccionado">-</h3>
+                <p>Barrio Seleccionado</p>
             </div>
         </div>
         
         <div class="filters">
             <div class="filter-group">
-                <label for="filtro-categoria">Filtrar por Actividad:</label>
-                <select id="filtro-categoria">
-                    <option value="">Todas las actividades</option>
+                <label for="filtro-barrio">Filtrar por Barrio:</label>
+                <select id="filtro-barrio">
+                    <option value="">Todos los barrios</option>
                 </select>
             </div>
             
             <div class="filter-group">
-                <label for="filtro-estado">Filtrar por Estado:</label>
-                <select id="filtro-estado">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="aprobado">Aprobado</option>
-                    <option value="rechazado">Rechazado</option>
+                <label for="filtro-tipo-actividad">Filtrar por Tipo de Actividad:</label>
+                <select id="filtro-tipo-actividad">
+                    <option value="">Todos los tipos</option>
                 </select>
             </div>
             
-            <button class="btn" onclick="cargarReportes()">
-                🔄 Actualizar
+            <button class="btn" onclick="aplicarFiltros()">
+                🔄 Aplicar Filtros
+            </button>
+            
+            <button class="btn" onclick="limpiarFiltros()" style="background: #6c757d;">
+                🧹 Limpiar
             </button>
         </div>
     </div>
     
-    <div class="map-container" id="map"></div>
+    <div class="map-container" id="map">
+        <!-- Leyenda del mapa -->
+        <div class="map-legend">
+            <h4 style="margin-bottom: 15px; color: #2c3e50;">🗺️ Leyenda del Mapa</h4>
+            
+            <div style="margin-bottom: 15px;">
+                <h5 style="color: #2c3e50; margin-bottom: 8px;">🏘️ Sectores Catastrales</h5>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #3498db; border: 2px solid #2980b9;"></div>
+                    <span>Polígonos de Sectores</span>
+                </div>
+            </div>
+            
+            <div>
+                <h5 style="color: #2c3e50; margin-bottom: 8px;">📍 Reportes del Formulario</h5>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #e74c3c; border-radius: 50%; width: 16px; height: 16px;"></div>
+                    <span>Marcadores de Reportes</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
     <script>
         let map;
-        let markers = [];
+        let sectoresLayer = null;
+        let reportesLayer = null;
+        let sectoresData = [];
+        let reportesData = [];
+        let filtrosActivos = {
+            barrio: '',
+            tipoActividad: ''
+        };
         
         // Inicializar mapa
         function initMap() {
@@ -230,79 +315,368 @@
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
             
-            // Cargar reportes iniciales
+            // Cargar sectores catastrales y reportes
+            cargarSectores();
             cargarReportes();
+            cargarTiposActividad();
+        }
+        
+        // Cargar sectores catastrales desde el archivo KML real
+        async function cargarSectores() {
+            try {
+                console.log('🗺️ Cargando sectores catastrales desde KML...');
+                
+                // Limpiar capa existente
+                if (sectoresLayer) {
+                    map.removeLayer(sectoresLayer);
+                }
+                
+                // URL del archivo KML de sectores catastrales
+                const kmlUrl = '/static/data/SectoresCatastrales.kml';
+                
+                console.log('📁 Intentando cargar KML desde:', kmlUrl);
+                
+                // Intentar cargar con leaflet-omnivore
+                try {
+                    const sectoresLayer = omnivore.kml(kmlUrl)
+                        .on('ready', function() {
+                            console.log('✅ KML cargado exitosamente con omnivore');
+                            console.log('📊 Número de capas:', this.getLayers().length);
+                            
+                            // Guardar referencia a la capa
+                            window.sectoresLayer = sectoresLayer;
+                            
+                            // Aplicar estilos a los polígonos y extraer nombres de barrios
+                            const barrios = new Set();
+                            this.eachLayer(function(layer) {
+                                if (layer instanceof L.Polygon) {
+                                    // Estilo por defecto
+                                    layer.setStyle({
+                                        color: '#3498db',
+                                        weight: 2,
+                                        fillColor: '#3498db',
+                                        fillOpacity: 0.3
+                                    });
+                                    
+                                    // Extraer nombre del barrio para el filtro
+                                    if (layer.feature && layer.feature.properties) {
+                                        const props = layer.feature.properties;
+                                        const barrioName = props.name || props.Name || 'Sector';
+                                        console.log(`🏘️ Sector cargado: "${barrioName}"`);
+                                        
+                                        barrios.add(barrioName);
+                                        
+                                        // Agregar popup con información del sector
+                                        const popupContent = crearPopupContentKML(props);
+                                        layer.bindPopup(popupContent);
+                                        
+                                        // Agregar etiqueta del sector
+                                        const center = layer.getBounds().getCenter();
+                                        const label = L.marker(center, {
+                                            icon: L.divIcon({
+                                                className: 'sector-label',
+                                                html: `<div style="background: white; padding: 5px; border-radius: 5px; border: 2px solid #3498db; font-weight: bold; color: #333;">${barrioName}</div>`,
+                                                iconSize: [120, 30],
+                                                iconAnchor: [60, 15]
+                                            })
+                                        }).addTo(map);
+                                    }
+                                }
+                            });
+                            
+                            // Agregar la capa al mapa
+                            this.addTo(map);
+                            
+                            // Ajustar vista del mapa
+                            if (this.getLayers().length > 0) {
+                                map.fitBounds(this.getBounds().pad(0.1));
+                            }
+                            
+                            // Actualizar estadísticas y cargar filtros de barrios
+                            actualizarEstadisticasKML(this);
+                            cargarFiltrosBarrios(Array.from(barrios));
+                            
+                        })
+                        .on('error', function(error) {
+                            console.error('❌ Error al cargar KML con omnivore:', error);
+                            console.log('🔄 Intentando método alternativo...');
+                            cargarKMLAlternativo();
+                        });
+                    
+                } catch (omnivoreError) {
+                    console.error('❌ Error con omnivore:', omnivoreError);
+                    console.log('🔄 Intentando método alternativo...');
+                    cargarKMLAlternativo();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error en cargarSectores:', error);
+                console.log('🔄 Usando datos de ejemplo como fallback...');
+                const sectores = generarSectoresEjemplo();
+                mostrarSectoresEnMapa(sectores);
+                actualizarEstadisticas(sectores);
+            }
         }
         
         // Cargar reportes desde la API
         async function cargarReportes() {
             try {
-                const categoria = document.getElementById('filtro-categoria').value;
-                const estado = document.getElementById('filtro-estado').value;
+                console.log('📋 Cargando reportes desde la API...');
                 
-                let url = '/api/reportes?per_page=100';
-                if (categoria) url += `&categoria_id=${categoria}`;
-                if (estado) url += `&estado=${estado}`;
+                const response = await fetch('/api/reportes?per_page=1000');
                 
-                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 
-                if (data.success !== false) {
-                    mostrarReportesEnMapa(data.reportes);
-                    actualizarEstadisticas(data.reportes);
+                if (data.reportes) {
+                    reportesData = data.reportes;
+                    console.log(`✅ ${reportesData.length} reportes cargados`);
+                    
+                    if (reportesData.length === 0) {
+                        console.log('ℹ️ No hay reportes en la base de datos');
+                    } else {
+                        console.log('✅ Reportes disponibles:', reportesData.map(r => ({id: r.id, fecha: r.fecha_reporte, coords: [r.latitud, r.longitud]})));
+                    }
+                    
+                    mostrarReportesEnMapa(reportesData);
+                    actualizarEstadisticasReportes();
                 } else {
-                    console.error('Error al cargar reportes:', data.error);
+                    console.error('❌ Error al cargar reportes:', data.error);
                 }
             } catch (error) {
-                console.error('Error de conexión:', error);
+                console.error('❌ Error de conexión al cargar reportes:', error);
+                
+                // Si hay error, intentar inicializar la base de datos
+                if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+                    console.log('🔄 Intentando inicializar base de datos...');
+                    try {
+                        const initResponse = await fetch('/init-db');
+                        const initData = await initResponse.json();
+                        
+                        if (initData.success) {
+                            console.log('✅ Base de datos inicializada, reintentando cargar reportes...');
+                            // Reintentar cargar reportes
+                            setTimeout(() => cargarReportes(), 1000);
+                        }
+                    } catch (initError) {
+                        console.error('❌ Error al inicializar BD:', initError);
+                    }
+                }
+            }
+        }
+        
+        // Cargar tipos de actividad para el filtro
+        async function cargarTiposActividad() {
+            try {
+                console.log('🏷️ Cargando tipos de actividad...');
+                
+                const response = await fetch('/api/tipos-actividad');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const tipos = await response.json();
+                
+                if (tipos && tipos.length > 0) {
+                    const select = document.getElementById('filtro-tipo-actividad');
+                    select.innerHTML = '<option value="">Todos los tipos</option>';
+                    
+                    tipos.forEach(tipo => {
+                        const option = document.createElement('option');
+                        option.value = tipo.id;
+                        option.textContent = tipo.nombre;
+                        select.appendChild(option);
+                    });
+                    
+                    console.log(`✅ ${tipos.length} tipos de actividad cargados`);
+                } else {
+                    console.warn('⚠️ No hay tipos de actividad disponibles');
+                }
+            } catch (error) {
+                console.error('❌ Error al cargar tipos de actividad:', error);
+                
+                // Si hay error, intentar inicializar la base de datos
+                if (error.message.includes('500') || error.message.includes('Internal Server Error')) {
+                    console.log('🔄 Intentando inicializar base de datos...');
+                    try {
+                        const initResponse = await fetch('/init-db');
+                        const initData = await initResponse.json();
+                        
+                        if (initData.success) {
+                            console.log('✅ Base de datos inicializada, reintentando cargar tipos de actividad...');
+                            // Reintentar cargar tipos de actividad
+                            setTimeout(() => cargarTiposActividad(), 1000);
+                        }
+                    } catch (initError) {
+                        console.error('❌ Error al inicializar BD:', initError);
+                    }
+                }
+            }
+        }
+        
+        // Cargar filtros de barrios
+        function cargarFiltrosBarrios(barrios) {
+            try {
+                console.log('🏘️ Cargando filtros de barrios...');
+                
+                const select = document.getElementById('filtro-barrio');
+                select.innerHTML = '<option value="">Todos los barrios</option>';
+                
+                barrios.sort().forEach(barrio => {
+                    const option = document.createElement('option');
+                    option.value = barrio;
+                    option.textContent = barrio;
+                    select.appendChild(option);
+                });
+                
+                console.log(`✅ ${barrios.length} barrios cargados en filtros`);
+            } catch (error) {
+                console.error('❌ Error al cargar filtros de barrios:', error);
             }
         }
         
         // Mostrar reportes en el mapa
         function mostrarReportesEnMapa(reportes) {
-            // Limpiar marcadores existentes
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
-            
-            if (!reportes || reportes.length === 0) {
-                return;
+            // Limpiar capa existente
+            if (reportesLayer) {
+                map.removeLayer(reportesLayer);
             }
+            
+            // Crear grupo de marcadores
+            reportesLayer = L.layerGroup();
             
             reportes.forEach(reporte => {
                 if (reporte.latitud && reporte.longitud) {
-                    const marker = L.marker([reporte.latitud, reporte.longitud])
-                        .addTo(map)
-                        .bindPopup(crearPopupContent(reporte));
+                    // Crear marcador del reporte
+                    const marker = L.marker([reporte.latitud, reporte.longitud], {
+                        icon: L.divIcon({
+                            className: 'reporte-marker',
+                            html: `<div style="background: #e74c3c; color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; border: 3px solid #c0392b;">📋</div>`,
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        })
+                    }).addTo(reportesLayer);
                     
-                    markers.push(marker);
+                    // Agregar popup con información del reporte
+                    marker.bindPopup(crearPopupContentReporte(reporte));
                 }
             });
             
-            // Ajustar vista del mapa si hay marcadores
-            if (markers.length > 0) {
-                const group = new L.featureGroup(markers);
-                map.fitBounds(group.getBounds().pad(0.1));
-            }
+            // Agregar la capa al mapa
+            reportesLayer.addTo(map);
         }
         
-        // Crear contenido del popup
-        function crearPopupContent(reporte) {
-            let contenido = `
-                <div style="min-width: 250px;">
-                    <h3 style="color: #2c3e50; margin-bottom: 10px;">📋 Reporte #${reporte.id}</h3>
-                    <p><strong>📅 Fecha:</strong> ${new Date(reporte.fecha_reporte).toLocaleDateString('es-CO')}</p>
-                    <p><strong>👤 Responsable:</strong> ${reporte.responsable || 'N/A'}</p>
-                    <p><strong>🏷️ Actividad:</strong> ${reporte.tipo_actividad || 'N/A'}</p>
-    
-                    <p><strong>📊 Estado:</strong> <span style="color: ${getEstadoColor(reporte.estado)};">${reporte.estado}</span></p>
-            `;
-            
-            if (reporte.archivos && reporte.archivos.length > 0) {
-                contenido += `<p><strong>📎 Archivos:</strong> ${reporte.archivos.length}</p>`;
+        // Crear popup para reportes
+        function crearPopupContentReporte(reporte) {
+            // Formatear fecha correctamente
+            let fechaFormateada = 'N/A';
+            if (reporte.fecha_reporte) {
+                try {
+                    const fecha = new Date(reporte.fecha_reporte);
+                    fechaFormateada = fecha.toLocaleDateString('es-CO', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (error) {
+                    fechaFormateada = reporte.fecha_reporte;
+                }
             }
             
-            contenido += '</div>';
-            return contenido;
+            // Formatear acompañamiento jurídico
+            const acompanamientoJuridico = reporte.acompanamiento_juridico ? '✅ Sí' : '❌ No';
+            
+            // Formatear participantes
+            let participantesInfo = 'N/A';
+            if (reporte.participantes && reporte.participantes.length > 0) {
+                participantesInfo = reporte.participantes.map(p => p.nombre || p).join(', ');
+            }
+            
+            // Formatear entidades
+            let entidadesInfo = 'N/A';
+            if (reporte.entidades && reporte.entidades.length > 0) {
+                entidadesInfo = reporte.entidades.map(e => e.nombre || e).join(', ');
+            }
+            
+            // Formatear resultados
+            let resultadosInfo = '';
+            if (reporte.resultados && reporte.resultados.length > 0) {
+                const resultado = reporte.resultados[0]; // Tomar el primer resultado
+                resultadosInfo = `
+                    <div style="margin-top: 12px; padding: 8px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #3498db;">
+                        <h4 style="color: #2c3e50; margin-bottom: 8px; font-size: 12px;">📊 Resultados de la Actividad</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 10px;">
+                            ${resultado.cambuches_levantados > 0 ? `<div><strong>🏠 Cambuches:</strong> ${resultado.cambuches_levantados}</div>` : ''}
+                            ${resultado.armas_blancas_decomisadas > 0 ? `<div><strong>🗡️ Armas Blancas:</strong> ${resultado.armas_blancas_decomisadas}</div>` : ''}
+                            ${resultado.armas_fuego_decomisadas > 0 ? `<div><strong>🔫 Armas de Fuego:</strong> ${resultado.armas_fuego_decomisadas}</div>` : ''}
+                            ${resultado.requisas > 0 ? `<div><strong>🔍 Requisas:</strong> ${resultado.requisas}</div>` : ''}
+                            ${resultado.sellamientos_establecimientos > 0 ? `<div><strong>🚫 Sellamientos:</strong> ${resultado.sellamientos_establecimientos}</div>` : ''}
+                            ${resultado.sensibilizaciones > 0 ? `<div><strong>💡 Sensibilizaciones:</strong> ${resultado.sensibilizaciones}</div>` : ''}
+                        </div>
+                        ${resultado.otra_descripcion ? `<div style="margin-top: 6px; font-size: 10px;"><strong>📝 Otros:</strong> ${resultado.otra_descripcion}</div>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Formatear observaciones
+            let observacionesInfo = '';
+            if (reporte.observaciones && reporte.observaciones.trim()) {
+                observacionesInfo = `
+                    <div style="margin-top: 12px; padding: 8px; background: #fff3cd; border-radius: 6px; border-left: 3px solid #ffc107;">
+                        <h4 style="color: #856404; margin-bottom: 6px; font-size: 12px;">📝 Observaciones</h4>
+                        <p style="color: #856404; font-size: 10px; margin: 0; line-height: 1.3;">${reporte.observaciones}</p>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div style="width: 350px; max-height: 400px; overflow-y: auto;">
+                    <!-- Encabezado del reporte -->
+                    <div style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; padding: 12px; border-radius: 8px 8px 0 0; margin: -15px -15px 12px -15px;">
+                        <h3 style="margin: 0; font-size: 16px;">📋 Reporte #${reporte.id}</h3>
+                        <p style="margin: 3px 0 0 0; opacity: 0.9; font-size: 12px;">${fechaFormateada}</p>
+                    </div>
+                    
+                    <!-- Información básica -->
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div><strong style="font-size: 11px;">👤 Responsable:</strong><br><span style="color: #2c3e50; font-size: 11px;">${reporte.responsable || 'N/A'}</span></div>
+                            <div><strong style="font-size: 11px;">🏷️ Tipo:</strong><br><span style="color: #2c3e50; font-size: 11px;">${reporte.tipo_actividad || 'N/A'}</span></div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <div><strong style="font-size: 11px;">📊 Estado:</strong><br><span style="color: ${getEstadoColor(reporte.estado)}; font-size: 11px;">${reporte.estado || 'N/A'}</span></div>
+                            <div><strong style="font-size: 11px;">⚖️ Jurídico:</strong><br><span style="color: #2c3e50; font-size: 11px;">${acompanamientoJuridico}</span></div>
+                        </div>
+                        <div><strong style="font-size: 11px;">📍 Coordenadas:</strong><br><span style="color: #2c3e50; font-family: monospace; font-size: 10px;">${reporte.latitud}, ${reporte.longitud}</span></div>
+                    </div>
+                    
+                    <!-- Participantes y Entidades -->
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div style="padding: 8px; background: #e8f5e8; border-radius: 6px; border-left: 3px solid #28a745;">
+                                <h4 style="color: #155724; margin-bottom: 6px; font-size: 12px;">👥 Participantes</h4>
+                                <p style="color: #155724; font-size: 10px; margin: 0; line-height: 1.3;">${participantesInfo}</p>
+                            </div>
+                            <div style="padding: 8px; background: #e8f4fd; border-radius: 6px; border-left: 3px solid #17a2b8;">
+                                <h4 style="color: #0c5460; margin-bottom: 6px; font-size: 12px;">🏛️ Entidades</h4>
+                                <p style="color: #0c5460; font-size: 10px; margin: 0; line-height: 1.3;">${entidadesInfo}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resultados -->
+                    ${resultadosInfo}
+                    
+                    <!-- Observaciones -->
+                    ${observacionesInfo}
+                </div>
+            `;
         }
         
         // Obtener color del estado
@@ -315,47 +689,669 @@
             }
         }
         
-        // Actualizar estadísticas
-        function actualizarEstadisticas(reportes) {
-            if (!reportes) return;
+        // Aplicar filtros
+        function aplicarFiltros() {
+            const barrioSeleccionado = document.getElementById('filtro-barrio').value;
+            const tipoSeleccionado = document.getElementById('filtro-tipo-actividad').value;
             
-            const total = reportes.length;
-            const pendientes = reportes.filter(r => r.estado === 'pendiente').length;
-            const conFotos = reportes.filter(r => r.archivos && r.archivos.length > 0).length;
+            filtrosActivos = {
+                barrio: barrioSeleccionado,
+                tipoActividad: tipoSeleccionado
+            };
             
-            document.getElementById('total-reportes').textContent = total;
-            document.getElementById('pendientes').textContent = pendientes;
-            document.getElementById('con-fotos').textContent = conFotos;
+            console.log('🔍 Aplicando filtros:', filtrosActivos);
+            
+            // Aplicar filtros a sectores
+            aplicarFiltrosSectores();
+            
+            // Aplicar filtros a reportes
+            aplicarFiltrosReportes();
+            
+            // Si se seleccionó un barrio, enfocar el mapa en ese sector
+            if (barrioSeleccionado) {
+                enfocarMapaEnBarrio(barrioSeleccionado);
         }
         
-        // Cargar categorías para el filtro
-        async function cargarCategorias() {
+        // Actualizar estadísticas
+            actualizarEstadisticasCombinadas();
+        }
+        
+        // Enfocar el mapa en un barrio específico
+        function enfocarMapaEnBarrio(nombreBarrio) {
+            if (!sectoresLayer) return;
+            
+            sectoresLayer.eachLayer(function(layer) {
+                if (layer instanceof L.Polygon) {
+                    const barrioName = layer.feature && layer.feature.properties ? 
+                        (layer.feature.properties.name || layer.feature.properties.Name) : '';
+                    
+                    if (barrioName === nombreBarrio) {
+                        // Enfocar el mapa en este polígono
+                        map.fitBounds(layer.getBounds().pad(0.1));
+                        console.log(`🎯 Mapa enfocado en el barrio: ${nombreBarrio}`);
+                    }
+                }
+            });
+        }
+        
+        // Limpiar filtros
+        function limpiarFiltros() {
+            document.getElementById('filtro-barrio').value = '';
+            document.getElementById('filtro-tipo-actividad').value = '';
+            
+            filtrosActivos = {
+                barrio: '',
+                tipoActividad: ''
+            };
+            
+            console.log('🧹 Filtros limpiados');
+            
+            // Restaurar vista original
+            mostrarTodosLosSectores();
+            mostrarTodosLosReportes();
+            
+            // Restaurar vista completa del mapa
+            if (sectoresLayer && sectoresLayer.getLayers().length > 0) {
+                map.fitBounds(sectoresLayer.getBounds().pad(0.1));
+                console.log('🗺️ Vista del mapa restaurada');
+            }
+            
+            actualizarEstadisticasCombinadas();
+        }
+        
+        // Aplicar filtros a sectores
+        function aplicarFiltrosSectores() {
+            if (!sectoresLayer) return;
+            
+            sectoresLayer.eachLayer(layer => {
+                if (layer instanceof L.Polygon) {
+                    if (filtrosActivos.barrio) {
+                        const barrioName = layer.feature && layer.feature.properties ? 
+                            (layer.feature.properties.name || layer.feature.properties.Name) : '';
+                        
+                        if (barrioName === filtrosActivos.barrio) {
+                            layer.setStyle({
+                                color: '#e74c3c',
+                                weight: 3,
+                                fillColor: '#e74c3c',
+                                fillOpacity: 0.5
+                            });
+                        } else {
+                            layer.setStyle({
+                                color: '#bdc3c7',
+                                weight: 1,
+                                fillColor: '#bdc3c7',
+                                fillOpacity: 0.1
+                            });
+                        }
+                    } else {
+                        // Restaurar estilo original
+                        layer.setStyle({
+                            color: '#3498db',
+                            weight: 2,
+                            fillColor: '#3498db',
+                            fillOpacity: 0.3
+                        });
+                    }
+                }
+            });
+        }
+        
+        // Aplicar filtros a reportes
+        function aplicarFiltrosReportes() {
+            if (!reportesLayer) return;
+            
+            console.log('🔍 Aplicando filtros a reportes...');
+            console.log('📊 Total de reportes disponibles:', reportesData.length);
+            console.log('🔧 Filtros activos:', filtrosActivos);
+            
+            const reportesFiltrados = reportesData.filter(reporte => {
+                let cumpleFiltros = true;
+                
+                // Filtro por tipo de actividad
+                if (filtrosActivos.tipoActividad && reporte.tipo_actividad_id) {
+                    const cumpleTipo = (reporte.tipo_actividad_id.toString() === filtrosActivos.tipoActividad);
+                    console.log(`🏷️ Reporte #${reporte.id} - Tipo: ${reporte.tipo_actividad_id} === ${filtrosActivos.tipoActividad}? ${cumpleTipo}`);
+                    cumpleFiltros = cumpleFiltros && cumpleTipo;
+                }
+                
+                // Filtro por barrio (usando coordenadas geográficas reales)
+                if (filtrosActivos.barrio) {
+                    console.log(`🏘️ Verificando reporte #${reporte.id} en barrio ${filtrosActivos.barrio}`);
+                    console.log(`📍 Coordenadas del reporte: ${reporte.latitud}, ${reporte.longitud}`);
+                    
+                    const estaEnBarrio = verificarReporteEnBarrio(reporte, filtrosActivos.barrio);
+                    console.log(`✅ ¿Está en el barrio? ${estaEnBarrio}`);
+                    
+                    cumpleFiltros = cumpleFiltros && estaEnBarrio;
+                }
+                
+                console.log(`📋 Reporte #${reporte.id} - Cumple filtros: ${cumpleFiltros}`);
+                return cumpleFiltros;
+            });
+            
+            console.log(`✅ Reportes filtrados: ${reportesFiltrados.length} de ${reportesData.length}`);
+            
+            mostrarReportesEnMapa(reportesFiltrados);
+        }
+        
+        // Verificar si un reporte está en un barrio específico
+        function verificarReporteEnBarrio(reporte, nombreBarrio) {
+            if (!sectoresLayer || !reporte.latitud || !reporte.longitud) {
+                return false;
+            }
+            
+            const puntoReporte = L.latLng(parseFloat(reporte.latitud), parseFloat(reporte.longitud));
+            let estaEnBarrio = false;
+            
+            // Buscar el polígono del barrio seleccionado
+            sectoresLayer.eachLayer(function(layer) {
+                if (layer instanceof L.Polygon && !estaEnBarrio) {
+                    // Verificar si este polígono corresponde al barrio seleccionado
+                    const barrioName = layer.feature && layer.feature.properties ? 
+                        (layer.feature.properties.name || layer.feature.properties.Name || layer.feature.properties.description) : '';
+                    
+                    console.log(`🔍 Comparando: "${barrioName}" con "${nombreBarrio}"`);
+                    
+                    if (barrioName.toLowerCase().includes(nombreBarrio.toLowerCase()) || 
+                        nombreBarrio.toLowerCase().includes(barrioName.toLowerCase())) {
+                        
+                        console.log(`✅ Nombres coinciden: "${barrioName}" y "${nombreBarrio}"`);
+                        
+                        // Usar la función nativa de Leaflet para verificar si está dentro del polígono
+                        try {
+                            // Método más confiable: usar bounds como primera verificación
+                            const bounds = layer.getBounds();
+                            if (bounds.contains(puntoReporte)) {
+                                // Si está dentro de los bounds, asumir que está dentro del polígono
+                                // (Para una verificación más precisa, podríamos usar ray casting)
+                                estaEnBarrio = true;
+                                console.log(`✅ Reporte ${reporte.id} está en ${barrioName}`);
+                            }
+                        } catch (error) {
+                            console.error('Error al verificar polígono:', error);
+                        }
+                    }
+                }
+            });
+            
+            return estaEnBarrio;
+        }
+        
+        // Función para verificar si un punto está dentro de un polígono (algoritmo ray casting)
+        function esPuntoEnPoligono(punto, poligono) {
+            const lat = punto.lat;
+            const lng = punto.lng;
+            let dentro = false;
+            
+            for (let i = 0, j = poligono.length - 1; i < poligono.length; j = i++) {
+                const xi = poligono[i].lng;
+                const yi = poligono[i].lat;
+                const xj = poligono[j].lng;
+                const yj = poligono[j].lat;
+                
+                if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+                    dentro = !dentro;
+                }
+            }
+            
+            return dentro;
+        }
+        
+        // Mostrar todos los sectores
+        function mostrarTodosLosSectores() {
+            if (!sectoresLayer) return;
+            
+            sectoresLayer.eachLayer(layer => {
+                if (layer instanceof L.Polygon) {
+                    layer.setStyle({
+                        color: '#3498db',
+                        weight: 2,
+                        fillColor: '#3498db',
+                        fillOpacity: 0.3
+                    });
+                }
+            });
+        }
+        
+        // Mostrar todos los reportes
+        function mostrarTodosLosReportes() {
+            mostrarReportesEnMapa(reportesData);
+        }
+        
+        // Actualizar estadísticas combinadas
+        function actualizarEstadisticasCombinadas() {
+            const totalSectores = sectoresData.length || 0;
+            const totalReportes = reportesData.length || 0;
+            const reportesFiltrados = reportesLayer ? reportesLayer.getLayers().length : 0;
+            const barrioSeleccionado = filtrosActivos.barrio || '-';
+            
+            document.getElementById('total-sectores').textContent = totalSectores;
+            document.getElementById('total-reportes').textContent = totalReportes;
+            document.getElementById('reportes-filtrados').textContent = reportesFiltrados;
+            document.getElementById('barrio-seleccionado').textContent = barrioSeleccionado;
+        }
+        
+        // Actualizar estadísticas de reportes
+        function actualizarEstadisticasReportes() {
+            actualizarEstadisticasCombinadas();
+        }
+        
+        // Método alternativo para cargar KML
+        async function cargarKMLAlternativo() {
             try {
-                const response = await fetch('/api/tipos-actividad');
-                const categorias = await response.json();
+                console.log('🔄 Cargando KML con método alternativo...');
                 
-                const select = document.getElementById('filtro-categoria');
-                select.innerHTML = '<option value="">Todas las actividades</option>';
+                const kmlUrl = '/static/data/SectoresCatastrales.kml';
+                const response = await fetch(kmlUrl);
+                const kmlText = await response.text();
                 
-                categorias.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.textContent = cat.nombre;
-                    select.appendChild(option);
-                });
+                console.log('📄 KML descargado, longitud:', kmlText.length);
+                console.log('📄 Primeras 500 caracteres:', kmlText.substring(0, 500));
+                
+                // Parsear KML manualmente (básico)
+                const sectores = parsearKMLManual(kmlText);
+                console.log('📊 Sectores parseados:', sectores);
+                
+                if (sectores && sectores.length > 0) {
+                    mostrarSectoresKML(sectores);
+                    actualizarEstadisticasKMLManual(sectores);
+                } else {
+                    throw new Error('No se pudieron parsear sectores del KML');
+                }
+                
             } catch (error) {
-                console.error('Error al cargar categorías:', error);
+                console.error('❌ Error en método alternativo:', error);
+                console.log('🔄 Usando datos de ejemplo como fallback...');
+                const sectores = generarSectoresEjemplo();
+                mostrarSectoresEnMapa(sectores);
+                actualizarEstadisticas(sectores);
             }
         }
         
-        // Event listeners
-        document.getElementById('filtro-categoria').addEventListener('change', cargarReportes);
-        document.getElementById('filtro-estado').addEventListener('change', cargarReportes);
+        // Parsear KML manualmente
+        function parsearKMLManual(kmlText) {
+            try {
+                console.log('🔍 Parseando KML manualmente...');
+                
+                const sectores = [];
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(kmlText, "text/xml");
+                
+                // Buscar todos los Placemarks
+                const placemarks = xmlDoc.getElementsByTagName('Placemark');
+                console.log('📋 Placemarks encontrados:', placemarks.length);
+                
+                for (let i = 0; i < placemarks.length; i++) {
+                    const placemark = placemarks[i];
+                    
+                    // Extraer nombre
+                    const nameElement = placemark.getElementsByTagName('name')[0];
+                    const name = nameElement ? nameElement.textContent : `Sector ${i + 1}`;
+                    
+                    // Extraer coordenadas
+                    const coordinatesElement = placemark.getElementsByTagName('coordinates')[0];
+                    if (coordinatesElement) {
+                        const coordsText = coordinatesElement.textContent.trim();
+                        const coordinates = parsearCoordenadas(coordsText);
+                        
+                        if (coordinates.length >= 3) {
+                            const sector = {
+                                id: i + 1,
+                                nombre: name,
+                                coordenadas: coordinates,
+                                tipo: 'residencial', // Por defecto
+                                zona: determinarZona(coordinates),
+                                area: calcularAreaAproximada(coordinates)
+                            };
+                            
+                            sectores.push(sector);
+                            console.log(`✅ Sector parseado: ${name} con ${coordinates.length} coordenadas`);
+                        }
+                    }
+                }
+                
+                console.log(`📊 Total de sectores parseados: ${sectores.length}`);
+                return sectores;
+                
+            } catch (error) {
+                console.error('❌ Error parseando KML manualmente:', error);
+                return [];
+            }
+        }
+        
+        // Parsear coordenadas del KML
+        function parsearCoordenadas(coordsText) {
+            const coords = [];
+            const lines = coordsText.split('\n');
+            
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed) {
+                    const parts = trimmed.split(',').map(p => p.trim());
+                    if (parts.length >= 2) {
+                        const lng = parseFloat(parts[0]);
+                        const lat = parseFloat(parts[1]);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            coords.push([lat, lng]);
+                        }
+                    }
+                }
+            }
+            
+            return coords;
+        }
+        
+        // Determinar zona basada en coordenadas
+        function determinarZona(coordinates) {
+            if (coordinates.length === 0) return 'centro';
+            
+            const centerLat = coordinates.reduce((sum, coord) => sum + coord[0], 0) / coordinates.length;
+            const centerLng = coordinates.reduce((sum, coord) => sum + coord[1], 0) / coordinates.length;
+            
+            // Coordenadas de referencia para Bogotá
+            const bogotaCenter = [4.710989, -74.072092];
+            
+            if (centerLat > bogotaCenter[0]) return 'norte';
+            if (centerLat < bogotaCenter[0]) return 'sur';
+            if (centerLng > bogotaCenter[1]) return 'este';
+            if (centerLng < bogotaCenter[1]) return 'oeste';
+            
+            return 'centro';
+        }
+        
+        // Calcular área aproximada
+        function calcularAreaAproximada(coordinates) {
+            if (coordinates.length < 3) return 0;
+            
+            // Fórmula del área de Gauss
+            let area = 0;
+            for (let i = 0; i < coordinates.length; i++) {
+                const j = (i + 1) % coordinates.length;
+                area += coordinates[i][0] * coordinates[j][1];
+                area -= coordinates[j][0] * coordinates[i][1];
+            }
+            
+            return Math.abs(area) / 2 * 111 * 111; // Convertir a km² aproximado
+        }
+        
+        // Mostrar sectores KML en el mapa
+        function mostrarSectoresKML(sectores) {
+            // Limpiar capa existente
+            if (sectoresLayer) {
+                map.removeLayer(sectoresLayer);
+            }
+            
+            // Crear grupo de polígonos
+            sectoresLayer = L.layerGroup();
+            
+            sectores.forEach(sector => {
+                if (sector.coordenadas.length >= 3) {
+                    // Crear polígono del sector
+                    const polygon = L.polygon(sector.coordenadas, {
+                        color: getColorPorTipo(sector.tipo),
+                        weight: 2,
+                        fillColor: getColorPorTipo(sector.tipo),
+                        fillOpacity: 0.3
+                    }).addTo(sectoresLayer);
+                    
+                    // Agregar popup con información del sector
+                    polygon.bindPopup(crearPopupContentKMLManual(sector));
+                    
+                    // Agregar etiqueta del sector
+                    const center = polygon.getBounds().getCenter();
+                    const label = L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'sector-label',
+                            html: `<div style="background: white; padding: 5px; border-radius: 5px; border: 2px solid ${getColorPorTipo(sector.tipo)}; font-weight: bold; color: #333;">${sector.nombre}</div>`,
+                            iconSize: [120, 30],
+                            iconAnchor: [60, 15]
+                        })
+                    }).addTo(sectoresLayer);
+                }
+            });
+            
+            // Agregar la capa al mapa
+            sectoresLayer.addTo(map);
+            
+            // Ajustar vista del mapa
+            if (sectores.length > 0) {
+                map.fitBounds(sectoresLayer.getBounds().pad(0.1));
+            }
+        }
+        
+        // Crear popup para sectores KML manuales
+        function crearPopupContentKMLManual(sector) {
+            return `
+                <div style="min-width: 250px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">🏘️ ${sector.nombre}</h3>
+                    <p><strong>📍 Zona:</strong> ${sector.zona.toUpperCase()}</p>
+                    <p><strong>🏷️ Tipo:</strong> ${sector.tipo.toUpperCase()}</p>
+                    <p><strong>📐 Área:</strong> ${sector.area.toFixed(2)} km²</p>
+                    <p><strong>🆔 ID:</strong> ${sector.id}</p>
+                    <p><strong>🗺️ Fuente:</strong> KML Parseado</p>
+                </div>
+            `;
+        }
+        
+        // Actualizar estadísticas para KML manual
+        function actualizarEstadisticasKMLManual(sectores) {
+            if (!sectores) return;
+            
+            const total = sectores.length;
+            const areaTotal = sectores.reduce((sum, s) => sum + s.area, 0);
+            
+            document.getElementById('total-sectores').textContent = total;
+            document.getElementById('area-total').textContent = areaTotal.toFixed(1);
+            document.getElementById('poblacion').textContent = total * 1000; // Estimación
+        }
+        
+        // Generar sectores de ejemplo para demostración
+        function generarSectoresEjemplo() {
+            return [
+                {
+                    id: 1,
+                    nombre: 'Sector Norte A',
+                    tipo: 'residencial',
+                    zona: 'norte',
+                    area: 2.5,
+                    poblacion: 1500,
+                    coordenadas: [[4.720989, -74.082092], [4.720989, -74.062092], [4.700989, -74.062092], [4.700989, -74.082092]]
+                },
+                {
+                    id: 2,
+                    nombre: 'Sector Norte B',
+                    tipo: 'comercial',
+                    zona: 'norte',
+                    area: 1.8,
+                    poblacion: 800,
+                    coordenadas: [[4.700989, -74.082092], [4.700989, -74.062092], [4.680989, -74.062092], [4.680989, -74.082092]]
+                },
+                {
+                    id: 3,
+                    nombre: 'Sector Sur A',
+                    tipo: 'mixto',
+                    zona: 'sur',
+                    area: 3.2,
+                    poblacion: 2200,
+                    coordenadas: [[4.680989, -74.082092], [4.680989, -74.062092], [4.660989, -74.062092], [4.660989, -74.082092]]
+                },
+                {
+                    id: 4,
+                    nombre: 'Sector Este A',
+                    tipo: 'residencial',
+                    zona: 'este',
+                    area: 2.8,
+                    poblacion: 1800,
+                    coordenadas: [[4.710989, -74.052092], [4.710989, -74.032092], [4.690989, -74.032092], [4.690989, -74.052092]]
+                },
+                {
+                    id: 5,
+                    nombre: 'Sector Oeste A',
+                    tipo: 'comercial',
+                    zona: 'oeste',
+                    area: 2.1,
+                    poblacion: 1200,
+                    coordenadas: [[4.710989, -74.112092], [4.710989, -74.092092], [4.690989, -74.092092], [4.690989, -74.112092]]
+                }
+            ];
+        }
+        
+        // Mostrar sectores de ejemplo en el mapa (fallback)
+        function mostrarSectoresEnMapa(sectores) {
+            // Limpiar capa existente
+            if (sectoresLayer) {
+                map.removeLayer(sectoresLayer);
+            }
+            
+            if (!sectores || sectores.length === 0) {
+                return;
+            }
+            
+            // Crear grupo de polígonos
+            sectoresLayer = L.layerGroup();
+            
+            sectores.forEach(sector => {
+                // Crear polígono del sector
+                const polygon = L.polygon(sector.coordenadas, {
+                    color: getColorPorTipo(sector.tipo),
+                    weight: 2,
+                    fillColor: getColorPorTipo(sector.tipo),
+                    fillOpacity: 0.3
+                }).addTo(sectoresLayer);
+                
+                // Agregar popup con información del sector
+                polygon.bindPopup(crearPopupContent(sector));
+                
+                // Agregar etiqueta del sector
+                const center = polygon.getBounds().getCenter();
+                const label = L.marker(center, {
+                    icon: L.divIcon({
+                        className: 'sector-label',
+                        html: `<div style="background: white; padding: 5px; border-radius: 5px; border: 2px solid ${getColorPorTipo(sector.tipo)}; font-weight: bold; color: #333;">${sector.nombre}</div>`,
+                        iconSize: [120, 30],
+                        iconAnchor: [60, 15]
+                    })
+                }).addTo(sectoresLayer);
+            });
+            
+            // Agregar la capa al mapa
+            sectoresLayer.addTo(map);
+            
+            // Ajustar vista del mapa
+            if (sectores.length > 0) {
+                map.fitBounds(sectoresLayer.getBounds().pad(0.1));
+            }
+        }
+        
+        // Crear contenido del popup para datos KML
+        function crearPopupContentKML(props) {
+            const nombre = props.name || props.Name || props.description || props.Description || 'Sector Catastral';
+            const descripcion = props.description || props.Description || 'Información del sector';
+            
+            return `
+                <div style="min-width: 250px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">🏘️ ${nombre}</h3>
+                    <p><strong>📝 Descripción:</strong> ${descripcion}</p>
+                    ${props.area ? `<p><strong>📐 Área:</strong> ${props.area}</p>` : ''}
+                    ${props.population ? `<p><strong>👥 Población:</strong> ${props.population}</p>` : ''}
+                    ${props.type ? `<p><strong>🏷️ Tipo:</strong> ${props.type}</p>` : ''}
+                    ${props.zone ? `<p><strong>📍 Zona:</strong> ${props.zone}</p>` : ''}
+                    <p><strong>🗺️ Fuente:</strong> KML Catastral</p>
+                </div>
+            `;
+        }
+        
+        // Crear contenido del popup para datos de ejemplo
+        function crearPopupContent(sector) {
+            return `
+                <div style="min-width: 250px;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">🏘️ ${sector.nombre}</h3>
+                    <p><strong>📍 Zona:</strong> ${sector.zona.toUpperCase()}</p>
+                    <p><strong>🏷️ Tipo:</strong> ${sector.tipo.toUpperCase()}</p>
+                    <p><strong>📐 Área:</strong> ${sector.area} km²</p>
+                    <p><strong>👥 Población:</strong> ${sector.poblacion.toLocaleString('es-CO')} habitantes</p>
+                    <p><strong>🆔 ID:</strong> ${sector.id}</p>
+                </div>
+            `;
+        }
+        
+        // Obtener color por tipo de sector
+        function getColorPorTipo(tipo) {
+            switch (tipo) {
+                case 'residencial': return '#3498db'; // Azul
+                case 'comercial': return '#e74c3c';   // Rojo
+                case 'mixto': return '#f39c12';       // Naranja
+                default: return '#95a5a6';            // Gris
+            }
+        }
+        
+        // Actualizar estadísticas para datos KML
+        function actualizarEstadisticasKML(layerGroup) {
+            if (!layerGroup) return;
+            
+            const layers = layerGroup.getLayers();
+            const total = layers.length;
+            
+            // Guardar datos de sectores para filtros
+            sectoresData = layers;
+            
+            // Calcular área total aproximada (en píxeles del mapa)
+            let areaTotal = 0;
+            layers.forEach(layer => {
+                if (layer instanceof L.Polygon) {
+                    const bounds = layer.getBounds();
+                    const area = bounds.getNorthEast().distanceTo(bounds.getSouthWest()) * 
+                                bounds.getNorthEast().distanceTo(bounds.getNorthWest()) / 1000000; // Convertir a km² aproximado
+                    areaTotal += area;
+                }
+            });
+            
+            // Actualizar solo el total de sectores, el resto se actualiza en actualizarEstadisticasCombinadas
+            document.getElementById('total-sectores').textContent = total;
+        }
+        
+        // Actualizar estadísticas para datos de ejemplo
+        function actualizarEstadisticas(sectores) {
+            if (!sectores) return;
+            
+            const total = sectores.length;
+            const areaTotal = sectores.reduce((sum, s) => sum + s.area, 0);
+            const poblacionTotal = sectores.reduce((sum, s) => sum + s.poblacion, 0);
+            
+            document.getElementById('total-sectores').textContent = total;
+            document.getElementById('area-total').textContent = areaTotal.toFixed(1);
+            document.getElementById('poblacion').textContent = poblacionTotal.toLocaleString('es-CO');
+        }
+        
+        // Event listeners para filtros
+        document.getElementById('filtro-barrio').addEventListener('change', function() {
+            // Los filtros se aplican cuando se presiona el botón "Aplicar Filtros"
+        });
+        
+        document.getElementById('filtro-tipo-actividad').addEventListener('change', function() {
+            // Los filtros se aplican cuando se presiona el botón "Aplicar Filtros"
+        });
         
         // Inicializar cuando se carga la página
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Inicializar base de datos automáticamente si es necesario
+            try {
+                console.log('🔄 Verificando estado de la base de datos...');
+                const response = await fetch('/init-db');
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Base de datos lista:', data.message);
+                } else {
+                    console.warn('⚠️ Base de datos no inicializada:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ Error al verificar base de datos:', error);
+            }
+            
+            // Inicializar el mapa
             initMap();
-            cargarCategorias();
         });
     </script>
 </body>

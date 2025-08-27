@@ -68,9 +68,8 @@ def create_app(config_class=config.DevelopmentConfig):
             logger.error(f"Error en ruta principal: {str(e)}")
             return render_template('error.html', error=str(e)), 500
     
-    @app.route('/init-db')
     def init_database():
-        """Ruta para inicializar la base de datos en Railway"""
+        """Función para inicializar la base de datos"""
         try:
             with app.app_context():
                 # Crear todas las tablas
@@ -126,22 +125,28 @@ def create_app(config_class=config.DevelopmentConfig):
                     
                     db.session.commit()
                     logger.info("Base de datos inicializada con datos básicos")
-                    return jsonify({
-                        'success': True,
-                        'message': 'Base de datos inicializada correctamente con datos básicos'
-                    })
+                    return True
                 else:
                     logger.info("Base de datos ya contiene datos")
-                    return jsonify({
-                        'success': True,
-                        'message': 'Base de datos ya está inicializada'
-                    })
+                    return True
                     
         except Exception as e:
             logger.error(f"Error al inicializar base de datos: {str(e)}")
+            return False
+
+    @app.route('/init-db')
+    def init_database_route():
+        """Ruta para inicializar la base de datos en Railway"""
+        success = init_database()
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Base de datos inicializada correctamente'
+            })
+        else:
             return jsonify({
                 'success': False,
-                'error': f'Error al inicializar base de datos: {str(e)}'
+                'error': 'Error al inicializar la base de datos'
             }), 500
     
     @app.route('/login', methods=['GET', 'POST'])

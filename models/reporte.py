@@ -53,7 +53,7 @@ def create_models(db):
         nombre = db.Column(db.String(100), nullable=False)
         tipo = db.Column(db.String(50))  # policía, ejército, etc.
         activo = db.Column(db.Boolean, default=True)
-        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.now)
         
         def __repr__(self):
             return f'<Entidad {self.nombre}>'
@@ -66,7 +66,7 @@ def create_models(db):
         descripcion = db.Column(db.Text)
         orden = db.Column(db.Integer, default=0)
         activo = db.Column(db.Boolean, default=True)
-        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.now)
         
         def __repr__(self):
             return f'<Sector {self.nombre}>'
@@ -75,7 +75,7 @@ def create_models(db):
         __tablename__ = 'reportes'
         
         id = db.Column(db.Integer, primary_key=True)
-        fecha_reporte = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+        fecha_reporte = db.Column(db.DateTime, default=datetime.now, nullable=False)
         responsable_id = db.Column(db.Integer, db.ForeignKey('responsables.id'), nullable=False)
         latitud = db.Column(db.Float, nullable=False)
         longitud = db.Column(db.Float, nullable=False)
@@ -86,7 +86,7 @@ def create_models(db):
         observaciones = db.Column(db.Text)
         usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
         estado = db.Column(db.String(20), default='activo')  # activo, inactivo, eliminado
-        fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+        fecha_actualizacion = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
         
         # Relaciones
         responsable = db.relationship('Responsable', backref='reportes')
@@ -117,7 +117,7 @@ def create_models(db):
         sellamientos_establecimientos = db.Column(db.Integer, default=0)
         sensibilizaciones = db.Column(db.Integer, default=0)
         otra_descripcion = db.Column(db.String(200))
-        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+        fecha_creacion = db.Column(db.DateTime, default=datetime.now)
         
         def __repr__(self):
             return f'<ResultadoReporte {self.id} - Reporte {self.reporte_id}>'
@@ -131,7 +131,7 @@ def create_models(db):
         ruta_archivo = db.Column(db.String(500), nullable=False)
         tipo_archivo = db.Column(db.String(20), nullable=False)  # pdf, imagen_antes, imagen_despues
         tamano = db.Column(db.Integer)  # en bytes
-        fecha_subida = db.Column(db.DateTime, default=datetime.utcnow)
+        fecha_subida = db.Column(db.DateTime, default=datetime.now)
         
         # Relación
         reporte = db.relationship('Reporte', backref='archivos')
