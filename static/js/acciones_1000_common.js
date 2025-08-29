@@ -153,21 +153,30 @@ function centerMap(mapInstance) {
 }
 
 /**
- * Formatear fecha
+ * Formatear fecha en hora de Colombia
  * @param {string} dateString - String de fecha
- * @returns {string} Fecha formateada
+ * @returns {string} Fecha formateada en hora de Colombia
  */
 function formatDate(dateString) {
     if (!dateString) return 'N/A';
     
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    try {
+        const date = new Date(dateString);
+        
+        // Formatear en español con hora de Colombia
+        return date.toLocaleDateString('es-CO', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'America/Bogota'
+        });
+    } catch (error) {
+        console.error('Error al formatear fecha:', error);
+        // Fallback: mostrar fecha original
+        return dateString;
+    }
 }
 
 /**

@@ -6,6 +6,7 @@ from flask import Flask, render_template, jsonify, request, session, redirect, u
 import os
 import logging
 from datetime import datetime
+import pytz
 
 # Importar módulos propios
 import config
@@ -33,6 +34,10 @@ def create_app(config_class=config.DevelopmentConfig):
     
     # Configuración para sesiones (necesario para autenticación)
     app.secret_key = 'tu_clave_secreta_super_segura_2024'
+    
+    # Configuración de zona horaria de Colombia
+    app.config['TIMEZONE'] = 'America/Bogota'
+    colombia_tz = pytz.timezone('America/Bogota')
     
     # Inicializar base de datos
     db.init_app(app)
@@ -641,6 +646,31 @@ def create_app(config_class=config.DevelopmentConfig):
         return render_template('error.html', error='Error interno del servidor'), 500
     
     return app
+
+def get_colombia_time():
+    """Obtener la hora actual de Colombia"""
+    colombia_tz = pytz.timezone('America/Bogota')
+    utc_now = datetime.utcnow()
+    colombia_time = colombia_tz.fromutc(utc_now)
+    return colombia_time
+
+def format_colombia_time(dt, format_str='%Y-%m-%d %H:%M:%S'):
+    """Formatear fecha/hora en zona horaria de Colombia"""
+    if dt is None:
+        return None
+    
+    # Si la fecha ya tiene zona horaria, convertirla
+    if dt.tzinfo is not None:
+        colombia_tz = pytz.timezone('America/Bogota')
+        colombia_time = dt.astimezone(colombia_tz)
+    else:
+        # Asumir que es UTC y convertir
+        utc_tz = pytz.UTC
+        utc_time = utc_tz.localize(dt)
+        colombia_tz = pytz.timezone('America/Bogota')
+        colombia_time = utc_time.astimezone(colombia_tz)
+    
+    return colombia_time.strftime(format_str)
 
 if __name__ == '__main__':
     import config

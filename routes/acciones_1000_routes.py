@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 import uuid
 from datetime import datetime
+import pytz
 from forms.acciones_1000_form import Acciones1000Form
 from models.acciones_1000 import create_acciones_1000_models
 from models import db
@@ -16,6 +17,13 @@ acciones_1000_bp = Blueprint('acciones_1000', __name__, url_prefix='/acciones-10
 
 # Obtener modelos (cacheado)
 _models_cache = None
+
+def get_colombia_now():
+    """Obtener la hora actual de Colombia"""
+    colombia_tz = pytz.timezone('America/Bogota')
+    utc_now = datetime.utcnow()
+    colombia_time = colombia_tz.fromutc(utc_now)
+    return colombia_time
 
 def get_models():
     """Obtener los modelos de acciones 1000 (cacheado)"""

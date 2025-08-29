@@ -1,6 +1,32 @@
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+import pytz
+
+def get_colombia_now():
+    """Obtener la hora actual de Colombia"""
+    colombia_tz = pytz.timezone('America/Bogota')
+    utc_now = datetime.utcnow()
+    colombia_time = colombia_tz.fromutc(utc_now)
+    return colombia_time
+
+def format_colombia_time(dt, format_str='%Y-%m-%d %H:%M:%S'):
+    """Formatear fecha/hora en zona horaria de Colombia"""
+    if dt is None:
+        return None
+    
+    # Si la fecha ya tiene zona horaria, convertirla
+    if dt.tzinfo is not None:
+        colombia_tz = pytz.timezone('America/Bogota')
+        colombia_time = dt.astimezone(colombia_tz)
+    else:
+        # Asumir que es UTC y convertir
+        utc_tz = pytz.UTC
+        utc_time = utc_tz.localize(dt)
+        colombia_tz = pytz.timezone('America/Bogota')
+        colombia_time = utc_time.astimezone(colombia_tz)
+    
+    return colombia_time.strftime(format_str)
 
 def create_acciones_1000_models(db):
     """Función para crear los modelos de 1000 acciones en 1 día"""
@@ -37,8 +63,8 @@ def create_acciones_1000_models(db):
         fotos = db.relationship('FotoActividad1000', backref='actividad', lazy=True, cascade='all, delete-orphan')
         
         # Campos de auditoría
-        fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-        fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+        fecha_creacion = db.Column(db.DateTime, default=get_colombia_now, nullable=False)
+        fecha_actualizacion = db.Column(db.DateTime, default=get_colombia_now, onupdate=get_colombia_now)
         estado = db.Column(db.String(20), default='activo')  # activo, inactivo, eliminado
         
         def __repr__(self):
@@ -57,7 +83,7 @@ def create_acciones_1000_models(db):
                 'observaciones_adicionales': self.observaciones_adicionales,
                 'latitud': self.latitud,
                 'longitud': self.longitud,
-                'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
+                'fecha_creacion': format_colombia_time(self.fecha_creacion) if self.fecha_creacion else None,
                 'estado': self.estado
             }
 
@@ -83,7 +109,7 @@ def create_acciones_1000_models(db):
         tamano_bytes = db.Column(db.BigInteger)
         
         # Fecha de subida
-        fecha_subida = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+        fecha_subida = db.Column(db.DateTime, default=get_colombia_now, nullable=False)
         
         def __repr__(self):
             return f'<FotoActividad1000 {self.nombre_original}>'
@@ -97,7 +123,7 @@ def create_acciones_1000_models(db):
                 'ruta_archivo': self.ruta_archivo,
                 'tipo_mime': self.tipo_mime,
                 'tamano_bytes': self.tamano_bytes,
-                'fecha_subida': self.fecha_subida.isoformat() if self.fecha_subida else None
+                'fecha_subida': format_colombia_time(self.fecha_subida) if self.fecha_subida else None
             }
 
     return {
