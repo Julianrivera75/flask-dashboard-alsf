@@ -511,16 +511,9 @@
                             <label for="responsable_id">Responsable <span class="required">*</span></label>
                             <select id="responsable_id" name="responsable_id" required>
                                 <option value="">Seleccione un responsable</option>
-                                {% if responsables %}
-                                    {% for responsable in responsables %}
-                                    <option value="{{ responsable.id }}">{{ responsable.nombre }}</option>
-                                    {% endfor %}
-                                {% else %}
-                                    <!-- Fallback estático si no hay datos de BD -->
-                                    <option value="1">Responsable General</option>
-                                    <option value="2">Coordinador de Campo</option>
-                                    <option value="3">Supervisor de Actividad</option>
-                                {% endif %}
+                                {% for responsable in responsables %}
+                                <option value="{{ responsable.id }}">{{ responsable.nombre }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         
@@ -531,17 +524,9 @@
                         <label for="tipo_actividad_id">Tipo de Actividad <span class="required">*</span></label>
                         <select id="tipo_actividad_id" name="tipo_actividad_id" required>
                             <option value="">Seleccione el tipo de actividad</option>
-                            {% if tipos_actividad %}
-                                {% for tipo in tipos_actividad %}
-                                <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
-                                {% endfor %}
-                            {% else %}
-                                <!-- Fallback estático si no hay datos de BD -->
-                                <option value="1">Actividad de Campo</option>
-                                <option value="2">Jornada de Trabajo</option>
-                                <option value="3">Operativo Especial</option>
-                                <option value="4">Actividad Comunitaria</option>
-                            {% endif %}
+                            {% for tipo in tipos_actividad %}
+                            <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                            {% endfor %}
                         </select>
                         
                         <!-- Campo de texto dinámico para "Otro" tipo de actividad -->
@@ -581,44 +566,19 @@
                         </div>
                         
                         <div class="participantes-grid">
-                            {% if responsables %}
-                                {% for responsable in responsables %}
-                                <div class="participante-toggle">
-                                    <input type="checkbox" 
-                                           id="participante_{{ responsable.id }}" 
-                                           name="participantes_ids" 
-                                           value="{{ responsable.id }}" 
-                                           class="participante-checkbox">
-                                    <label for="participante_{{ responsable.id }}" class="toggle-label">
-                                        <span class="toggle-text">{{ responsable.nombre }}</span>
-                                        <span class="toggle-icon">👤</span>
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <!-- Fallback estático si no hay datos de BD -->
-                                <div class="participante-toggle">
-                                    <input type="checkbox" id="participante_1" name="participantes_ids" value="1" class="participante-checkbox">
-                                    <label for="participante_1" class="toggle-label">
-                                        <span class="toggle-text">Responsable General</span>
-                                        <span class="toggle-icon">👤</span>
-                                    </label>
-                                </div>
-                                <div class="participante-toggle">
-                                    <input type="checkbox" id="participante_2" name="participantes_ids" value="2" class="participante-checkbox">
-                                    <label for="participante_2" class="toggle-label">
-                                        <span class="toggle-text">Coordinador de Campo</span>
-                                        <span class="toggle-icon">👤</span>
-                                    </label>
-                                </div>
-                                <div class="participante-toggle">
-                                    <input type="checkbox" id="participante_3" name="participantes_ids" value="3" class="participante-checkbox">
-                                    <label for="participante_3" class="toggle-label">
-                                        <span class="toggle-text">Supervisor de Actividad</span>
-                                        <span class="toggle-icon">👤</span>
-                                    </label>
-                                </div>
-                            {% endif %}
+                            {% for responsable in responsables %}
+                            <div class="participante-toggle">
+                                <input type="checkbox" 
+                                       id="participante_{{ responsable.id }}" 
+                                       name="participantes_ids" 
+                                       value="{{ responsable.id }}" 
+                                       class="participante-checkbox">
+                                <label for="participante_{{ responsable.id }}" class="toggle-label">
+                                    <span class="toggle-text">{{ responsable.nombre }}</span>
+                                    <span class="toggle-icon">👤</span>
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
                         <small>Seleccione los participantes que estuvieron presentes en la actividad</small>
                     </div>
@@ -637,44 +597,19 @@
                         </div>
                         
                         <div class="entidades-grid">
-                            {% if entidades %}
-                                {% for entidad in entidades %}
-                                <div class="entidad-toggle">
-                                    <input type="checkbox" 
-                                           id="entidad_{{ entidad.id }}" 
-                                           name="entidades_ids" 
-                                           value="{{ entidad.id }}" 
-                                           class="entidad-checkbox">
-                                    <label for="entidad_{{ entidad.id }}" class="toggle-label">
-                                        <span class="toggle-text">{{ entidad.nombre }}</span>
-                                        <span class="toggle-icon">🏛️</span>
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <!-- Fallback estático si no hay datos de BD -->
-                                <div class="entidad-toggle">
-                                    <input type="checkbox" id="entidad_1" name="entidades_ids" value="1" class="entidad-checkbox">
-                                    <label for="entidad_1" class="toggle-label">
-                                        <span class="toggle-text">Entidad General</span>
-                                        <span class="toggle-icon">🏛️</span>
-                                    </label>
-                                </div>
-                                <div class="entidad-toggle">
-                                    <input type="checkbox" id="entidad_2" name="entidades_ids" value="2" class="entidad-checkbox">
-                                    <label for="entidad_2" class="toggle-label">
-                                        <span class="toggle-text">Organización Local</span>
-                                        <span class="toggle-icon">🏛️</span>
-                                    </label>
-                                </div>
-                                <div class="entidad-toggle">
-                                    <input type="checkbox" id="entidad_3" name="entidades_ids" value="3" class="entidad-checkbox">
-                                    <label for="entidad_3" class="toggle-label">
-                                        <span class="toggle-text">Institución Pública</span>
-                                        <span class="toggle-icon">🏛️</span>
-                                    </label>
-                                </div>
-                            {% endif %}
+                            {% for entidad in entidades %}
+                            <div class="entidad-toggle">
+                                <input type="checkbox" 
+                                       id="entidad_{{ entidad.id }}" 
+                                       name="entidades_ids" 
+                                       value="{{ entidad.id }}" 
+                                       class="entidad-checkbox">
+                                <label for="entidad_{{ entidad.id }}" class="toggle-label">
+                                    <span class="toggle-text">{{ entidad.nombre }}</span>
+                                    <span class="toggle-icon">🏛️</span>
+                                </label>
+                            </div>
+                            {% endfor %}
                         </div>
                         <small>Seleccione las entidades que participaron en la actividad</small>
                         

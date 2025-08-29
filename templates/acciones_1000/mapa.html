@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Actividades - 1000 Acciones en 1 Día</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/acciones_1000.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <!-- Botón hamburguesa flotante -->
+    <a href="/" class="menu-btn" aria-label="Retorno al inicio" title="Retorno al inicio">
+        <i class="fas fa-home"></i>
+        <span class="menu-btn-text">Inicio</span>
+    </a>
+    
+    <!-- Overlay antes del menú lateral -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+    
+    <!-- Menú lateral -->
+    <nav id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <h3>1000 Acciones en 1 Día</h3>
+        </div>
+        <ul id="menu-options">
+            <li><a href="/" class=""><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="/acciones-1000/" class=""><i class="fas fa-clipboard-list"></i> Nuevo Reporte</a></li>
+            <li><a href="/acciones-1000/listar" class=""><i class="fas fa-list"></i> Ver Actividades</a></li>
+            <li><a href="/acciones-1000/mapa" class="active"><i class="fas fa-map"></i> Mapa de Actividades</a></li>
+            <li><a href="/formulario-reporte"><i class="fas fa-clipboard-list"></i> Otros Reportes</a></li>
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; vertical-align: middle;">
+            </div>
+            <div class="header-title">
+                <p>Programa "1000 Acciones en 1 Día" - Alcaldía Local Santa Fe</p>
+            </div>
+            <div class="header-empty"></div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Inicio</a> / 
+                <a href="/acciones-1000/">1000 Acciones en 1 Día</a> / 
+                <span>Mapa de Actividades</span>
+            </nav>
+
+            <!-- Botón para reportar nueva actividad -->
+            <div class="report-activity-section">
+                <button type="button" class="btn btn-report-activity" onclick="showReportActivityModal()">
+                    <i class="fas fa-plus-circle"></i>
+                    Reporta una actividad nueva
+                </button>
+            </div>
+
+            <!-- Título de la sección -->
+            <div class="section-header">
+                <h2><i class="fas fa-map-marked-alt"></i> Mapa de Actividades Registradas</h2>
+                <p>Visualice la distribución geográfica de todas las actividades del programa "1000 Acciones en 1 Día"</p>
+            </div>
+
+            <!-- Indicadores principales -->
+            <div class="indicators-container">
+                <div class="indicator-card">
+                    <div class="indicator-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Cumplimiento de Actividades</h3>
+                        <div class="indicator-value">
+                            <span id="cumplimiento-actividades">0</span>
+                            <span class="indicator-max">/32</span>
+                        </div>
+                        <div class="indicator-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-cumplimiento"></div>
+                            </div>
+                        </div>
+                        <p class="indicator-update">Última actualización: <span id="fecha-ultima-actividad">No hay registros</span></p>
+                    </div>
+                </div>
+                
+                <div class="indicator-card">
+                    <div class="indicator-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Personas Impactadas</h3>
+                        <div class="indicator-value">
+                            <span id="total-personas-impactadas">0</span>
+                        </div>
+                        <div class="indicator-trend">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Total acumulado</span>
+                        </div>
+                        <p class="indicator-update">Última actualización: <span id="fecha-ultima-persona">No hay registros</span></p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Título del mapa -->
+            <div class="map-title-section">
+                <h2 class="map-title">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Actividades: 1000 en un día Localidad de Santa Fe
+                </h2>
+            </div>
+
+            <!-- Contenedor del mapa -->
+            <div class="map-container-large">
+                <div id="mapa-actividades" style="height: 600px; width: 100%; border-radius: 12px;"></div>
+
+            </div>
+
+            <!-- Reporting Service - Tabla de Actividades -->
+            <div class="reporting-service-section">
+                <div class="reporting-header">
+                    <h3><i class="fas fa-chart-line"></i> Reporting Service - Actividades Reportadas</h3>
+                    <div class="reporting-controls">
+                        <span class="last-update">Última actualización: <span id="last-table-update">Cargando...</span></span>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="refreshActivitiesTable()">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="activities-table" id="activities-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Responsable</th>
+                                <th>Actividad</th>
+                                <th>Área</th>
+                                <th>Personas Impactadas</th>
+                                <th>Ubicación</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activities-table-body">
+                            <tr>
+                                <td colspan="9" class="loading-row">
+                                    <div class="loading-spinner">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        Cargando actividades...
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total de Actividades:</span>
+                        <span class="stat-value" id="total-activities-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Personas Impactadas:</span>
+                        <span class="stat-value" id="total-impacted-count">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Actividades Hoy:</span>
+                        <span class="stat-value" id="today-activities-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de la actividad seleccionada -->
+            <div class="activity-info" id="activity-info" style="display: none;">
+                <div class="activity-header">
+                    <h3 id="activity-title">Información de la Actividad</h3>
+                    <button type="button" class="btn-close" onclick="closeActivityInfo()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="activity-content" id="activity-content">
+                    <div class="activity-details">
+                        <div class="detail-row">
+                            <div class="detail-label">Responsable:</div>
+                            <div class="detail-value" id="activity-responsable"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Tipo de Actividad:</div>
+                            <div class="detail-value" id="activity-tipo"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Área Responsable:</div>
+                            <div class="detail-value" id="activity-area"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Personas Impactadas:</div>
+                            <div class="detail-value" id="activity-impacto"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Descripción:</div>
+                            <div class="detail-value" id="activity-descripcion"></div>
+                        </div>
+                        <div class="detail-row" id="activity-observaciones-row" style="display: none;">
+                            <div class="detail-label">Observaciones:</div>
+                            <div class="detail-value" id="activity-observaciones"></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Fecha de Registro:</div>
+                            <div class="detail-value" id="activity-fecha"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-photos" id="activity-photos">
+                        <h4>Fotos de la Actividad</h4>
+                        <div class="photos-grid" id="photos-grid">
+                            <!-- Las fotos se cargarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Alcaldía Local Santa Fe. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+
+
+    <!-- Modal de Autenticación para Reportar Actividad -->
+    <div id="auth-modal" class="auth-modal" style="display: none;">
+        <div class="auth-modal-content">
+            <div class="auth-modal-header">
+                <h3><i class="fas fa-lock"></i> Autenticación Requerida</h3>
+                <button type="button" class="btn-close" onclick="closeAuthModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="auth-modal-body">
+                <p>Para reportar una nueva actividad, ingrese la clave de acceso:</p>
+                <div class="auth-input-group">
+                    <input type="password" id="auth-password" placeholder="Ingrese la clave" class="auth-input">
+                    <button type="button" class="btn btn-primary" onclick="authenticateAndRedirect()">
+                        <i class="fas fa-sign-in-alt"></i> Acceder
+                    </button>
+                </div>
+                <div id="auth-error" class="auth-error" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Clave incorrecta. Intente nuevamente.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Librería para cargar archivos KML -->
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <!-- Funciones comunes -->
+    <script src="{{ url_for('static', filename='js/acciones_1000_common.js') }}"></script>
+    <!-- Funciones específicas del mapa -->
+    <script src="{{ url_for('static', filename='js/acciones_1000_mapa.js') }}"></script>
+</body>
+</html>

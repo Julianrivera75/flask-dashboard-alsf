@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1000 Acciones en 1 Día - Alcaldía Local Santa Fe</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/acciones_1000.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <!-- Botón volver al mapa -->
+    <a href="/acciones-1000/mapa" class="menu-btn" aria-label="Volver al mapa" title="Volver al mapa de actividades">
+        <i class="fas fa-arrow-left"></i>
+        <span class="menu-btn-text">Volver</span>
+    </a>
+    
+
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; vertical-align: middle;">
+            </div>
+            <div class="header-title">
+                <h1>1000 Acciones en 1 Día</h1>
+                <p>Sistema de Registro de Actividades - Alcaldía Local Santa Fe</p>
+            </div>
+            <div class="header-empty"></div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Inicio</a> / 
+                <span>1000 Acciones en 1 Día</span>
+            </nav>
+
+            <!-- Título de la sección -->
+            <div class="section-header">
+                <h2><i class="fas fa-clipboard-check"></i> Registro de Nueva Actividad</h2>
+                <p>Complete el siguiente formulario para registrar una nueva actividad realizada en el marco del programa "1000 Acciones en 1 Día"</p>
+            </div>
+
+            <!-- Formulario -->
+            <div class="form-container">
+                <form id="acciones1000Form" method="POST" action="{{ url_for('acciones_1000.submit_actividad') }}" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    
+                    <div class="form-grid">
+                        <!-- Campo 1: Nombre del responsable -->
+                        <div class="form-group full-width">
+                            <label for="{{ form.nombre_responsable.id }}">
+                                {{ form.nombre_responsable.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.nombre_responsable(class="form-control", placeholder="Ingrese el nombre completo del responsable") }}
+                            {% if form.nombre_responsable.errors %}
+                                <div class="error-message">
+                                    {% for error in form.nombre_responsable.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 2: Tipo de actividad -->
+                        <div class="form-group full-width">
+                            <label for="{{ form.tipo_actividad.id }}">
+                                {{ form.tipo_actividad.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.tipo_actividad(class="form-control") }}
+                            {% if form.tipo_actividad.errors %}
+                                <div class="error-message">
+                                    {% for error in form.tipo_actividad.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 3: Área responsable -->
+                        <div class="form-group">
+                            <label for="{{ form.area_responsable.id }}">
+                                {{ form.area_responsable.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.area_responsable(class="form-control", id="area_responsable") }}
+                            {% if form.area_responsable.errors %}
+                                <div class="error-message">
+                                    {% for error in form.area_responsable.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo adicional para "otro" área -->
+                        <div class="form-group" id="area_otro_group" style="display: none;">
+                            <label for="{{ form.area_otro.id }}">
+                                {{ form.area_otro.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.area_otro(class="form-control", placeholder="Especifique otra área") }}
+                            {% if form.area_otro.errors %}
+                                <div class="error-message">
+                                    {% for error in form.area_otro.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 4: Número de personas impactadas -->
+                        <div class="form-group">
+                            <label for="{{ form.personas_impactadas.id }}">
+                                {{ form.personas_impactadas.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.personas_impactadas(class="form-control", placeholder="Ej: 50", min="1") }}
+                            {% if form.personas_impactadas.errors %}
+                                <div class="error-message">
+                                    {% for error in form.personas_impactadas.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 5: Descripción detallada -->
+                        <div class="form-group full-width">
+                            <label for="{{ form.descripcion_detallada.id }}">
+                                {{ form.descripcion_detallada.label }}
+                                <span class="required">*</span>
+                            </label>
+                            {{ form.descripcion_detallada(class="form-control") }}
+                            {% if form.descripcion_detallada.errors %}
+                                <div class="error-message">
+                                    {% for error in form.descripcion_detallada.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 6: Observaciones adicionales -->
+                        <div class="form-group full-width">
+                            <label for="{{ form.observaciones_adicionales.id }}">
+                                {{ form.observaciones_adicionales.label }}
+                            </label>
+                            {{ form.observaciones_adicionales(class="form-control") }}
+                            {% if form.observaciones_adicionales.errors %}
+                                <div class="error-message">
+                                    {% for error in form.observaciones_adicionales.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 7: Ubicación en el mapa -->
+                        <div class="form-group full-width">
+                            <label>
+                                Seleccione la ubicación en el mapa donde se desarrolló la actividad
+                                <span class="required">*</span>
+                            </label>
+                            <div class="map-container">
+                                <div id="mapa-formulario" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+                                <div class="map-instructions">
+                                    <i class="fas fa-info-circle"></i>
+                                    Haga clic en el mapa para seleccionar la ubicación exacta de la actividad
+                                </div>
+                            </div>
+                            {{ form.latitud(id="latitud") }}
+                            {{ form.longitud(id="longitud") }}
+                            {% if form.latitud.errors or form.longitud.errors %}
+                                <div class="error-message">
+                                    {% for error in form.latitud.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                    {% for error in form.longitud.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo 8: Fotos de la actividad -->
+                        <div class="form-group full-width">
+                            <label for="{{ form.fotos.id }}">
+                                {{ form.fotos.label }}
+                                <span class="required">*</span>
+                                <span class="file-limit">(Máximo 4 imágenes)</span>
+                            </label>
+                            <div class="file-upload-container">
+                                <input type="file" name="fotos" id="fotos" multiple accept="image/*" class="file-input" required>
+                                <label for="fotos" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Seleccionar fotos (máx. 4)</span>
+                                </label>
+                                <div class="file-preview" id="file-preview"></div>
+                                <div class="file-info" id="file-info">
+                                    <span class="file-count">0 de 4 imágenes seleccionadas</span>
+                                    <span class="file-size-info">Tamaño máximo por imagen: 5MB</span>
+                                </div>
+                            </div>
+                            {% if form.fotos.errors %}
+                                <div class="error-message">
+                                    {% for error in form.fotos.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm(true)">
+                            <i class="fas fa-undo"></i> Limpiar Formulario
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Registrar Actividad
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Alcaldía Local Santa Fe. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <!-- Librería para cargar archivos KML -->
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <!-- Funciones comunes -->
+    <script src="{{ url_for('static', filename='js/acciones_1000_common.js') }}"></script>
+    <!-- Funciones específicas del formulario -->
+    <script src="{{ url_for('static', filename='js/acciones_1000.js') }}"></script>
+</body>
+</html>

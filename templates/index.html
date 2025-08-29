@@ -36,13 +36,20 @@
         <ul id="menu-options">
             <li><a href="/" class="active">Inicio</a></li>
             <li><a href="/el-consuelo"><i class="fas fa-map-marker-alt"></i> Barrio El Consuelo</a></li>
+            
             {% if session.authenticated %}
-           <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
-           {% else %}
-           <li><a href="/login"><i class="fas fa-lock"></i> Acceso Administrativo</a></li>
-           {% endif %}
-            <li><a href="/formulario-reporte"><i class="fas fa-clipboard-list"></i> Nuevo Reporte</a></li>
-            <li><a href="/mapa-reportes"><i class="fas fa-map"></i> Mapa de Reportes</a></li>
+                <!-- Sección de Acceso Administrativo - Solo visible cuando está autenticado -->
+                <li class="menu-section-header">
+                    <span><i class="fas fa-shield-alt"></i> Acceso Administrativo</span>
+                </li>
+                <li><a href="/formulario-reporte"><i class="fas fa-clipboard-list"></i> Nuevo Reporte</a></li>
+                <li><a href="/mapa-reportes"><i class="fas fa-map"></i> Mapa de Reportes</a></li>
+                <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+            {% else %}
+                <!-- Enlace de login cuando no está autenticado -->
+                <li><a href="/login"><i class="fas fa-lock"></i> Acceso Administrativo</a></li>
+            {% endif %}
+            
             <!-- <li><a href="/datos">Datos</a></li> -->
             <!-- <li><a href="/contacto">Contacto</a></li> -->
         </ul>
@@ -52,11 +59,14 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <div class="header-logo">
-                <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; vertical-align: middle;">
+            <div class="header-logo-bogotaneidapp">
+                <img src="{{ url_for('static', filename='images/logos/Bogotaneidapp.jpg') }}" alt="Logo BogotaneidApp" style="height: 150px; width: auto; border-radius: 8px; vertical-align: middle;">
             </div>
             <div class="header-title">
                 <h1>BogotaneidApp Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe</h1>
+            </div>
+            <div class="header-logo-alcaldia">
+                <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Local Santa Fe" style="height: 80px; width: auto; border-radius: 8px; vertical-align: middle;">
             </div>
             <div class="header-empty"></div>
                 </div>
@@ -64,6 +74,14 @@
     <!-- Features Section -->
     <section class="features">
         <div class="container">
+            <!-- Botón 1000 Acciones en 1 Día -->
+            <div class="acciones-1000-button-container" style="text-align: center; margin-bottom: 3rem;">
+                <a href="/acciones-1000/mapa" class="btn btn-acciones-1000">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Conoce las actividades de 1000 en un día - Santa Fe
+                </a>
+            </div>
+            
             <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">¿Qué ofrece el Sistema de Monitoreo y Seguimiento?</h2>
             <div class="features-grid">
                 <div class="feature-card">
@@ -94,54 +112,12 @@
                     <h3>Reportes Detallados</h3>
                     <p>Generación de informes y estadísticas para la gestión administrativa.</p>
         </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-lock"></i>
-            </div>
-                    <h3>Acceso Restringido</h3>
-                    <p>Algunas secciones requieren autenticación para proteger información sensible.</p>
-        </div>
+
             </div>
                     </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <h2 class="section-title">Estadísticas Generales</h2>
-            <div style="margin-bottom: 1.2rem; margin-top:2rem;">
-                <h3 style="color:#e4032e; font-size:1.25rem; margin-bottom:1rem;">Barrio San Bernardo</h3>
-                <div class="stats-grid" style="margin-bottom: 2rem;">
-                    <div class="stat-card" id="personas-impactadas-card">
-                        <div class="icon"><i class="fas fa-users"></i></div>
-                        <h3 id="personas-impactadas">-</h3>
-                        <p>Cantidad de personas impactadas</p>
-                    </div>
-                    <div class="stat-card" id="actividades-realizadas-card">
-                        <div class="icon"><i class="fas fa-tasks"></i></div>
-                        <h3 id="actividades-realizadas">-</h3>
-                        <p>Número aprox. de actividades realizadas</p>
-                    </div>
-                    <div class="stat-card" id="dias-sin-homicidios-card">
-                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
-                        <h3 id="dias-sin-homicidios">-</h3>
-                        <p id="dias-sin-homicidios-label">Días sin homicidio</p>
-                        <p id="fecha-base" style="font-size: 0.85rem; color: #666; margin-top: 0.3rem;">Desde: 21/08/2025</p>
-                    </div>
-                </div>
-            </div>
-            <div style="margin-bottom: 1.2rem;">
-                <h3 style="color:#e4032e; font-size:1.25rem; margin-bottom:1rem;">Barrio El Consuelo</h3>
-                <div class="stats-grid" style="margin-bottom: 2rem;">
-                    <div class="stat-card" id="encuestas-realizadas-card">
-                        <div class="icon"><i class="fas fa-poll"></i></div>
-                        <h3 id="encuestas-realizadas">-</h3>
-                        <p>Encuestas realizadas</p>
-        </div>
-                </div>
-                        </div>
-                    </div>
-    </section>
+
 
     <!-- Footer -->
     <footer class="footer">
@@ -184,148 +160,10 @@
             console.log('Menú cerrado por overlay');
         });
 
-        // --- Indicadores principales: San Bernardo y El Consuelo ---
-        async function cargarIndicadoresPrincipales() {
-            // San Bernardo
-            try {
-                const resSB = await fetch('/api/san-bernardo/data');
-                const dataSB = await resSB.json();
-                if (dataSB && dataSB.data && Array.isArray(dataSB.data)) {
-                    // Personas impactadas
-                    let totalPersonas = 0;
-                    let colPoblacion = null;
-                    if (dataSB.data.length > 0) {
-                        for (let key in dataSB.data[0]) {
-                            if (key && key.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').includes('poblacion impactada')) {
-                                colPoblacion = key;
-                                break;
-                            }
-                        }
-                    }
-                    if (colPoblacion) {
-                        for (let i = 0; i < dataSB.data.length; i++) {
-                            let val = dataSB.data[i][colPoblacion];
-                            if (typeof val === 'string') val = val.replace(/[^\d]/g, '');
-                            val = parseInt(val);
-                            if (!isNaN(val)) totalPersonas += val;
-                        }
-                    }
-                    document.getElementById('personas-impactadas').textContent = totalPersonas.toLocaleString('es-CO');
-                    // Actividades realizadas
-                    document.getElementById('actividades-realizadas').textContent = dataSB.data.length.toLocaleString('es-CO');
-                }
-            } catch (e) {
-                document.getElementById('personas-impactadas').textContent = '-';
-                document.getElementById('actividades-realizadas').textContent = '-';
-            }
-            // Días sin homicidio (San Bernardo) - Misma lógica que san_bernardo.html
-            try {
-                // Fecha base fija: 21 de agosto de 2025 (último homicidio)
-                const baseDate = '2025-08-21';
-                const today = new Date();
-                const base = new Date(baseDate);
-                const diffTime = today - base;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                // Si la fecha base es en el futuro, mostrar 0
-                if (diffDays < 0) {
-                    document.getElementById('dias-sin-homicidios').textContent = '0';
-                } else {
-                    document.getElementById('dias-sin-homicidios').textContent = diffDays;
-                }
-            } catch (e) {
-                document.getElementById('dias-sin-homicidios').textContent = '-';
-            }
-            // El Consuelo
-            try {
-                console.log('🔍 Cargando datos de El Consuelo...');
-                const resEC = await fetch('/api/el-consuelo/data');
-                const dataEC = await resEC.json();
-                console.log('📊 Respuesta de El Consuelo:', dataEC);
-                
-                if (dataEC && dataEC.data && Array.isArray(dataEC.data)) {
-                    const totalEncuestas = dataEC.data.length;
-                    document.getElementById('encuestas-realizadas').textContent = totalEncuestas.toLocaleString('es-CO');
-                    console.log('✅ Encuestas de El Consuelo cargadas:', totalEncuestas);
-                } else {
-                    console.warn('⚠️ Datos de El Consuelo no tienen el formato esperado:', dataEC);
-                    document.getElementById('encuestas-realizadas').textContent = '0';
-                }
-            } catch (e) {
-                console.error('❌ Error al cargar datos de El Consuelo:', e);
-                document.getElementById('encuestas-realizadas').textContent = '-';
-            }
-        }
-        document.addEventListener('DOMContentLoaded', cargarIndicadoresPrincipales);
+
         
-        // Función para actualizar la fecha base dinámicamente
-        function updateFechaBase() {
-            const fechaBaseElement = document.getElementById('fecha-base');
-            if (fechaBaseElement) {
-                fechaBaseElement.textContent = 'Desde: 21/08/2025';
-            }
-        }
-        
-        // Llamar a updateFechaBase cuando se cargue la página
-        document.addEventListener('DOMContentLoaded', function() {
-            updateFechaBase();
-        });
-        
-        // Función para inicializar la base de datos automáticamente
-        async function inicializarBaseDatosAutomaticamente() {
-            try {
-                console.log('🔄 Inicializando base de datos automáticamente...');
-                const response = await fetch('/init-db');
-                const data = await response.json();
-                
-                if (data.success) {
-                    console.log('✅ Base de datos inicializada automáticamente');
-                    return true;
-                } else {
-                    console.error('❌ Error al inicializar BD automáticamente:', data.error);
-                    return false;
-                }
-            } catch (error) {
-                console.error('❌ Error al inicializar BD automáticamente:', error);
-                return false;
-            }
-        }
-        
-        // Función para limpiar opciones no deseadas
-        async function limpiarOpcionesNoDeseadas() {
-            try {
-                console.log('🧹 Limpiando opciones no deseadas...');
-                const response = await fetch('/clean-db');
-                const data = await response.json();
-                
-                if (data.success) {
-                    console.log('✅ Limpieza completada:', data.message);
-                    alert('Limpieza completada: ' + data.message);
-                } else {
-                    console.error('❌ Error al limpiar:', data.error);
-                    alert('Error al limpiar: ' + data.error);
-                }
-            } catch (error) {
-                console.error('❌ Error al limpiar:', error);
-                alert('Error al limpiar: ' + error.message);
-            }
-        }
+
     </script>
     
-    <!-- Botón para limpiar opciones no deseadas -->
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-        <button onclick="limpiarOpcionesNoDeseadas()" 
-                style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); 
-                       color: white; 
-                       border: none; 
-                       padding: 12px 20px; 
-                       border-radius: 25px; 
-                       cursor: pointer; 
-                       font-weight: 600; 
-                       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                       transition: all 0.3s ease;">
-            <i class="fas fa-trash"></i> Limpiar Opciones No Deseadas
-        </button>
-    </div>
 </body>
 </html> 

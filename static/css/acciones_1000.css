@@ -1,0 +1,1150 @@
+/* Estilos específicos para 1000 Acciones en 1 Día */
+
+/* Variables de color específicas */
+:root {
+    --primary-yellow: #fab62d;
+    --primary-red: #e4032e;
+    --white: #ffffff;
+    --dark-gray: #333333;
+    --light-gray: #f5f5f5;
+    --success-green: #28a745;
+    --warning-orange: #ffc107;
+    --danger-red: #dc3545;
+    --info-blue: #17a2b8;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+}
+
+/* Estilos del breadcrumb */
+.breadcrumb {
+    background: var(--light-gray);
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.breadcrumb a {
+    color: var(--primary-red);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    color: var(--dark-gray);
+    font-weight: 600;
+}
+
+/* Encabezado de sección */
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.section-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.section-header h2 i {
+    margin-right: 1rem;
+    color: var(--primary-yellow);
+}
+
+.section-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Contenedor del formulario */
+.form-container {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 3rem;
+}
+
+/* Grid del formulario */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Grupos de formulario */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-gray);
+    font-size: 1rem;
+}
+
+.required {
+    color: var(--danger-red);
+    font-weight: 700;
+}
+
+/* Controles del formulario */
+.form-control {
+    padding: 1rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: var(--white);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 3px rgba(228, 3, 46, 0.1);
+}
+
+.form-control:invalid {
+    border-color: var(--danger-red);
+}
+
+/* Área de texto */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+/* Select personalizado */
+select.form-control {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Contenedor del mapa */
+.map-container {
+    margin-top: 1rem;
+}
+
+.map-instructions {
+    background: var(--info-blue);
+    color: var(--white);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.map-instructions i {
+    font-size: 1.1rem;
+}
+
+/* Estilos para marcadores de sectores catastrales */
+.sector-catastral-marker {
+    background: rgba(0, 123, 255, 0.7);
+    border: 2px solid #007bff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sector-catastral-marker:hover {
+    background: rgba(0, 123, 255, 0.9);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.4);
+}
+
+/* Contenedor de carga de archivos */
+.file-upload-container {
+    margin-top: 1rem;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border: 2px dashed var(--primary-red);
+    border-radius: var(--border-radius);
+    background: var(--light-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.file-upload-label:hover {
+    background: var(--primary-red);
+    color: var(--white);
+    border-color: var(--primary-red);
+}
+
+.file-upload-label i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary-red);
+}
+
+.file-upload-label:hover i {
+    color: var(--white);
+}
+
+.file-upload-label span {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Vista previa de archivos */
+.file-preview {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.file-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.file-preview-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.file-preview-item .file-info {
+    padding: 0.5rem;
+    background: var(--white);
+    font-size: 0.8rem;
+    color: var(--dark-gray);
+}
+
+.file-preview-item .remove-file {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--danger-red);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Estilos para múltiples imágenes */
+.file-limit {
+    font-size: 0.9rem;
+    color: var(--primary-red);
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.file-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+}
+
+.file-count {
+    font-weight: 500;
+    color: var(--primary-red);
+}
+
+.file-size-info {
+    color: var(--dark-gray);
+    opacity: 0.8;
+}
+
+/* Mejoras en la vista previa para múltiples imágenes */
+.file-preview {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    max-width: 100%;
+}
+
+.file-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease;
+}
+
+.file-preview-item:hover {
+    transform: scale(1.05);
+}
+
+.file-preview-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.file-preview-item .file-details {
+    padding: 0.5rem;
+    background: var(--white);
+    font-size: 0.75rem;
+    color: var(--dark-gray);
+    text-align: center;
+}
+
+.file-preview-item .file-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-preview-item .file-size {
+    color: var(--dark-gray);
+    opacity: 0.8;
+}
+
+/* Mensajes de error */
+.error-message {
+    color: var(--danger-red);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid var(--danger-red);
+}
+
+/* Botones de acción */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid var(--light-gray);
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-yellow) 100%);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+    border: 2px solid var(--light-gray);
+}
+
+.btn-secondary:hover {
+    background: var(--dark-gray);
+    color: var(--white);
+    border-color: var(--dark-gray);
+}
+
+/* Estados de carga */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--white);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-container {
+        padding: 2rem 1rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .section-header h2 {
+        font-size: 2rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        min-width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-header {
+        padding: 1.5rem 1rem;
+    }
+    
+    .section-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .section-header p {
+        font-size: 1rem;
+    }
+    
+    .form-container {
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* Estilos para el mapa de Leaflet */
+.leaflet-container {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.leaflet-popup-content {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+}
+
+.leaflet-popup-content h3 {
+    color: var(--primary-red);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+/* Estilos para mensajes de éxito/error */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-success {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success-green);
+    border-left: 4px solid var(--success-green);
+}
+
+.alert-error {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger-red);
+    border-left: 4px solid var(--danger-red);
+}
+
+.alert-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning-orange);
+    border-left: 4px solid var(--warning-orange);
+}
+
+.alert-info {
+    background: rgba(23, 162, 184, 0.1);
+    color: var(--info-blue);
+    border-left: 4px solid var(--info-blue);
+}
+
+/* Estilos para los indicadores principales */
+.indicators-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.indicator-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.indicator-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.indicator-icon {
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    color: var(--white);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.indicator-content {
+    flex: 1;
+}
+
+.indicator-content h3 {
+    color: var(--dark-gray);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.indicator-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.indicator-value span:first-child {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-red);
+}
+
+.indicator-max {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.indicator-progress {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.indicator-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--success-green);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.indicator-update {
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Estilos para la información de actividad */
+.activity-info {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-top: 2rem;
+    overflow: hidden;
+}
+
+.activity-header {
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    color: var(--white);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.activity-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.btn-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.activity-content {
+    padding: 2rem;
+}
+
+.activity-details {
+    margin-bottom: 2rem;
+}
+
+.detail-row {
+    display: flex;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--dark-gray);
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.detail-value {
+    color: var(--dark-gray);
+    flex: 1;
+}
+
+.activity-photos h4 {
+    color: var(--primary-red);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.photo-item {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.05);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+/* Responsive para indicadores */
+@media (max-width: 768px) {
+    .indicators-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .indicator-card {
+        padding: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .indicator-icon {
+        align-self: center;
+    }
+    
+    .activity-content {
+        padding: 1.5rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .detail-label {
+        width: auto;
+    }
+    
+    .photos-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+/* Estilos para el título del mapa */
+.map-title-section {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.map-title {
+    color: var(--white);
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.map-title i {
+    color: var(--primary-yellow);
+    font-size: 1.8rem;
+}
+
+/* Responsive para el título del mapa */
+@media (max-width: 768px) {
+    .map-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .map-title i {
+        font-size: 1.5rem;
+    }
+    
+    .map-title-section {
+        margin: 1.5rem 0;
+        padding: 1rem;
+    }
+}
+
+/* Estilos para el Reporting Service */
+.reporting-service-section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin: 2rem 0;
+    overflow: hidden;
+}
+
+.reporting-header {
+    background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
+    color: var(--white);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.reporting-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.reporting-header i {
+    color: var(--primary-yellow);
+}
+
+.reporting-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.last-update {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.table-container {
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.activities-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.activities-table th {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+    font-weight: 600;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid var(--primary-red);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.activities-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: middle;
+}
+
+.activities-table tbody tr:hover {
+    background: rgba(250, 182, 45, 0.1);
+}
+
+.loading-row {
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    color: var(--primary-red);
+    font-size: 1.1rem;
+}
+
+.loading-spinner i {
+    margin-right: 0.5rem;
+}
+
+.table-stats {
+    background: var(--light-gray);
+    padding: 1.5rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    border-top: 1px solid #ddd;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-red);
+}
+
+/* Responsive para el reporting service */
+@media (max-width: 768px) {
+    .reporting-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .reporting-controls {
+        justify-content: center;
+    }
+    
+    .activities-table {
+        font-size: 0.8rem;
+    }
+    
+    .activities-table th,
+    .activities-table td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .table-stats {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+        gap: 1rem;
+    }
+}
+
+/* Estilos adicionales para la tabla */
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status-activo {
+    background: var(--success-green);
+    color: white;
+}
+
+.status-inactivo {
+    background: var(--danger-red);
+    color: white;
+}
+
+.status-pendiente {
+    background: var(--warning-orange);
+    color: white;
+}
+
+.no-data-message,
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--dark-gray);
+    font-size: 1.1rem;
+}
+
+.no-data-message i {
+    color: var(--info-blue);
+    margin-right: 0.5rem;
+}
+
+.error-message i {
+    color: var(--danger-red);
+    margin-right: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Estilos para el botón de reportar actividad */
+.report-activity-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.btn-report-activity {
+    background: var(--primary-yellow);
+    color: var(--dark-gray);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-report-activity:hover {
+    background: var(--primary-red);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-report-activity i {
+    font-size: 1rem;
+}
+
+/* Modal de autenticación */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-content {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+}
+
+.auth-modal-header {
+    background: var(--primary-red);
+    color: var(--white);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.auth-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.auth-modal-header .btn-close {
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+.auth-modal-body {
+    padding: 2rem;
+    text-align: center;
+}
+
+.auth-modal-body p {
+    margin-bottom: 1.5rem;
+    color: var(--dark-gray);
+    font-size: 1rem;
+}
+
+.auth-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.auth-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--primary-red);
+}
+
+.auth-error {
+    background: #ffebee;
+    color: var(--danger-red);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--danger-red);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Responsive para el modal */
+@media (max-width: 480px) {
+    .auth-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    
+    .auth-modal-header {
+        padding: 1rem;
+    }
+    
+    .auth-modal-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-report-activity {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+}
