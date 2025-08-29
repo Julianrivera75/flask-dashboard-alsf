@@ -7,6 +7,7 @@ import os
 import logging
 from datetime import datetime
 import pytz
+from flask_wtf.csrf import CSRFProtect
 
 # Importar módulos propios
 import config
@@ -38,6 +39,9 @@ def create_app(config_class=config.DevelopmentConfig):
     # Configuración de zona horaria de Colombia
     app.config['TIMEZONE'] = 'America/Bogota'
     colombia_tz = pytz.timezone('America/Bogota')
+    
+    # Inicializar CSRF protection
+    csrf = CSRFProtect(app)
     
     # Inicializar base de datos
     db.init_app(app)
@@ -81,6 +85,27 @@ def create_app(config_class=config.DevelopmentConfig):
     # Inicializar middleware de analytics
     from middleware.analytics_middleware import init_analytics_middleware
     init_analytics_middleware(app)
+    
+    @app.route('/uploads/<path:filename>')
+    def uploaded_file(filename):
+        """Servir archivos subidos (fotos de actividades)"""
+        try:
+            # Construir la ruta completa del archivo
+            upload_folder = os.path.join(app.root_path, 'static', 'uploads')
+            file_path = os.path.join(upload_folder, filename)
+            
+            # Crear directorio de uploads si no existe
+            os.makedirs(upload_folder, exist_ok=True)
+            
+            # Verificar que el archivo existe y está dentro del directorio de uploads
+            if os.path.exists(file_path) and os.path.commonpath([upload_folder, file_path]) == upload_folder:
+                return send_file(file_path)
+            else:
+                logger.warning(f"Archivo no encontrado: {file_path}")
+                return "Archivo no encontrado", 404
+        except Exception as e:
+            logger.error(f"Error al servir archivo {filename}: {e}")
+            return "Error interno del servidor", 500
     
     @app.route('/')
     def index():

@@ -7,7 +7,18 @@
 let map;
 let selectedLocation = false;
 
-// Tipos de actividades disponibles (31 actividades)
+// Tipos de actividades disponibles (32 actividades totales)
+// 1. Diálogo diferencial LGBTI
+// 2. Fiesta Mayor  
+// 3. Feria de Emprendedoras y Productoras Locales
+// 4. Recuperación entornos tramos universitarios - sector las aguas-
+// 5-26. DANZA (22 veces)
+// 27. Jornada de embellecimiento
+// 28. Jornada de Protección y Bienestar Animal - PYBA
+// 29. MES MAYOR
+// 30. INAUGURACIÓN CENTRO DE EXPERIENCIA TIC
+// 31. Actividad
+// 32. Encuentro
 const ACTIVIDADES_DISPONIBLES = [
     'Diálogo diferencial LGBTI',
     'Fiesta Mayor',
@@ -15,13 +26,13 @@ const ACTIVIDADES_DISPONIBLES = [
     'Recuperación entornos tramos universitarios - sector las aguas-',
     'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA',
     'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA', 'DANZA',
+    'DANZA', 'DANZA', // Total: 22 DANZA
     'Jornada de embellecimiento',
     'Jornada de Protección y Bienestar Animal - PYBA',
     'MES MAYOR',
     'INAUGURACIÓN CENTRO DE EXPERIENCIA TIC',
     'Actividad',
-    'Encuentro',
-    'Fugate al centro'
+    'Encuentro'
 ];
 
 // Colores para los marcadores según el área

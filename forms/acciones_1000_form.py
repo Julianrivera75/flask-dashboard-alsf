@@ -5,6 +5,7 @@ from wtforms import (
 )
 from wtforms.validators import DataRequired, Optional, NumberRange, ValidationError
 from wtforms.widgets import TextArea
+from flask_wtf.csrf import CSRFProtect
 
 class Acciones1000Form(FlaskForm):
     """Formulario para 1000 acciones en 1 día"""

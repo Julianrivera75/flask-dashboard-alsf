@@ -356,7 +356,20 @@ function handleFormSubmit(e) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        // Verificar si la respuesta es JSON válido
+        if (!response.ok) {
+            if (response.status === 400) {
+                // Error de validación o CSRF
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Error de validación');
+                });
+            } else {
+                throw new Error(`Error del servidor: ${response.status}`);
+            }
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showAlert('¡Éxito!', data.message, 'success');
@@ -377,7 +390,18 @@ function handleFormSubmit(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        showAlert('Error', 'Error de conexión. Intente nuevamente.', 'error');
+        
+        // Verificar si es un error de CSRF
+        if (error.message && error.message.includes('CSRF')) {
+            showAlert('Error de Seguridad', 'El token de seguridad ha expirado. Por favor, recargue la página e intente nuevamente.', 'error');
+            
+            // Opcional: recargar la página automáticamente
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        } else {
+            showAlert('Error', 'Error de conexión. Intente nuevamente.', 'error');
+        }
     })
     .finally(() => {
         // Restaurar botón
