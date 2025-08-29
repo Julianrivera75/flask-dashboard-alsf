@@ -112,10 +112,35 @@ def init_railway_database():
             create_page_views_table = """
             CREATE TABLE IF NOT EXISTS page_views (
                 id SERIAL PRIMARY KEY,
-                page_name VARCHAR(200) NOT NULL,
-                timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                page_url VARCHAR(500) NOT NULL,
                 user_agent TEXT,
-                ip_address VARCHAR(45)
+                ip_address VARCHAR(45),
+                referrer TEXT,
+                session_id VARCHAR(100),
+                timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                load_time INTEGER,
+                user_id INTEGER
+            );
+            """
+        else:
+            # Si la tabla existe pero tiene estructura incorrecta, la recreamos
+            print("🔄 Recreando tabla 'page_views' con estructura correcta...")
+            with engine.connect() as connection:
+                connection.execute(text("DROP TABLE IF EXISTS page_views CASCADE"))
+                connection.commit()
+                print("🗑️  Tabla 'page_views' eliminada")
+            
+            create_page_views_table = """
+            CREATE TABLE page_views (
+                id SERIAL PRIMARY KEY,
+                page_url VARCHAR(500) NOT NULL,
+                user_agent TEXT,
+                ip_address VARCHAR(45),
+                referrer TEXT,
+                session_id VARCHAR(100),
+                timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                load_time INTEGER,
+                user_id INTEGER
             );
             """
             
