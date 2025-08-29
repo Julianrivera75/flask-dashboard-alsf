@@ -727,6 +727,40 @@ select.form-control {
     cursor: pointer;
 }
 
+/* Estilos para fotos no disponibles */
+.photo-item.no-photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: var(--border-radius);
+    height: 150px;
+    color: #6c757d;
+}
+
+.no-photo-message {
+    text-align: center;
+    padding: 20px;
+}
+
+.no-photo-message i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #adb5bd;
+}
+
+.no-photo-message p {
+    margin: 5px 0;
+    font-weight: 500;
+    color: #495057;
+}
+
+.no-photo-message small {
+    color: #6c757d;
+    font-style: italic;
+}
+
 /* Responsive para indicadores */
 @media (max-width: 768px) {
     .indicators-container {
