@@ -45,6 +45,23 @@ def create_app(config_class=config.DevelopmentConfig):
         app.config['DEBUG'] = True
         app.config['TESTING'] = False
     
+    # Inicialización automática de base de datos para Railway
+    with app.app_context():
+        try:
+            from init_railway_db import init_railway_database
+            logger.info("🚀 Inicializando base de datos de Railway...")
+            if init_railway_database():
+                logger.info("✅ Base de datos de Railway inicializada correctamente")
+            else:
+                logger.warning("⚠️  La inicialización de Railway falló, usando configuración por defecto")
+        except ImportError:
+            logger.info("ℹ️  Script de Railway no disponible, usando configuración por defecto")
+        except Exception as e:
+            logger.error(f"❌ Error en inicialización de Railway: {e}")
+        
+        # Crear tablas por defecto
+        db.create_all()
+    
     # Inicializar servicios
     sheets_connector = GoogleSheetsConnector()
     
