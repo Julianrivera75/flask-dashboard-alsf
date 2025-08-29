@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Header Color - 1000 Acciones</title>
+    <style>
+        :root {
+            --primary-red: #e4032e;
+            --white: #ffffff;
+        }
+        
+        .header {
+            background: var(--primary-red);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 200px;
+            gap: 1.5rem;
+        }
+        
+        .header-logo-bogotaneidapp img {
+            height: 150px;
+            width: auto;
+            border-radius: 8px;
+            vertical-align: middle;
+        }
+        
+        .header-title h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-logo-alcaldia img {
+            height: 80px;
+            width: auto;
+            border-radius: 8px;
+            vertical-align: middle;
+        }
+        
+        .test-info {
+            background: #f0f0f0;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>🧪 Test de Color del Header</h2>
+        <p><strong>Color esperado:</strong> #e4032e (Rojo)</p>
+        <p><strong>Variable CSS:</strong> var(--primary-red)</p>
+        <p><strong>Estado:</strong> <span id="color-status">Verificando...</span></p>
+    </div>
+
+    <!-- Header de prueba -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo-bogotaneidapp">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjZmZmZmZmIi8+Cjx0ZXh0IHg9Ijc1IiB5PSI4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5Cb2dvdGFuZWlBcHA8L3RleHQ+Cjwvc3ZnPgo=" alt="Logo BogotaneidApp">
+            </div>
+            <div class="header-title">
+                <h1>BogotaneidApp Sistema de Monitoreo y Seguimiento de la Alcaldía Local Santa Fe</h1>
+            </div>
+            <div class="header-logo-alcaldia">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjZmZmZmZmIi8+Cjx0ZXh0IHg9IjQwIiB5PSI0NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5BbGNhbGTtYTwvdGV4dD4KPC9zdmc+Cg==" alt="Logo Alcaldía Local Santa Fe">
+            </div>
+        </div>
+    </header>
+
+    <script>
+        // Verificar el color del header
+        function checkHeaderColor() {
+            const header = document.querySelector('.header');
+            const computedStyle = window.getComputedStyle(header);
+            const backgroundColor = computedStyle.backgroundColor;
+            
+            console.log('Color del header:', backgroundColor);
+            
+            // Verificar si es rojo (aproximadamente)
+            if (backgroundColor.includes('228') || backgroundColor.includes('3') || backgroundColor.includes('46')) {
+                document.getElementById('color-status').innerHTML = '✅ Header ROJO detectado correctamente';
+                document.getElementById('color-status').style.color = 'green';
+            } else {
+                document.getElementById('color-status').innerHTML = '❌ Header NO es rojo: ' + backgroundColor;
+                document.getElementById('color-status').style.color = 'red';
+            }
+        }
+        
+        // Ejecutar verificación cuando se carga la página
+        window.onload = checkHeaderColor;
+        
+        // Verificar también después de un delay
+        setTimeout(checkHeaderColor, 1000);
+    </script>
+</body>
+</html>

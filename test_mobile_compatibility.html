@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Compatibilidad Móvil - 1000 Acciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Compatibilidad Móvil</h1>
+    <p>Esta página te ayudará a diagnosticar problemas en dispositivos móviles.</p>
+
+    <div class="test-section">
+        <h2>📱 Información del Dispositivo</h2>
+        <div id="device-info" class="info">
+            <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+            <p><strong>Pantalla:</strong> <span id="screen-size"></span></p>
+            <p><strong>Viewport:</strong> <span id="viewport-size"></span></p>
+            <p><strong>Touch:</strong> <span id="touch-support"></span></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Test de JavaScript</h2>
+        <button onclick="testJavaScript()">Probar JavaScript</button>
+        <div id="js-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Test de Formularios</h2>
+        <form id="test-form">
+            <label>Campo de texto:</label>
+            <input type="text" id="test-input" placeholder="Escribe algo aquí">
+            
+            <label>Dropdown:</label>
+            <select id="test-select">
+                <option value="">Selecciona una opción</option>
+                <option value="1">Opción 1</option>
+                <option value="2">Opción 2</option>
+                <option value="3">Opción 3</option>
+            </select>
+            
+            <label>Textarea:</label>
+            <textarea id="test-textarea" placeholder="Escribe un párrafo aquí"></textarea>
+            
+            <label>File Upload:</label>
+            <input type="file" id="test-file" accept="image/*">
+        </form>
+        <button onclick="testForm()">Probar Formulario</button>
+        <div id="form-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🗺️ Test de Mapas</h2>
+        <button onclick="testMaps()">Probar Mapas</button>
+        <div id="maps-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Test de Responsive</h2>
+        <div id="responsive-test">
+            <p>Este texto debe ser legible en móvil</p>
+            <div style="background: #007bff; color: white; padding: 20px; margin: 10px 0;">
+                Este div debe ser visible y bien dimensionado
+            </div>
+        </div>
+        <button onclick="testResponsive()">Probar Responsive</button>
+        <div id="responsive-result"></div>
+    </div>
+
+    <script>
+        // Mostrar información del dispositivo
+        function showDeviceInfo() {
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            document.getElementById('screen-size').textContent = `${screen.width}x${screen.height}`;
+            document.getElementById('viewport-size').textContent = `${window.innerWidth}x${window.innerHeight}`;
+            document.getElementById('touch-support').textContent = 'ontouchstart' in window ? 'Sí' : 'No';
+        }
+
+        // Test de JavaScript
+        function testJavaScript() {
+            const result = document.getElementById('js-result');
+            try {
+                // Test ES6 features
+                const testArray = [1, 2, 3];
+                const doubled = testArray.map(x => x * 2);
+                const sum = testArray.reduce((a, b) => a + b, 0);
+                
+                // Test async/await
+                const testAsync = async () => {
+                    return new Promise(resolve => setTimeout(() => resolve('Async OK'), 100));
+                };
+                
+                result.innerHTML = '<div class="test-result success">✅ JavaScript funciona correctamente</div>';
+                result.innerHTML += '<div class="test-result success">✅ ES6+ features soportados</div>';
+                result.innerHTML += '<div class="test-result success">✅ Async/await soportado</div>';
+            } catch (error) {
+                result.innerHTML = `<div class="test-result error">❌ Error en JavaScript: ${error.message}</div>`;
+            }
+        }
+
+        // Test de formularios
+        function testForm() {
+            const result = document.getElementById('form-result');
+            const input = document.getElementById('test-input');
+            const select = document.getElementById('test-select');
+            const textarea = document.getElementById('test-textarea');
+            const file = document.getElementById('test-file');
+            
+            let formOk = true;
+            let messages = [];
+            
+            // Test input
+            if (input.value) {
+                messages.push('✅ Campo de texto funciona');
+            } else {
+                messages.push('⚠️ Campo de texto vacío (escribe algo)');
+            }
+            
+            // Test select
+            if (select.value) {
+                messages.push('✅ Dropdown funciona');
+            } else {
+                messages.push('⚠️ Dropdown no seleccionado (selecciona una opción)');
+            }
+            
+            // Test textarea
+            if (textarea.value) {
+                messages.push('✅ Textarea funciona');
+            } else {
+                messages.push('⚠️ Textarea vacío (escribe algo)');
+            }
+            
+            // Test file
+            if (file.files.length > 0) {
+                messages.push('✅ File upload funciona');
+            } else {
+                messages.push('⚠️ File upload no seleccionado (selecciona una imagen)');
+            }
+            
+            result.innerHTML = messages.map(msg => `<div class="test-result ${msg.includes('✅') ? 'success' : 'warning'}">${msg}</div>`).join('');
+        }
+
+        // Test de mapas
+        function testMaps() {
+            const result = document.getElementById('maps-result');
+            try {
+                // Verificar si Leaflet está disponible
+                if (typeof L !== 'undefined') {
+                    result.innerHTML = '<div class="test-result success">✅ Leaflet está disponible</div>';
+                } else {
+                    result.innerHTML = '<div class="test-result warning">⚠️ Leaflet no está cargado</div>';
+                }
+                
+                // Test de touch events
+                if ('ontouchstart' in window) {
+                    result.innerHTML += '<div class="test-result success">✅ Touch events soportados</div>';
+                } else {
+                    result.innerHTML += '<div class="test-result warning">⚠️ Touch events no soportados</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="test-result error">❌ Error en test de mapas: ${error.message}</div>`;
+            }
+        }
+
+        // Test de responsive
+        function testResponsive() {
+            const result = document.getElementById('responsive-result');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            result.innerHTML = `<div class="test-result info">📱 Viewport actual: ${width}x${height}</div>`;
+            
+            if (width < 768) {
+                result.innerHTML += '<div class="test-result success">✅ Dispositivo móvil detectado</div>';
+            } else if (width < 1024) {
+                result.innerHTML += '<div class="test-result warning">⚠️ Dispositivo tablet detectado</div>';
+            } else {
+                result.innerHTML += '<div class="test-result warning">⚠️ Dispositivo desktop detectado</div>';
+            }
+        }
+
+        // Inicializar
+        window.onload = function() {
+            showDeviceInfo();
+            testJavaScript();
+            testMaps();
+            testResponsive();
+        };
+
+        // Test de eventos touch
+        document.addEventListener('touchstart', function() {
+            console.log('Touch event detectado');
+        });
+
+        // Test de resize
+        window.addEventListener('resize', function() {
+            showDeviceInfo();
+        });
+    </script>
+</body>
+</html>

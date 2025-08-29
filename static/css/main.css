@@ -1,4 +1,4 @@
- fot:root {
+:root {
     /* Colores principales */
     --primary-yellow: #fab62d;    /* Amarillo principal */
     --primary-red: #e4032e;       /* Rojo principal */
@@ -23,8 +23,8 @@ body {
 }
 
 .header {
-    background: var(--primary-red);
-    color: var(--white);
+    background: var(--primary-red) !important;
+    color: var(--white) !important;
     padding: 2rem;
     text-align: center;
     box-shadow: var(--shadow);
