@@ -48,6 +48,21 @@ def init_railway_database():
             
             if id_column and 'autoincrement' in id_column and id_column['autoincrement']:
                 print("✅ Tabla 'actividades_1000' tiene estructura correcta")
+                
+                # Verificar si existe el campo foto_base64 en fotos_actividades_1000
+                if 'fotos_actividades_1000' in existing_tables:
+                    foto_columns = inspector.get_columns('fotos_actividades_1000')
+                    foto_base64_exists = any(col['name'] == 'foto_base64' for col in foto_columns)
+                    
+                    if not foto_base64_exists:
+                        print("🔄 Agregando campo foto_base64 a tabla existente...")
+                        with engine.connect() as connection:
+                            connection.execute(text("ALTER TABLE fotos_actividades_1000 ADD COLUMN foto_base64 TEXT"))
+                            connection.commit()
+                        print("✅ Campo foto_base64 agregado correctamente")
+                    else:
+                        print("✅ Campo foto_base64 ya existe")
+                
                 return True
             else:
                 print("❌ Tabla 'actividades_1000' tiene estructura incorrecta")
