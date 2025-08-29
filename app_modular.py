@@ -91,6 +91,7 @@ def create_app(config_class=config.DevelopmentConfig):
         """Servir archivos subidos (fotos de actividades)"""
         try:
             # Construir la ruta completa del archivo
+            # Las fotos se guardan en static/uploads/acciones_1000/
             upload_folder = os.path.join(app.root_path, 'static', 'uploads')
             file_path = os.path.join(upload_folder, filename)
             
