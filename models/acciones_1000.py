@@ -108,6 +108,9 @@ def create_acciones_1000_models(db):
         # Tamaño del archivo en bytes
         tamano_bytes = db.Column(db.BigInteger)
         
+        # Foto en base64 para almacenamiento persistente en Railway
+        foto_base64 = db.Column(db.Text)
+        
         # Fecha de subida
         fecha_subida = db.Column(db.DateTime, default=get_colombia_now, nullable=False)
         
@@ -123,6 +126,7 @@ def create_acciones_1000_models(db):
                 'ruta_archivo': self.ruta_archivo,
                 'tipo_mime': self.tipo_mime,
                 'tamano_bytes': self.tamano_bytes,
+                'foto_base64': self.foto_base64,  # Incluir base64
                 'fecha_subida': format_colombia_time(self.fecha_subida) if self.fecha_subida else None
             }
 

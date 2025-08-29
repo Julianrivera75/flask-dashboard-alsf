@@ -147,14 +147,20 @@ def submit_actividad():
                 # Guardar archivo
                 foto.save(ruta_archivo)
                 
-                # Crear registro en base de datos
+                # Convertir foto a base64 para almacenamiento persistente
+                import base64
+                with open(ruta_archivo, 'rb') as f:
+                    foto_base64 = base64.b64encode(f.read()).decode('utf-8')
+                
+                # Crear registro en base de datos con base64
                 nueva_foto = FotoActividad1000(
                     actividad_id=nueva_actividad.id,
                     nombre_original=foto.filename,
                     nombre_archivo=nombre_archivo,
                     ruta_archivo=f'uploads/acciones_1000/{nombre_archivo}',
                     tipo_mime=foto.content_type,
-                    tamano_bytes=os.path.getsize(ruta_archivo)
+                    tamano_bytes=os.path.getsize(ruta_archivo),
+                    foto_base64=foto_base64  # Nuevo campo para base64
                 )
                 
                 db.session.add(nueva_foto)

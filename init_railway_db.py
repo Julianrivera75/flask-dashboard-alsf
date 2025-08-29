@@ -96,6 +96,7 @@ def init_railway_database():
             ruta_archivo VARCHAR(500) NOT NULL,
             tipo_mime VARCHAR(100),
             tamano_bytes BIGINT,
+            foto_base64 TEXT,
             fecha_subida TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (actividad_id) REFERENCES actividades_1000(id) ON DELETE CASCADE
         );
