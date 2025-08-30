@@ -7,7 +7,7 @@
 let map;
 let selectedLocation = false;
 
-// Tipos de actividades disponibles (32 actividades totales)
+// Tipos de actividades disponibles (31 actividades totales)
 // 1. Diálogo diferencial LGBTI
 // 2. Fiesta Mayor  
 // 3. Feria de Emprendedoras y Productoras Locales
@@ -18,7 +18,6 @@ let selectedLocation = false;
 // 29. MES MAYOR
 // 30. INAUGURACIÓN CENTRO DE EXPERIENCIA TIC
 // 31. Actividad
-// 32. Encuentro
 const ACTIVIDADES_DISPONIBLES = [
     'Diálogo diferencial LGBTI',
     'Fiesta Mayor',
@@ -31,8 +30,7 @@ const ACTIVIDADES_DISPONIBLES = [
     'Jornada de Protección y Bienestar Animal - PYBA',
     'MES MAYOR',
     'INAUGURACIÓN CENTRO DE EXPERIENCIA TIC',
-    'Actividad',
-    'Encuentro'
+    'Actividad'
 ];
 
 // Colores para los marcadores según el área
