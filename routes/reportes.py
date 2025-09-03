@@ -38,8 +38,52 @@ def formulario_reporte():
         # 1. RESPONSABLES - Solo agregar los que falten
         responsables_existentes = {r.nombre.lower() for r in Responsable.query.all()}
         responsables_basicos = [
-            # Opciones básicas sin secretarías ni alcaldía local
-            # Agregar aquí solo las opciones que realmente necesites
+            "ANDERSON TORRES SALCEDO",
+            "ANGIE LORENA RAIRAN CARREÑO",
+            "CAMILO ANDRES ALVAREZ MARQUEZ",
+            "CARLOS FABIAN RAMIREZ",
+            "DIEGO ARMANDO ORTIZ PINEDA",
+            "FRANCISCO JAVIER DIAZ CANASTEROS",
+            "HERNAN ALONSO NOVOA HERRERA",
+            "IVAN RAMIRO MARTINEZ GUZMAN",
+            "JOHANNA IBET GARAY ALVAREZ",
+            "JOSE DAVID RODRIGUEZ REYES",
+            "KAROL VANESA CASTIBLANCO NOHAVA",
+            "MANUEL EDBERTO MARTINEZ MOSQUERA",
+            "OLGA LUCIA MARTINEZ MOLINA",
+            "PEDRO IGNACIO BELTRAN QUINTERO",
+            "SARA INES TAVERA OCHOA",
+            "YESSICA PAOLA OLIVEROS YATE",
+            "ANYELA GINETH PEDRAZA HERNANDEZ",
+            "BRAYAN DAVID PAEZ ACHURY",
+            "CARLOS ANTONIO ROMERO DUARTE",
+            "DAIZ ARGEL SOLANO",
+            "ELKIN JOSE SIERRA BRACHO",
+            "GUSTAVO ALBERTO DE LA ROSA FLOREZ",
+            "INGRID IVONE MORALES BERNAL",
+            "JAVIER ORLANDO DIAZ PULIDO",
+            "JONATHAN CAMILO SUAREZ BULA",
+            "JOSE GIOVANNY QUINTERO RINCON",
+            "LEIDY CAROLINA MORA CHAPARRO",
+            "MARIA CAMILA RUEDA PULIDO",
+            "OSCAR RENE ORTIZ RODRIGUEZ",
+            "ROBERT MAURICIO VARGAS BAUTISTA",
+            "YEISON DAVID CORREA ARIAS",
+            "ANGELICA MILENA IBAÑEZ PIRAQUIVE",
+            "BRYAN JOSEPH CASTILLO ACEVEDO",
+            "CARLOS ARTURO ROA DIAZ",
+            "DANERY ALEXANDRA HENAO DELGADO",
+            "FENNER ANDRES VARGAS RODRIGUEZ",
+            "HERMAN YESID MUEGUES TOVAR",
+            "IOSIF DAVID ORTIZ RODRIGUEZ",
+            "JEAN PAUL PERILLA GARZON",
+            "JONNATHAN ALEJANDRO PATARROYO FIGUEROA",
+            "KAREN MICHEL MAHECHA ESPINOSA",
+            "LUIS ANTONIO CELIS CASTELLANOS",
+            "MILENA FAIZURE TORRES HERNANDEZ",
+            "PAOLA ANDREA CARDOZO SANCHEZ",
+            "SANTIAGO FELIPE GUTIERREZ MERIÑO",
+            "YENY ANDREA GARZON MENDOZA"
         ]
         
         for nombre in responsables_basicos:
@@ -51,8 +95,27 @@ def formulario_reporte():
         # 2. TIPOS DE ACTIVIDAD - Solo agregar los que falten
         tipos_existentes = {t.nombre.lower() for t in TipoActividad.query.all()}
         tipos_basicos = [
-            # Opciones básicas sin los tipos no deseados
-            # Agregar aquí solo los tipos que realmente necesites
+            "ESTRATEGIA SAN VICTORINO",
+            "SOSTENIMIENTO Y MONITOREO ESPACIO PÚBLICO CARRERA SÉPTIMA",
+            "SOSTENIMIENTO Y MONITOREO ESPACIO PÚBLICO SAN BERNARDO",
+            "SOSTENIMIENTO Y MONITOREO ESPACIO PÚBLICO SAN VICTORINO",
+            "MONITOREO, SEGUIMIENTO Y ACOMPAÑAMIENTO PARQUE NACIONAL COMUNIDAD INDIGENA",
+            "REUNIÓN INSTITUCIONAL",
+            "REUNIÓN CON COMUNIDAD",
+            "REUNIÓN DE EQUIPO",
+            "RECUPERACIÓN, SEGUIMIENTO Y/O SOSTENIMIENTO ESPACIO PÚBLICO",
+            "ACOMPAÑAMIENTO ENTORNOS ESCOLARES",
+            "CAMPAÑAS DE PREVENCIÓN Y/O SENSIBILIZACION",
+            "OPERATIVO IVC",
+            "OPERATIVO CONTROL A PERSONAS",
+            "DESMONTE CAMBUCHES",
+            "MONITOREO DRON",
+            "APOYO ADMINISTRATIVO",
+            "ATENCIÓN A VENDEDORES INFORMALES - CARNETIZACIÓN",
+            "CONMEMORACION, CELEBRACIÓN O FESTIVAL CON COMUNIDAD",
+            "EMBELLECIMIENTO Y/O RESIGNIFICACION",
+            "RECORRIDO RECONOCIMIENTO O ACOMPAÑAMIENTO",
+            "Otro"
         ]
         
         for nombre in tipos_basicos:
@@ -64,11 +127,19 @@ def formulario_reporte():
         # 3. ENTIDADES - Solo agregar las que falten
         entidades_existentes = {e.nombre.lower() for e in Entidad.query.all()}
         entidades_basicas = [
-            "Alcaldía Mayor de Bogotá",
-            "Policía Nacional",
-            "Bomberos",
-            "Secretaría de Salud",
-            "Secretaría de Integración Social",
+            "ALSF",
+            "MEBOG",
+            "IPES",
+            "DADEP",
+            "UAESP",
+            "PROMOAMBIENTAL",
+            "INTEGRACIÓN SOCIAL",
+            "IDIPRON",
+            "MIGRACIÓN COLOMBIA",
+            "IDARTES",
+            "SECRETARÍA DISTRITAL DE SEGURIDAD",
+            "SECRETARÍA DISTRITAL DE SALUD",
+            "SECRETARÍA DISTRITAL DE MOVILIDAD",
             "OTRA"
         ]
         
@@ -81,9 +152,28 @@ def formulario_reporte():
         # 4. SECTORES - Solo agregar los que falten
         sectores_existentes = {s.nombre.lower() for s in Sector.query.all()}
         sectores_basicos = [
-            "Sector 1",
-            "Sector 2", 
-            "Sector 3"
+            "Centro Histórico",
+            "Chapinero",
+            "Santa Fe",
+            "San Cristóbal",
+            "Usaquén",
+            "Suba",
+            "Barrios Unidos",
+            "Teusaquillo",
+            "Los Mártires",
+            "Antonio Nariño",
+            "Puente Aranda",
+            "La Candelaria",
+            "Rafael Uribe Uribe",
+            "Ciudad Bolívar",
+            "Sumapaz",
+            "Usme",
+            "Tunjuelito",
+            "Bosa",
+            "Kennedy",
+            "Fontibón",
+            "Engativá",
+            "Otra"
         ]
         
         for nombre in sectores_basicos:
@@ -95,9 +185,10 @@ def formulario_reporte():
         # Hacer commit solo si se agregaron nuevos datos
         try:
             db.session.commit()
-            logging.info("Base de datos verificada y completada correctamente")
+            logging.info("✅ Base de datos verificada y completada correctamente")
+            logging.info(f"📊 Datos cargados: {len(responsables_basicos)} responsables, {len(tipos_basicos)} tipos, {len(entidades_basicas)} entidades, {len(sectores_basicos)} sectores")
         except Exception as commit_error:
-            logging.error(f"Error al hacer commit: {commit_error}")
+            logging.error(f"❌ Error al hacer commit: {commit_error}")
             db.session.rollback()
             # Continuar con datos existentes si falla el commit
         

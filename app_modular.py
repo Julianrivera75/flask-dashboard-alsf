@@ -70,6 +70,19 @@ def create_app(config_class=config.DevelopmentConfig):
         
         # Crear tablas por defecto
         db.create_all()
+        
+        # Inicializar datos básicos si es necesario (para Railway)
+        try:
+            from scripts.init_railway_data import init_railway_data
+            logger.info("📊 Verificando datos básicos...")
+            if init_railway_data():
+                logger.info("✅ Datos básicos verificados/cargados correctamente")
+            else:
+                logger.warning("⚠️  Error cargando datos básicos")
+        except ImportError:
+            logger.info("ℹ️  Script de datos básicos no disponible")
+        except Exception as e:
+            logger.error(f"❌ Error cargando datos básicos: {e}")
     
     # Inicializar servicios
     sheets_connector = GoogleSheetsConnector()
