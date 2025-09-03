@@ -84,10 +84,10 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SECRET_KEY = os.environ.get('SECRET_KEY', 'cambiar_en_produccion_por_clave_segura')
     
-    # Configuración de CSRF
-    WTF_CSRF_ENABLED = True
+    # Configuración de CSRF - Deshabilitado para mantener consistencia con sistema simple
+    WTF_CSRF_ENABLED = False
     WTF_CSRF_TIME_LIMIT = 7200  # 2 horas en segundos para producción
-    WTF_CSRF_SSL_STRICT = True
+    WTF_CSRF_SSL_STRICT = False
 
 class TestingConfig(Config):
     """Configuración para testing"""
