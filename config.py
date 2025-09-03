@@ -70,9 +70,10 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///dev.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'tu_clave_secreta_super_segura_2024_dev')
     
-    # Configuración de CSRF
-    WTF_CSRF_ENABLED = True
+    # Configuración de CSRF - Deshabilitado para sistema simple
+    WTF_CSRF_ENABLED = False
     WTF_CSRF_TIME_LIMIT = 3600  # 1 hora en segundos
     WTF_CSRF_SSL_STRICT = False
 
@@ -81,6 +82,7 @@ class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'cambiar_en_produccion_por_clave_segura')
     
     # Configuración de CSRF
     WTF_CSRF_ENABLED = True

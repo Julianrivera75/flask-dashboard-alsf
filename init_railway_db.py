@@ -179,10 +179,55 @@ def init_railway_database():
             connection.commit()
             print("✅ Índices creados correctamente")
         
+        # Crear tabla de usuarios si no existe
+        if 'users' not in existing_tables:
+            print("👤 Creando tabla 'users'...")
+            create_users_table = """
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(120) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                first_name VARCHAR(50) NOT NULL,
+                last_name VARCHAR(50) NOT NULL,
+                role VARCHAR(20) DEFAULT 'user',
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP,
+                failed_login_attempts INTEGER DEFAULT 0,
+                locked_until TIMESTAMP
+            );
+            """
+            
+            with engine.connect() as connection:
+                connection.execute(text(create_users_table))
+                connection.commit()
+                print("✅ Tabla 'users' creada correctamente")
+            
+            # Crear usuario administrador por defecto
+            print("👨‍💼 Creando usuario administrador por defecto...")
+            import bcrypt
+            
+            # Hash de la contraseña 'ALSF2025'
+            password = 'ALSF2025'
+            salt = bcrypt.gensalt()
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+            
+            create_admin_user = """
+            INSERT INTO users (email, password_hash, first_name, last_name, role, is_active)
+            VALUES ('admin@alsf.gov.co', %s, 'Administrador', 'ALSF', 'admin', TRUE)
+            ON CONFLICT (email) DO NOTHING;
+            """
+            
+            with engine.connect() as connection:
+                connection.execute(text(create_admin_user), (password_hash,))
+                connection.commit()
+                print("✅ Usuario administrador creado: admin@alsf.gov.co / ALSF2025")
+        
         print("\n🎉 ¡BASE DE DATOS INICIALIZADA EXITOSAMENTE!")
         print("✅ Todas las tablas creadas con estructura correcta")
         print("✅ Columna 'id' configurada como SERIAL (auto-incremento)")
         print("✅ Relaciones y índices configurados")
+        print("✅ Usuario administrador disponible")
         
         return True
         
