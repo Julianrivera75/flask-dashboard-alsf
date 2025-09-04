@@ -77,12 +77,12 @@ def create_app(config_class=config.DevelopmentConfig):
     # Inicialización automática de base de datos para Railway
     with app.app_context():
         try:
-            from init_railway_db import init_railway_database
-            logger.info("🚀 Inicializando base de datos de Railway...")
-            if init_railway_database():
-                logger.info("✅ Base de datos de Railway inicializada correctamente")
+            from init_reportes_railway import init_reportes_database
+            logger.info("🚀 Inicializando base de datos de reportes en Railway...")
+            if init_reportes_database():
+                logger.info("✅ Base de datos de reportes de Railway inicializada correctamente")
             else:
-                logger.warning("⚠️  La inicialización de Railway falló, usando configuración por defecto")
+                logger.warning("⚠️  La inicialización de reportes de Railway falló, usando configuración por defecto")
         except ImportError:
             logger.info("ℹ️  Script de Railway no disponible, usando configuración por defecto")
         except Exception as e:
