@@ -1,5 +1,25 @@
 """
 Aplicación principal Flask - Versión Modular
+
+Copyright (c) 2024 Alcaldía Local Santa Fe
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 from flask import Flask, render_template, jsonify, request, session, redirect, url_for, send_file
@@ -71,18 +91,20 @@ def create_app(config_class=config.DevelopmentConfig):
         # Crear tablas por defecto
         db.create_all()
         
-        # Inicializar datos básicos si es necesario (para Railway)
-        try:
-            from scripts.init_railway_data import init_railway_data
-            logger.info("📊 Verificando datos básicos...")
-            if init_railway_data():
-                logger.info("✅ Datos básicos verificados/cargados correctamente")
-            else:
-                logger.warning("⚠️  Error cargando datos básicos")
-        except ImportError:
-            logger.info("ℹ️  Script de datos básicos no disponible")
-        except Exception as e:
-            logger.error(f"❌ Error cargando datos básicos: {e}")
+        # Inicializar datos básicos de reportes si es necesario (para Railway)
+        # Comentado temporalmente para evitar bucle infinito
+        # try:
+        #     from scripts.init_reportes_database import init_reportes_database
+        #     logger.info("📊 Verificando datos básicos de reportes...")
+        #     if init_reportes_database():
+        #         logger.info("✅ Datos básicos de reportes verificados/cargados correctamente")
+        #     else:
+        #         logger.warning("⚠️  Error cargando datos básicos de reportes")
+        # except ImportError:
+        #     logger.info("ℹ️  Script de datos básicos de reportes no disponible")
+        # except Exception as e:
+        #     logger.error(f"❌ Error cargando datos básicos de reportes: {e}")
+        logger.info("ℹ️  Inicialización de datos básicos deshabilitada temporalmente")
     
     # Inicializar servicios
     sheets_connector = GoogleSheetsConnector()

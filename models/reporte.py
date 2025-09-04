@@ -116,7 +116,7 @@ def create_models(db):
         requisas = db.Column(db.Integer, default=0)
         sellamientos_establecimientos = db.Column(db.Integer, default=0)
         sensibilizaciones = db.Column(db.Integer, default=0)
-        otra_descripcion = db.Column(db.String(200))
+        otra_descripcion = db.Column(db.Text)  # Cambiado de String(200) a Text para permitir textos largos
         fecha_creacion = db.Column(db.DateTime, default=datetime.now)
         
         def __repr__(self):

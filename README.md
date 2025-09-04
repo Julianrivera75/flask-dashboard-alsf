@@ -185,6 +185,24 @@ python app.py
 gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ```
 
+## 📄 Licencia
+
+Este proyecto está bajo la **Licencia MIT** - ver el archivo [LICENSE](LICENSE) para detalles.
+
+### Resumen de la Licencia MIT
+
+La Licencia MIT es una licencia de software libre permisiva que permite:
+
+- ✅ **Uso comercial** - Puede usarse en proyectos comerciales
+- ✅ **Modificación** - Puede modificarse libremente
+- ✅ **Distribución** - Puede distribuirse sin restricciones
+- ✅ **Uso privado** - Puede usarse en proyectos privados
+- ✅ **Sublicencia** - Puede sublicenciarse bajo otras licencias
+
+**Única condición**: Incluir el aviso de copyright y la licencia en todas las copias o partes sustanciales del software.
+
+Para más información sobre la Licencia MIT, consulta: [opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
+
 ---
 
 **Desarrollado con ❤️ para la Alcaldía Mayor de Bogotá** 

@@ -344,9 +344,23 @@ Para soporte técnico o consultas sobre el sistema:
 - **Documentación**: [URL de la documentación]
 - **Repositorio**: [URL del repositorio]
 
-## Licencia
+## 📄 Licencia
 
-Este proyecto está desarrollado para la Alcaldía Local Santa Fe y está sujeto a los términos de licencia correspondientes.
+Este proyecto está bajo la **Licencia MIT** - ver el archivo [LICENSE](../LICENSE) para detalles.
+
+### Resumen de la Licencia MIT
+
+La Licencia MIT es una licencia de software libre permisiva que permite:
+
+- ✅ **Uso comercial** - Puede usarse en proyectos comerciales
+- ✅ **Modificación** - Puede modificarse libremente
+- ✅ **Distribución** - Puede distribuirse sin restricciones
+- ✅ **Uso privado** - Puede usarse en proyectos privados
+- ✅ **Sublicencia** - Puede sublicenciarse bajo otras licencias
+
+**Única condición**: Incluir el aviso de copyright y la licencia en todas las copias o partes sustanciales del software.
+
+Para más información sobre la Licencia MIT, consulta: [opensource.org/licenses/MIT](https://opensource.org/licenses/MIT)
 
 ---
 

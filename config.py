@@ -81,7 +81,13 @@ class ProductionConfig(Config):
     """Configuración para producción"""
     DEBUG = False
     SESSION_COOKIE_SECURE = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
+    # Base de datos para reportes ALSF (nueva)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('REPORTES_DATABASE_URL')
+    
+    # Base de datos para 1000 acciones (existente)
+    ACCIONES_1000_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
     SECRET_KEY = os.environ.get('SECRET_KEY', 'cambiar_en_produccion_por_clave_segura')
     
     # Configuración de CSRF - Deshabilitado para mantener consistencia con sistema simple
