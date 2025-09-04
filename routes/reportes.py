@@ -523,3 +523,74 @@ def mapa_reportes():
         logging.error(f"Error en mapa_reportes: {e}")
         flash('Error al cargar el mapa', 'error')
         return redirect(url_for('index'))
+
+@reportes_bp.route('/mapa-publico')
+def mapa_publico():
+    """Muestra el mapa público sin autenticación para Santa Fe Camina Segura"""
+    try:
+        return render_template('reportes/mapa.html')
+    except Exception as e:
+        logging.error(f"Error en mapa_publico: {e}")
+        return render_template('error.html', error=str(e)), 500
+
+@reportes_bp.route('/api/reportes-publico')
+def api_reportes_publico():
+    """API pública para obtener reportes sin autenticación"""
+    try:
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 1000, type=int)
+        
+        # Obtener reportes de la base de datos
+        reportes = Reporte.query.paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+        
+        reportes_data = []
+        for reporte in reportes.items:
+            reporte_dict = {
+                'id': reporte.id,
+                'fecha': reporte.fecha_reporte.strftime('%Y-%m-%d') if reporte.fecha_reporte else None,
+                'hora_inicio': None,  # Campo no disponible en el modelo actual
+                'hora_fin': None,     # Campo no disponible en el modelo actual
+                'tipo_actividad': reporte.tipo_actividad.nombre if reporte.tipo_actividad else None,
+                'descripcion': None,  # Campo no disponible en el modelo actual
+                'ubicacion': None,    # Campo no disponible en el modelo actual
+                'latitud': float(reporte.latitud) if reporte.latitud else None,
+                'longitud': float(reporte.longitud) if reporte.longitud else None,
+                'barrio': reporte.sector.nombre if reporte.sector else None,
+                'sector_catastral': reporte.sector.nombre if reporte.sector else None,
+                'responsable': reporte.responsable.nombre if reporte.responsable else None,
+                'observaciones': reporte.observaciones,
+                'fecha_creacion': reporte.fecha_reporte.strftime('%Y-%m-%d %H:%M:%S') if reporte.fecha_reporte else None
+            }
+            reportes_data.append(reporte_dict)
+        
+        return jsonify({
+            'reportes': reportes_data,
+            'total': reportes.total,
+            'pages': reportes.pages,
+            'current_page': reportes.page,
+            'per_page': reportes.per_page
+        })
+        
+    except Exception as e:
+        logging.error(f"Error en api_reportes_publico: {e}")
+        return jsonify({'error': 'Error al obtener reportes'}), 500
+
+@reportes_bp.route('/api/tipos-actividad-publico')
+def api_tipos_actividad_publico():
+    """API pública para obtener tipos de actividad sin autenticación"""
+    try:
+        # Obtener tipos únicos de actividad de los reportes
+        tipos = db.session.query(TipoActividad.nombre).distinct().all()
+        tipos_lista = [tipo[0] for tipo in tipos if tipo[0]]
+        
+        logging.info(f"API tipos de actividad público: {len(tipos_lista)} encontrados")
+        
+        return jsonify({'tipos': tipos_lista})
+        
+    except Exception as e:
+        logging.error(f"Error en api_tipos_actividad_publico: {e}")
+        return jsonify({'error': 'Error al obtener tipos de actividad'}), 500

@@ -16,7 +16,13 @@
       "variables": {
         "FLASK_ENV": "production",
         "FLASK_APP": "wsgi.py",
-        "PORT": "8000"
+        "PORT": "8000",
+        "SECRET_KEY": "cambiar_por_clave_segura_en_railway",
+        "DATABASE_URL": "postgresql://usuario:password@host:puerto/acciones_1000_db",
+        "REPORTES_DATABASE_URL": "postgresql://usuario:password@host:puerto/reportes_seguridad_db",
+        "GOOGLE_SHEET_ID": "1v4duGwbae0AAHPAEXsGZPZqWI35JkgHyhHg4yHTIpPU",
+        "SAN_BERNARDO_SHEET_ID": "1v4duGwbae0AAHPAEXsGZPZqWI35JkgHyhHg4yHTIpPU",
+        "EL_CONSUELO_SHEET_ID": "1265C_6-JZ-ZzeUD4RRZ1cKoVYOVvysztvWLx63dh2TM"
       }
     }
   }

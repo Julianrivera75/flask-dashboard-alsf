@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Sectores Catastrales - ALSF</title>
+    <title>Santa Fe Camina Segura: Resultados y Actividades</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
@@ -14,12 +14,12 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #e4032e 0%, #c4022a 100%);
             min-height: 100vh;
         }
         
         .header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            background: linear-gradient(135deg, #e4032e 0%, #c4022a 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -203,28 +203,18 @@
 </head>
 <body>
             <div class="header">
-            <h1>🗺️ Mapa de Sectores Catastrales ALSF</h1>
-            <p>Visualización geográfica de la división territorial por sectores catastrales</p>
-            <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
-                <p style="margin: 0; font-size: 1.1em;">
-                    🔒 <strong>Área de Acceso Restringido</strong> - Solo personal autorizado puede visualizar sectores
-                </p>
+            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                <img src="/static/images/logos/Alcaldia_SantaFe.jpg" alt="Alcaldía Local Santa Fe" style="height: 60px; margin-right: 20px; border-radius: 8px;">
+                <h1 style="margin: 0; font-size: 2em;">🛡️ Santa Fe Camina Segura: Resultados y Actividades</h1>
+                <img src="/static/images/logos/Bogotaneidapp.jpg" alt="Bogotá" style="height: 60px; margin-left: 20px; border-radius: 8px;">
             </div>
-            <div style="text-align: right; margin-top: 20px;">
-                <a href="/logout" class="btn-logout">
-                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            <p>Visualización geográfica de la división territorial por sectores catastrales</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/" class="btn-back" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; transition: all 0.3s ease;">
+                    <i class="fas fa-arrow-left"></i> Volver al Inicio
                 </a>
             </div>
         </div>
-    
-    <div class="nav-menu">
-        <a href="/">🏠 Inicio</a>
-        <a href="/formulario-reporte">📋 Nuevo Reporte</a>
-        <a href="/mapa-reportes">🗺️ Ver Mapa</a>
-        <a href="/el-consuelo">📍 El Consuelo</a>
-        <a href="/san-bernardo">📍 San Bernardo</a>
-        <a href="/convenio-interadministrativo-302">📄 Convenio</a>
-    </div>
     
     <div class="controls">
         <div class="stats">
@@ -306,6 +296,26 @@
             barrio: '',
             tipoActividad: ''
         };
+        
+        // Detectar si estamos en la ruta pública
+        function isPublicRoute() {
+            return window.location.pathname === '/mapa-publico';
+        }
+        
+        // Obtener URLs de API según el contexto
+        function getApiUrls() {
+            if (isPublicRoute()) {
+                return {
+                    reportes: '/api/reportes-publico',
+                    tipos: '/api/tipos-actividad-publico'
+                };
+            } else {
+                return {
+                    reportes: '/api/reportes',
+                    tipos: '/api/tipos-actividad'
+                };
+            }
+        }
         
         // Inicializar mapa
         function initMap() {
@@ -423,7 +433,8 @@
             try {
                 console.log('📋 Cargando reportes desde la API...');
                 
-                const response = await fetch('/api/reportes?per_page=1000');
+                const apiUrls = getApiUrls();
+                const response = await fetch(`${apiUrls.reportes}?per_page=1000`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -473,7 +484,8 @@
             try {
                 console.log('🏷️ Cargando tipos de actividad...');
                 
-                const response = await fetch('/api/tipos-actividad');
+                const apiUrls = getApiUrls();
+                const response = await fetch(apiUrls.tipos);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);

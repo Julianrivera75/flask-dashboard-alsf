@@ -82,10 +82,10 @@ class ProductionConfig(Config):
     DEBUG = False
     SESSION_COOKIE_SECURE = True
     
-    # Base de datos para reportes ALSF (nueva)
+    # Base de datos para reportes de seguridad y convivencia (nueva)
     SQLALCHEMY_DATABASE_URI = os.environ.get('REPORTES_DATABASE_URL')
     
-    # Base de datos para 1000 acciones (existente)
+    # Base de datos para 1000 acciones (existente en Railway)
     ACCIONES_1000_DATABASE_URI = os.environ.get('DATABASE_URL')
     
     SECRET_KEY = os.environ.get('SECRET_KEY', 'cambiar_en_produccion_por_clave_segura')

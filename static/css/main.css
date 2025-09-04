@@ -1,4 +1,4 @@
-:root {
+:root { ya 
     /* Colores principales */
     --primary-yellow: #fab62d;    /* Amarillo principal */
     --primary-red: #e4032e;       /* Rojo principal */
@@ -524,6 +524,87 @@ body {
     }
     
     .acciones-1000-button-container {
+        margin: 2.5rem 0;
+        padding: 2rem;
+    }
+}
+
+/* Estilos para el botón de Reportes de Seguridad y Convivencia */
+.btn-reportes-seguridad {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--primary-red);
+    color: var(--white);
+    text-decoration: none;
+    padding: 3rem 4rem;
+    border-radius: var(--border-radius);
+    font-weight: 700;
+    font-size: 2rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    min-width: 800px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-reportes-seguridad:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    color: var(--white);
+    text-decoration: none;
+}
+
+.btn-reportes-seguridad:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-reportes-seguridad i {
+    font-size: 2.5rem;
+    color: var(--white);
+}
+
+.reportes-seguridad-button-container {
+    margin: 4rem 0;
+    padding: 3rem;
+    background: rgba(228, 3, 46, 0.05);
+    border-radius: var(--border-radius);
+    border: 2px solid rgba(228, 3, 46, 0.1);
+    background-clip: padding-box;
+}
+
+/* Responsive para el botón de Reportes de Seguridad */
+@media (max-width: 768px) {
+    .btn-reportes-seguridad {
+        min-width: 600px;
+        padding: 2.5rem 3.5rem;
+        font-size: 1.8rem;
+    }
+    
+    .btn-reportes-seguridad i {
+        font-size: 2rem;
+    }
+    
+    .reportes-seguridad-button-container {
+        margin: 3rem 0;
+        padding: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-reportes-seguridad {
+        min-width: 500px;
+        padding: 2rem 3rem;
+        font-size: 1.5rem;
+    }
+    
+    .btn-reportes-seguridad i {
+        font-size: 1.8rem;
+    }
+    
+    .reportes-seguridad-button-container {
         margin: 2.5rem 0;
         padding: 2rem;
     }

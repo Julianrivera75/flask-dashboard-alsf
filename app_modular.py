@@ -430,6 +430,7 @@ def create_app(config_class=config.DevelopmentConfig):
             logger.error(f"Error en página del convenio: {str(e)}")
             return render_template('error.html', error=str(e)), 500
     
+    
     @app.route('/formulario-georeferenciado')
     def formulario_georeferenciado():
         """Ruta para el formulario georeferenciado"""
