@@ -119,6 +119,11 @@ def create_app(config_class=config.DevelopmentConfig):
     app.register_blueprint(acciones_1000_bp)
     app.register_blueprint(buscar_reportes_bp)
     
+    # Ruta de prueba temporal
+    @app.route('/test-app')
+    def test_app():
+        return jsonify({'success': True, 'message': 'App funcionando'})
+    
     # Inicializar middleware de analytics
     from middleware.analytics_middleware import init_analytics_middleware
     init_analytics_middleware(app)
