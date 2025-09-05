@@ -10,6 +10,15 @@ import logging
 
 buscar_reportes_bp = Blueprint('buscar_reportes', __name__)
 
+@buscar_reportes_bp.route('/test-diagnostico')
+def test_diagnostico():
+    """Ruta de prueba simple"""
+    return jsonify({
+        'success': True,
+        'message': 'Ruta de diagnóstico funcionando',
+        'timestamp': '2025-01-05'
+    })
+
 @buscar_reportes_bp.route('/buscar-reportes-perdidos')
 def buscar_reportes_perdidos():
     """Buscar reportes perdidos en la base de datos original de Railway"""
