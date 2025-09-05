@@ -40,10 +40,7 @@ def init_reportes_database():
         with app.app_context():
             print("📋 Creando tablas de REPORTES en Railway...")
             
-            # Crear todos los modelos
-            create_models(db)
-            
-            # Crear todas las tablas
+            # Solo crear las tablas (los modelos ya están definidos)
             db.create_all()
             
             print("✅ Tablas de reportes creadas exitosamente")
@@ -57,72 +54,8 @@ def init_reportes_database():
             for table in tables:
                 print(f"   - {table}")
             
-            # Crear usuario administrador por defecto para reportes
-            from models.user import User
-            from werkzeug.security import generate_password_hash
-            
-            admin_user = User.query.filter_by(username='admin_reportes').first()
-            if not admin_user:
-                admin_user = User(
-                    username='admin_reportes',
-                    email='admin.reportes@alsf.gov.co',
-                    password_hash=generate_password_hash('admin123'),
-                    is_admin=True
-                )
-                db.session.add(admin_user)
-                db.session.commit()
-                print("✅ Usuario administrador de reportes creado (admin_reportes/admin123)")
-            else:
-                print("ℹ️  Usuario administrador de reportes ya existe")
-            
-            # Crear algunos datos de ejemplo para tipos de actividad
-            from models.reporte import TipoActividad
-            
-            tipos_ejemplo = [
-                {'nombre': 'Patrullaje', 'descripcion': 'Actividades de patrullaje y vigilancia'},
-                {'nombre': 'Operativo', 'descripcion': 'Operativos de seguridad y convivencia'},
-                {'nombre': 'Sensibilización', 'descripcion': 'Actividades de sensibilización comunitaria'},
-                {'nombre': 'Intervención', 'descripcion': 'Intervenciones en puntos críticos'},
-                {'nombre': 'Requisas', 'descripcion': 'Actividades de requisa y decomiso'},
-                {'nombre': 'Levantamiento', 'descripcion': 'Levantamiento de cambuches'},
-                {'nombre': 'Sellamiento', 'descripcion': 'Sellamiento de establecimientos'},
-                {'nombre': 'Acompañamiento', 'descripcion': 'Acompañamiento jurídico y social'}
-            ]
-            
-            for tipo_data in tipos_ejemplo:
-                tipo_existente = TipoActividad.query.filter_by(nombre=tipo_data['nombre']).first()
-                if not tipo_existente:
-                    tipo = TipoActividad(
-                        nombre=tipo_data['nombre'],
-                        descripcion=tipo_data['descripcion']
-                    )
-                    db.session.add(tipo)
-            
-            db.session.commit()
-            print("✅ Tipos de actividad de ejemplo creados")
-            
-            # Crear algunos sectores de ejemplo
-            from models.reporte import Sector
-            
-            sectores_ejemplo = [
-                {'nombre': 'Centro', 'descripcion': 'Sector centro de Santa Fe'},
-                {'nombre': 'Norte', 'descripcion': 'Sector norte de Santa Fe'},
-                {'nombre': 'Sur', 'descripcion': 'Sector sur de Santa Fe'},
-                {'nombre': 'Oriente', 'descripcion': 'Sector oriente de Santa Fe'},
-                {'nombre': 'Occidente', 'descripcion': 'Sector occidente de Santa Fe'}
-            ]
-            
-            for sector_data in sectores_ejemplo:
-                sector_existente = Sector.query.filter_by(nombre=sector_data['nombre']).first()
-                if not sector_existente:
-                    sector = Sector(
-                        nombre=sector_data['nombre'],
-                        descripcion=sector_data['descripcion']
-                    )
-                    db.session.add(sector)
-            
-            db.session.commit()
-            print("✅ Sectores de ejemplo creados")
+            # Las tablas están listas, no necesitamos crear datos de ejemplo
+            print("ℹ️  Las tablas están listas para recibir datos")
             
             print("\n🎉 Inicialización de base de datos de REPORTES completada exitosamente!")
             print("📋 Esta base de datos es específica para 'Santa Fe Camina Segura: Reportes de Seguridad y Convivencia'")
