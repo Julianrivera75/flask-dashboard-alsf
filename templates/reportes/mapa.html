@@ -445,6 +445,7 @@
                 if (data.reportes) {
                     reportesData = data.reportes;
                     console.log(`✅ ${reportesData.length} reportes cargados`);
+                    console.log('🔍 DEBUG - Datos de reportes:', reportesData);
                     
                     if (reportesData.length === 0) {
                         console.log('ℹ️ No hay reportes en la base de datos');
@@ -937,6 +938,13 @@
             const totalReportes = reportesData.length || 0;
             const reportesFiltrados = reportesLayer ? reportesLayer.getLayers().length : 0;
             const barrioSeleccionado = filtrosActivos.barrio || '-';
+            
+            // Debug: Log de estadísticas
+            console.log('🔍 DEBUG - Estadísticas:');
+            console.log('  - Sectores:', totalSectores);
+            console.log('  - Reportes (datos):', totalReportes);
+            console.log('  - Reportes (marcadores):', reportesFiltrados);
+            console.log('  - Barrio:', barrioSeleccionado);
             
             document.getElementById('total-sectores').textContent = totalSectores;
             document.getElementById('total-reportes').textContent = totalReportes;
