@@ -31,8 +31,8 @@ def init_reportes_database():
         app = Flask(__name__)
         app.config.from_object(ProductionConfig)
         
-        # Importar modelos después de configurar la app
-        from models import db, create_models
+        # Importar solo la base de datos
+        from models import db
         
         # Inicializar base de datos
         db.init_app(app)
