@@ -40,6 +40,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Scripts de inicialización
 COPY init_railway.py .
 COPY init_reportes_railway.py .
+COPY buscar_reportes_railway_directo.py .
 
-# Comando de inicio con inicialización de ambas bases de datos
-CMD ["sh", "-c", "python init_reportes_railway.py && gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 wsgi:app"]
+# Comando de inicio con búsqueda de reportes perdidos e inicialización
+CMD ["sh", "-c", "python buscar_reportes_railway_directo.py && python init_reportes_railway.py && gunicorn --bind 0.0.0.0:8000 --workers 4 --timeout 120 wsgi:app"]
