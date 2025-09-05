@@ -150,3 +150,126 @@ def buscar_reportes_perdidos():
             'error': str(e),
             'success': False
         }), 500
+
+@buscar_reportes_bp.route('/migrar-reportes-perdidos')
+def migrar_reportes_perdidos():
+    """Migrar reportes perdidos de la base original a la nueva base de reportes-seguridad"""
+    
+    try:
+        from app_modular import create_app
+        from models import db, Reporte, ResultadoReporte
+        from sqlalchemy import create_engine, text
+        from datetime import datetime
+        import os
+        
+        app = create_app()
+        
+        with app.app_context():
+            # Obtener la URL de la base de datos original
+            from config import ProductionConfig
+            database_url_original = ProductionConfig.ACCIONES_1000_DATABASE_URI
+            
+            if not database_url_original:
+                return jsonify({
+                    'error': 'No se encontró ACCIONES_1000_DATABASE_URI',
+                    'success': False
+                }), 500
+            
+            # Conectar a la base de datos original
+            engine_original = create_engine(database_url_original)
+            
+            with engine_original.connect() as conn_original:
+                logging.info("🔍 Buscando reportes en base original...")
+                
+                # Buscar tabla de reportes
+                result = conn_original.execute(text("""
+                    SELECT table_name 
+                    FROM information_schema.tables 
+                    WHERE table_schema = 'public'
+                    AND table_name LIKE '%reporte%'
+                    AND table_name NOT LIKE '%participante%'
+                    AND table_name NOT LIKE '%entidad%'
+                    ORDER BY table_name;
+                """))
+                
+                reporte_tables = [row[0] for row in result]
+                
+                if not reporte_tables:
+                    return jsonify({
+                        'error': 'No se encontraron tablas de reportes en la base original',
+                        'success': False
+                    }), 500
+                
+                tabla_principal = reporte_tables[0]
+                logging.info(f"📋 Usando tabla: {tabla_principal}")
+                
+                # Obtener reportes de la base original
+                result = conn_original.execute(text(f"""
+                    SELECT id, fecha_reporte, latitud, longitud, observaciones, 
+                           responsable_id, tipo_actividad_id, sector_id, acompanamiento_juridico,
+                           usuario_id, estado, fecha_actualizacion
+                    FROM {tabla_principal} 
+                    ORDER BY fecha_reporte DESC;
+                """))
+                
+                reportes_originales = result.fetchall()
+                logging.info(f"📊 Reportes encontrados: {len(reportes_originales)}")
+                
+                # Verificar cuántos ya existen
+                reportes_existentes = Reporte.query.count()
+                logging.info(f"📊 Reportes existentes en nueva base: {reportes_existentes}")
+                
+                # Migrar reportes
+                reportes_migrados = 0
+                errores = []
+                
+                for reporte_data in reportes_originales:
+                    # Verificar si ya existe
+                    if Reporte.query.filter_by(id=reporte_data[0]).first():
+                        continue
+                    
+                    try:
+                        reporte = Reporte(
+                            id=reporte_data[0],
+                            fecha_reporte=reporte_data[1],
+                            latitud=reporte_data[2],
+                            longitud=reporte_data[3],
+                            observaciones=reporte_data[4],
+                            responsable_id=reporte_data[5],
+                            tipo_actividad_id=reporte_data[6],
+                            sector_id=reporte_data[7],
+                            acompanamiento_juridico=reporte_data[8] == 1 if reporte_data[8] is not None else False,
+                            usuario_id=reporte_data[9] if reporte_data[9] else 1,
+                            estado=reporte_data[10] if reporte_data[10] else 'activo',
+                            fecha_actualizacion=reporte_data[11] if reporte_data[11] else datetime.now()
+                        )
+                        
+                        db.session.add(reporte)
+                        reportes_migrados += 1
+                        logging.info(f"✅ Reporte ID {reporte_data[0]} agregado")
+                        
+                    except Exception as e:
+                        errores.append(f"Error migrando reporte ID {reporte_data[0]}: {str(e)}")
+                        logging.error(f"❌ Error migrando reporte ID {reporte_data[0]}: {e}")
+                
+                # Guardar cambios
+                if reportes_migrados > 0:
+                    db.session.commit()
+                    logging.info(f"💾 {reportes_migrados} reportes migrados exitosamente")
+                
+                return jsonify({
+                    'success': True,
+                    'reportes_encontrados': len(reportes_originales),
+                    'reportes_migrados': reportes_migrados,
+                    'reportes_existentes_antes': reportes_existentes,
+                    'reportes_totales_ahora': Reporte.query.count(),
+                    'errores': errores,
+                    'tabla_origen': tabla_principal
+                })
+                
+    except Exception as e:
+        logging.error(f"❌ Error en migración: {e}")
+        return jsonify({
+            'error': str(e),
+            'success': False
+        }), 500
