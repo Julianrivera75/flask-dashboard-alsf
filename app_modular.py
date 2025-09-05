@@ -113,9 +113,11 @@ def create_app(config_class=config.DevelopmentConfig):
     from routes.reportes import reportes_bp
     from routes.analytics_routes import analytics_bp
     from routes.acciones_1000_routes import acciones_1000_bp
+    from routes.buscar_reportes import buscar_reportes_bp
     app.register_blueprint(reportes_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(acciones_1000_bp)
+    app.register_blueprint(buscar_reportes_bp)
     
     # Inicializar middleware de analytics
     from middleware.analytics_middleware import init_analytics_middleware
