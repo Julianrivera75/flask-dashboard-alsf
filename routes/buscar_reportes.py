@@ -273,3 +273,125 @@ def migrar_reportes_perdidos():
             'error': str(e),
             'success': False
         }), 500
+
+@buscar_reportes_bp.route('/diagnosticar-reportes')
+def diagnosticar_reportes():
+    """Diagnosticar problemas con reportes en Railway"""
+    
+    try:
+        from app_modular import create_app
+        from models import db, Reporte, Responsable, TipoActividad, Entidad, Sector, ResultadoReporte
+        from sqlalchemy import create_engine, text
+        import os
+        
+        app = create_app()
+        
+        with app.app_context():
+            logging.info("🔍 Iniciando diagnóstico de reportes...")
+            
+            # 1. Verificar configuración de bases de datos
+            from config import ProductionConfig
+            config_info = {
+                'sqlalchemy_database_uri': ProductionConfig.SQLALCHEMY_DATABASE_URI[:50] + "..." if ProductionConfig.SQLALCHEMY_DATABASE_URI else "No configurado",
+                'acciones_1000_database_uri': ProductionConfig.ACCIONES_1000_DATABASE_URI[:50] + "..." if ProductionConfig.ACCIONES_1000_DATABASE_URI else "No configurado"
+            }
+            
+            # 2. Verificar reportes en la nueva base de datos
+            reportes_nueva = Reporte.query.all()
+            reportes_info = []
+            
+            for reporte in reportes_nueva:
+                reportes_info.append({
+                    'id': reporte.id,
+                    'fecha_reporte': str(reporte.fecha_reporte) if reporte.fecha_reporte else None,
+                    'latitud': reporte.latitud,
+                    'longitud': reporte.longitud,
+                    'observaciones': reporte.observaciones
+                })
+            
+            # 3. Verificar reportes en la base de datos original
+            reportes_originales = []
+            tabla_original = None
+            
+            try:
+                if ProductionConfig.ACCIONES_1000_DATABASE_URI:
+                    engine_original = create_engine(ProductionConfig.ACCIONES_1000_DATABASE_URI)
+                    
+                    with engine_original.connect() as conn:
+                        # Buscar tablas de reportes
+                        result = conn.execute(text("""
+                            SELECT table_name 
+                            FROM information_schema.tables 
+                            WHERE table_schema = 'public'
+                            AND table_name LIKE '%reporte%'
+                            ORDER BY table_name;
+                        """))
+                        
+                        reporte_tables = [row[0] for row in result]
+                        
+                        if reporte_tables:
+                            # Buscar la tabla principal
+                            for table in reporte_tables:
+                                if 'reporte' in table.lower() and 'participante' not in table.lower() and 'entidad' not in table.lower():
+                                    tabla_original = table
+                                    break
+                            
+                            if tabla_original:
+                                # Obtener reportes
+                                result = conn.execute(text(f"""
+                                    SELECT id, fecha_reporte, latitud, longitud, observaciones
+                                    FROM {tabla_original} 
+                                    ORDER BY fecha_reporte DESC
+                                    LIMIT 10;
+                                """))
+                                
+                                for row in result:
+                                    reportes_originales.append({
+                                        'id': row[0],
+                                        'fecha_reporte': str(row[1]) if row[1] else None,
+                                        'latitud': row[2],
+                                        'longitud': row[3],
+                                        'observaciones': row[4]
+                                    })
+                                
+            except Exception as e:
+                logging.error(f"Error conectando a base original: {e}")
+            
+            # 4. Verificar otras tablas
+            otras_tablas = {
+                'responsables': Responsable.query.count(),
+                'tipos_actividad': TipoActividad.query.count(),
+                'entidades': Entidad.query.count(),
+                'sectores': Sector.query.count(),
+                'resultados': ResultadoReporte.query.count()
+            }
+            
+            # 5. Verificar variables de entorno
+            env_vars = {
+                'FLASK_ENV': os.environ.get('FLASK_ENV', 'No configurado'),
+                'REPORTES_DATABASE_URL': 'Configurado' if os.environ.get('REPORTES_DATABASE_URL') else 'No configurado',
+                'DATABASE_URL': 'Configurado' if os.environ.get('DATABASE_URL') else 'No configurado'
+            }
+            
+            return jsonify({
+                'success': True,
+                'configuracion': config_info,
+                'reportes_nueva_base': {
+                    'total': len(reportes_nueva),
+                    'reportes': reportes_info
+                },
+                'reportes_base_original': {
+                    'total': len(reportes_originales),
+                    'tabla': tabla_original,
+                    'reportes': reportes_originales
+                },
+                'otras_tablas': otras_tablas,
+                'variables_entorno': env_vars
+            })
+            
+    except Exception as e:
+        logging.error(f"❌ Error en diagnóstico: {e}")
+        return jsonify({
+            'error': str(e),
+            'success': False
+        }), 500
