@@ -1,6 +1,6 @@
 # 🔐 Gestión de Tokens y Sesiones - Sistema ALSF
 
-## 📋 **Configuración Actual**
+## 📋 **Configuración Actual**i
 
 ### **CSRF Tokens:**
 - ✅ **Desarrollo:** Deshabilitado (`WTF_CSRF_ENABLED = False`)

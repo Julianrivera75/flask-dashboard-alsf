@@ -217,3 +217,7 @@ if __name__ == '__main__':
     else:
         print("\n❌ Error al inicializar base de datos de reportes")
         sys.exit(1)
+
+
+
+

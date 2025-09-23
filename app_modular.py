@@ -113,11 +113,16 @@ def create_app(config_class=config.DevelopmentConfig):
     from routes.reportes import reportes_bp
     from routes.analytics_routes import analytics_bp
     from routes.acciones_1000_routes import acciones_1000_bp
-    from routes.buscar_reportes import buscar_reportes_bp
+    try:
+        from routes.buscar_reportes import buscar_reportes_bp
+        app.register_blueprint(buscar_reportes_bp)
+        logger.info("✅ Blueprint buscar_reportes registrado correctamente")
+    except Exception as e:
+        logger.error(f"❌ Error registrando blueprint buscar_reportes: {e}")
+    
     app.register_blueprint(reportes_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(acciones_1000_bp)
-    app.register_blueprint(buscar_reportes_bp)
     
     # Ruta de prueba temporal
     @app.route('/test-app')
@@ -447,6 +452,18 @@ def create_app(config_class=config.DevelopmentConfig):
         except Exception as e:
             logger.error(f"Error en formulario georeferenciado: {str(e)}")
             return render_template('error.html', error=str(e)), 500
+
+    @app.route('/entornos-inspiradores')
+    def entornos_inspiradores():
+        """Ruta para el mapa interactivo de Entornos Inspiradores"""
+        try:
+            logger.info("Accediendo a la página de Entornos Inspiradores")
+            return render_template('entornos_inspiradores.html')
+        except Exception as e:
+            logger.error(f"Error en página de Entornos Inspiradores: {str(e)}")
+            return render_template('error.html',
+                                 error_message="Error al cargar la página de Entornos Inspiradores",
+                                 error_details=str(e)), 500
     
     @app.route('/api/validate-location', methods=['POST'])
     def api_validate_location():

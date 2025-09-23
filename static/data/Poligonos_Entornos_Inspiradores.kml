@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+<Document id="Poligono_intervenido">
+  <name>Poligono_intervenido</name>
+  <snippet></snippet>
+  <description><![CDATA[]]></description>
+  <Folder id="FeatureLayer0">
+    <name>Poligono_intervenido</name>
+    <snippet></snippet>
+    <description><![CDATA[]]></description>
+    <Placemark id="ID_00000">
+      <name>2.80792339621341E-02</name>
+      <snippet></snippet>
+      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+<td>2.80792339621341E-02</td>
+</tr>
+<tr>
+<td>
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+<tr>
+<td>SHAPE</td>
+<td>Polígono</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>UPZ</td>
+<td>LAS CRUCES</td>
+</tr>
+<tr>
+<td>Barrio</td>
+<td>Las cruces y Santa Barbara</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>ImpactoGeneral</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+<tr>
+<td>Campo</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body><script type="text/javascript">
+				function changeImage(attElement, nameElement) {
+				document.getElementById('imageAttachment').src = attElement;
+				document.getElementById('imageName').innerHTML = nameElement;}
+			</script></html>
+]]></description>
+      <styleUrl>#PolyStyle00</styleUrl>
+      <MultiGeometry>
+        <Polygon>
+          <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
+          <outerBoundaryIs><LinearRing><coordinates> -74.08119999999997,4.594642856849177,0 -74.08490057099993,4.589375999849363,0 -74.08465828599998,4.589279999849325,0 -74.08432914299993,4.588987428849352,0 -74.08374770699999,4.588538402849347,0 -74.08314971399994,4.588251428849349,0 -74.08245942899998,4.588105142849398,0 -74.08292571399994,4.587428570849385,0 -74.08104657099994,4.586046873849435,0 -74.07979999999998,4.588264285849355,0 -74.07907199999994,4.587867428849363,0 -74.07858435699995,4.587660005849368,0 -74.07845485699994,4.587314285849395,0 -74.07772391199995,4.587105886849427,0 -74.07749028599994,4.588091428849367,0 -74.07717197799997,4.588706188849365,0 -74.07891657099998,4.589823999849297,0 -74.07859809399997,4.590360376849283,0 -74.07926428599995,4.590592856849296,0 -74.08107857099998,4.591914285849284,0 -74.08132142899996,4.592507142849221,0 -74.08067857099996,4.594292856849157,0 -74.08075714299997,4.594599999849189,0 -74.08119999999997,4.594642856849177,0</coordinates></LinearRing></outerBoundaryIs>
+        </Polygon>
+      </MultiGeometry>
+    </Placemark>
+    <Placemark id="ID_00001">
+      <name>0.017927828512157</name>
+      <snippet></snippet>
+      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+<td>0.017927828512157</td>
+</tr>
+<tr>
+<td>
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+<tr>
+<td>SHAPE</td>
+<td>Polígono</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>UPZ</td>
+<td>LOURDES</td>
+</tr>
+<tr>
+<td>Barrio</td>
+<td>Los laches, El rocio y el Guavio</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>ImpactoGeneral</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+<tr>
+<td>Campo</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body><script type="text/javascript">
+				function changeImage(attElement, nameElement) {
+				document.getElementById('imageAttachment').src = attElement;
+				document.getElementById('imageName').innerHTML = nameElement;}
+			</script></html>
+]]></description>
+      <styleUrl>#PolyStyle00</styleUrl>
+      <MultiGeometry>
+        <Polygon>
+          <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
+          <outerBoundaryIs><LinearRing><coordinates> -74.06767857099999,4.585449999849455,0 -74.06824657699997,4.585230070849494,0 -74.06845165399994,4.585279572849465,0 -74.06865606299993,4.585372544849463,0 -74.06892833699999,4.58555502584948,0 -74.06903558499994,4.585673522849439,0 -74.06914267999997,4.585691162849447,0 -74.06921509299997,4.585662197849431,0 -74.06926723099997,4.585612956849435,0 -74.06936281599997,4.585520267849458,0 -74.06951946699996,4.58561900984949,0 -74.06983768899994,4.585817014849439,0 -74.07012762499994,4.585958446849457,0 -74.07010640999994,4.586198881849469,0 -74.07026905699996,4.58649588884943,0 -74.07051656299996,4.586807039849428,0 -74.07041756099994,4.587047473849395,0 -74.07022309199994,4.58724105984942,0 -74.06990133299996,4.587591987849392,0 -74.06979439899999,4.587916740849415,0 -74.06979810699994,4.588070604849372,0 -74.06982776699994,4.588222613849401,0 -74.06987225799998,4.588328279849369,0 -74.06994574299995,4.588506770849346,0 -74.06993580699998,4.588655380849339,0 -74.06958862999994,4.589097597849318,0 -74.06972586899997,4.589252047849346,0 -74.07017889399998,4.589263096849366,0 -74.07023414099996,4.58898686284936,0 -74.07037778299997,4.588622232849345,0 -74.07067920999998,4.588101143849397,0 -74.07104488999994,4.588257602849374,0 -74.07111394799995,4.588015897849369,0 -74.07066506699994,4.587722398849376,0 -74.07069959599994,4.587394369849379,0 -74.07130385999994,4.586651988849456,0 -74.07159735899995,4.586099519849455,0 -74.07194265199996,4.585719696849475,0 -74.06940474599998,4.583958700849498,0 -74.06907671799996,4.584148612849488,0 -74.06862783599996,4.584200406849482,0 -74.06809420999997,4.584064356849511,0 -74.06767857099999,4.585449999849455,0</coordinates></LinearRing></outerBoundaryIs>
+        </Polygon>
+      </MultiGeometry>
+    </Placemark>
+    <Placemark id="ID_00002">
+      <name>3.46251966922484E-02</name>
+      <snippet></snippet>
+      <description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-collapse:collapse;padding:3px 3px 3px 3px">
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+<td>3.46251966922484E-02</td>
+</tr>
+<tr>
+<td>
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100%;border-spacing:0px; padding:3px 3px 3px 3px">
+<tr>
+<td>SHAPE</td>
+<td>Polígono</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>UPZ</td>
+<td>SAGRADO CORAZÓN - LA MACARENA</td>
+</tr>
+<tr>
+<td>Barrio</td>
+<td>San Martin, La merced, La perseverancia, Parque Nacional</td>
+</tr>
+<tr bgcolor="#D4E4F3">
+<td>ImpactoGeneral</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+<tr>
+<td>Campo</td>
+<td>&lt;Nulo&gt;</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body><script type="text/javascript">
+				function changeImage(attElement, nameElement) {
+				document.getElementById('imageAttachment').src = attElement;
+				document.getElementById('imageName').innerHTML = nameElement;}
+			</script></html>
+]]></description>
+      <styleUrl>#PolyStyle00</styleUrl>
+      <MultiGeometry>
+        <Polygon>
+          <extrude>0</extrude><altitudeMode>clampToGround</altitudeMode>
+          <outerBoundaryIs><LinearRing><coordinates> -74.06317253499998,4.615879357848451,0 -74.06223978699995,4.61755351984843,0 -74.06537286099996,4.62004084584835,0 -74.06477494699999,4.620925759848301,0 -74.06372261599995,4.620590926848299,0 -74.06314861799996,4.62080617684829,0 -74.06496627899998,4.621643257848301,0 -74.06491844599998,4.622671670848248,0 -74.06577944399999,4.62307825384826,0 -74.06400961499997,4.623724001848253,0 -74.06408136499994,4.624369749848182,0 -74.06558811099995,4.62601999484813,0 -74.06661652499997,4.622528171848252,0 -74.06829068599995,4.618845015848349,0 -74.06874510199998,4.617123020848444,0 -74.06893643399997,4.616262022848469,0 -74.06818181799997,4.616085422848498,0 -74.06816222599997,4.616340124848429,0 -74.06664380899997,4.615830720848497,0 -74.06649686499998,4.616202977848465,0 -74.06579841499996,4.61613498484845,0 -74.06565438899997,4.616614419848479,0 -74.06317253499998,4.615879357848451,0</coordinates></LinearRing></outerBoundaryIs>
+        </Polygon>
+      </MultiGeometry>
+    </Placemark>
+  </Folder>
+  <Style id="PolyStyle00">
+    <LabelStyle>
+      <color>00000000</color>
+      <scale>0.000000</scale>
+    </LabelStyle>
+    <LineStyle>
+      <color>ff0055ff</color>
+      <width>2.000000</width>
+    </LineStyle>
+    <PolyStyle>
+      <color>1a005ed2</color>
+      <outline>1</outline>
+    </PolyStyle>
+  </Style>
+</Document>
+</kml>

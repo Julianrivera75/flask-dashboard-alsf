@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entornos Inspiradores - Mapa Interactivo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .entorno-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .entorno-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-color: #3498db;
+        }
+
+        .entorno-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .entorno-details {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .legend h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+
+        .custom-marker {
+            background: transparent !important;
+            border: none !important;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            .map-container {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>🌱 Entornos Inspiradores</h1>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="total-entornos">3</div>
+                    <div class="stat-label">Entornos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-upz">3</div>
+                    <div class="stat-label">UPZ</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-marcadores">26</div>
+                    <div class="stat-label">Puntos</div>
+                </div>
+            </div>
+            
+            <h3>📍 Entornos Inspiradores</h3>
+            <div id="entornos-list">
+                <div class="entorno-item" data-entorno="0">
+                    <div class="entorno-name">Entorno 1</div>
+                    <div class="entorno-details">UPZ: LAS CRUCES<br>Barrio: Las cruces y Santa Barbara<br>Impacto: Nulo</div>
+                </div>
+                <div class="entorno-item" data-entorno="1">
+                    <div class="entorno-name">Entorno 2</div>
+                    <div class="entorno-details">UPZ: LAS CRUCES<br>Barrio: Las cruces y Santa Barbara<br>Impacto: Nulo</div>
+                </div>
+                <div class="entorno-item" data-entorno="2">
+                    <div class="entorno-name">Entorno 3</div>
+                    <div class="entorno-details">UPZ: LAS CRUCES<br>Barrio: Las cruces y Santa Barbara<br>Impacto: Nulo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>Cargando mapa...</div>
+            </div>
+            <div class="legend">
+                <h4>Leyenda</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #00ff00; opacity: 0.3;"></div>
+                    <span>Área de entorno</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff0000;"></div>
+                    <span>Límites de polígonos</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff6b6b; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">1</div>
+                    <span>Puntos de coordenadas (1-22, 24-26)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4CAF50; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">23</div>
+                    <span>Punto especial (23)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #3388ff; border-radius: 50%; width: 20px; height: 20px;"></div>
+                    <span>Centro de Bogotá</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Datos de los entornos inspiradores (polígonos)
+        const entornosData = [
+            {
+                id: 0,
+                name: "Entorno 1",
+                upz: "LAS CRUCES",
+                barrio: "Las cruces y Santa Barbara",
+                impacto: "Nulo",
+                coordinates: [
+                    [-74.0812, 4.5946],
+                    [-74.0849, 4.5894],
+                    [-74.0876, 4.5921],
+                    [-74.0833, 4.5978],
+                    [-74.0812, 4.5946]
+                ]
+            },
+            {
+                id: 1,
+                name: "Entorno 2",
+                upz: "LAS CRUCES",
+                barrio: "Las cruces y Santa Barbara",
+                impacto: "Nulo",
+                coordinates: [
+                    [-74.0756, 4.6012],
+                    [-74.0789, 4.5987],
+                    [-74.0823, 4.6034],
+                    [-74.0791, 4.6067],
+                    [-74.0756, 4.6012]
+                ]
+            },
+            {
+                id: 2,
+                name: "Entorno 3",
+                upz: "LAS CRUCES",
+                barrio: "Las cruces y Santa Barbara",
+                impacto: "Nulo",
+                coordinates: [
+                    [-74.0701, 4.6089],
+                    [-74.0734, 4.6064],
+                    [-74.0768, 4.6111],
+                    [-74.0736, 4.6144],
+                    [-74.0701, 4.6089]
+                ]
+            }
+        ];
+
+        // Datos de los marcadores adicionales de la tabla (26 puntos)
+        const marcadoresData = [
+            { lat: 4.616218, lng: -74.068224, name: "Punto 1" },
+            { lat: 4.616180, lng: -74.065979, name: "Punto 2" },
+            { lat: 4.616625, lng: -74.065613, name: "Punto 3" },
+            { lat: 4.616269, lng: -74.064290, name: "Punto 4" },
+            { lat: 4.616103, lng: -74.064039, name: "Punto 5" },
+            { lat: 4.616035, lng: -74.063560, name: "Punto 6" },
+            { lat: 4.617802, lng: -74.062886, name: "Punto 7" },
+            { lat: 4.618656, lng: -74.063836, name: "Punto 8" },
+            { lat: 4.625626, lng: -74.065818, name: "Punto 9" },
+            { lat: 4.616151, lng: -74.066179, name: "Punto 10" },
+            { lat: 4.616112, lng: -74.064059, name: "Punto 11" },
+            { lat: 4.615580, lng: -74.063643, name: "Punto 12" },
+            { lat: 4.617953, lng: -74.063242, name: "Punto 13" },
+            { lat: 4.618066, lng: -74.063250, name: "Punto 14" },
+            { lat: 4.618437, lng: -74.063616, name: "Punto 15" },
+            { lat: 4.618674, lng: -74.063789, name: "Punto 16" },
+            { lat: 4.617835, lng: -74.062747, name: "Punto 17" },
+            { lat: 4.616775, lng: -74.065628, name: "Punto 18" },
+            { lat: 4.616111, lng: -74.064011, name: "Punto 19" },
+            { lat: 4.616064, lng: -74.063500, name: "Punto 20" },
+            { lat: 4.617777, lng: -74.062846, name: "Punto 21" },
+            { lat: 4.617847, lng: -74.062907, name: "Punto 22" },
+            { lat: 4.618566, lng: -74.063703, name: "Punto 23" },
+            { lat: 4.618583, lng: -74.063705, name: "Punto 24" },
+            { lat: 4.616667, lng: -74.065618, name: "Punto 25" },
+            { lat: 4.617759, lng: -74.062853, name: "Punto 26" }
+        ];
+
+        // Inicializar el mapa
+        let map;
+        let entornosLayer;
+
+        function initMap() {
+            console.log('Iniciando mapa...');
+            try {
+                map = L.map('map').setView([4.6097, -74.0817], 12);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                map.whenReady(function() {
+                    console.log('Mapa completamente cargado');
+                    addPolygons();
+                    hideLoading();
+                });
+
+                console.log('Mapa inicializado correctamente');
+            } catch (error) {
+                console.error('Error al inicializar el mapa:', error);
+                showError('Error al cargar el mapa: ' + error.message);
+            }
+        }
+
+        function addPolygons() {
+            console.log('Añadiendo polígonos...');
+            entornosLayer = L.layerGroup().addTo(map);
+            console.log('Grupo de capas creado');
+
+            // Añadir marcador de prueba en el centro de Bogotá
+            const testMarker = L.marker([4.6097, -74.0817]).addTo(map);
+            testMarker.bindPopup('Centro de Bogotá - Marcador de prueba');
+            console.log('Marcador de prueba añadido en [4.6097, -74.0817]');
+
+            // Añadir marcadores de la tabla
+            marcadoresData.forEach((marcador, index) => {
+                // Determinar el color según el número del punto
+                let backgroundColor = '#ff6b6b'; // Color rojo por defecto
+                if (index + 1 === 23) {
+                    backgroundColor = '#4CAF50'; // Color verde para el punto 23
+                }
+                
+                const marker = L.marker([marcador.lat, marcador.lng], {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<div style="background-color: ' + backgroundColor + '; color: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; border: 3px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.4);">' + (index + 1) + '</div>',
+                        iconSize: [35, 35],
+                        iconAnchor: [17, 17]
+                    })
+                });
+
+                marker.bindPopup(`
+                    <div style="text-align: center; padding: 10px;">
+                        <h3 style="margin: 0 0 10px 0; color: #2c3e50;">${marcador.name}</h3>
+                        <p style="margin: 5px 0; color: #7f8c8d;"><strong>Coordenadas:</strong></p>
+                        <p style="margin: 5px 0; font-family: monospace; background: #f8f9fa; padding: 5px; border-radius: 3px;">
+                            Lat: ${marcador.lat.toFixed(6)}<br>
+                            Lng: ${marcador.lng.toFixed(6)}
+                        </p>
+                        <p style="margin: 5px 0; color: #7f8c8d; font-size: 12px;">
+                            Punto ${index + 1} de 26
+                        </p>
+                    </div>
+                `);
+
+                entornosLayer.addLayer(marker);
+            });
+
+            // Añadir polígonos de entornos
+            entornosData.forEach((entorno, index) => {
+                try {
+                    console.log(`Procesando entorno ${index + 1}:`, entorno.name);
+                    
+                    // Intercambiar lat y lng si es necesario
+                    const validCoordinates = entorno.coordinates.map(coord => {
+                        if (Array.isArray(coord) && coord.length >= 2) {
+                            return [coord[1], coord[0]]; // Intercambiar lat y lng si es necesario
+                        }
+                        return coord;
+                    });
+
+                    console.log(`Coordenadas válidas para ${entorno.name}:`, validCoordinates);
+
+                    const polygon = L.polygon(validCoordinates, {
+                        color: '#ff0000',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: '#00ff00',
+                        fillOpacity: 0.3
+                    });
+
+                    polygon.bindPopup(`
+                        <div style="text-align: center; padding: 10px;">
+                            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">${entorno.name}</h3>
+                            <p style="margin: 5px 0; color: #7f8c8d;"><strong>UPZ:</strong> ${entorno.upz}</p>
+                            <p style="margin: 5px 0; color: #7f8c8d;"><strong>Barrio:</strong> ${entorno.barrio}</p>
+                            <p style="margin: 5px 0; color: #7f8c8d;"><strong>Impacto:</strong> ${entorno.impacto}</p>
+                        </div>
+                    `);
+
+                    polygon.on('click', function() {
+                        console.log(`Polígono clickeado: ${entorno.name}`);
+                    });
+
+                    entornosLayer.addLayer(polygon);
+                    console.log(`Polígono ${entorno.name} añadido correctamente`);
+
+                } catch (error) {
+                    console.error(`Error al procesar entorno ${entorno.name}:`, error);
+                }
+            });
+
+            // Ajustar la vista para mostrar todos los elementos
+            if (entornosLayer.getLayers().length > 0) {
+                const group = new L.featureGroup(entornosLayer.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+                console.log('Vista ajustada para mostrar todos los elementos');
+            }
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            const sidebar = document.querySelector('.sidebar');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            sidebar.appendChild(errorDiv);
+        }
+
+        // Event listeners para los elementos de la lista
+        document.addEventListener('DOMContentLoaded', function() {
+            const entornoItems = document.querySelectorAll('.entorno-item');
+            entornoItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const entornoId = parseInt(this.dataset.entorno);
+                    const entorno = entornosData[entornoId];
+                    
+                    if (entorno && map) {
+                        // Centrar el mapa en el entorno seleccionado
+                        const coordinates = entorno.coordinates.map(coord => [coord[1], coord[0]]);
+                        const polygon = L.polygon(coordinates);
+                        map.fitBounds(polygon.getBounds());
+                        
+                        // Resaltar el polígono
+                        entornosLayer.eachLayer(function(layer) {
+                            if (layer instanceof L.Polygon) {
+                                layer.setStyle({ weight: 2, opacity: 0.8 });
+                            }
+                        });
+                        
+                        // Encontrar y resaltar el polígono específico
+                        entornosLayer.eachLayer(function(layer) {
+                            if (layer instanceof L.Polygon && layer.getLatLngs()[0].length === coordinates.length) {
+                                layer.setStyle({ weight: 4, opacity: 1 });
+                                layer.openPopup();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+
+        // Inicializar el mapa cuando la página esté cargada
+        window.addEventListener('load', initMap);
+    </script>
+</body>
+</html>

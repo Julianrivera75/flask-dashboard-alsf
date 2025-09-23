@@ -168,3 +168,7 @@ SELECT email, first_name, last_name, role FROM users;
 **Estado:** ✅ **CONFIGURACIÓN COMPLETA**  
 **Fecha:** 3 de septiembre de 2025  
 **Próximo paso:** Desplegar a Railway
+
+
+
+
