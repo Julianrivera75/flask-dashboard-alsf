@@ -610,27 +610,27 @@
 
 <body>
 
-    <!-- Botón hamburguesa flotante -->
+    <!-- Botón de regreso al inicio -->
 
-    <button id="menu-btn" class="menu-btn" aria-label="Abrir menú">
+    <button id="home-btn" class="menu-btn" aria-label="Volver al inicio" onclick="window.location.href='/'">
 
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-arrow-left"></i>
 
-        <span class="menu-btn-text">Menú</span>
+        <span class="menu-btn-text">Inicio</span>
 
     </button>
 
     
 
-    <!-- Overlay antes del menú lateral -->
+    <!-- Overlay antes del menú lateral - COMENTADO -->
 
-    <div id="menu-overlay" class="menu-overlay"></div>
+    <!-- <div id="menu-overlay" class="menu-overlay"></div> -->
 
     
 
-    <!-- Menú lateral -->
+    <!-- Menú lateral - COMENTADO -->
 
-    <nav id="side-menu" class="side-menu">
+    <!-- <nav id="side-menu" class="side-menu"> -->
 
         <div class="side-menu-header">
 
@@ -652,7 +652,7 @@
 
         </ul>
 
-    </nav>
+    </nav> -->
 
 
 
@@ -926,7 +926,7 @@
 
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card" id="hojas-vida-card" style="cursor: pointer;">
 
                 <div class="icon" style="color: var(--primary-red);"><i class="fas fa-file-alt"></i></div>
 
@@ -936,7 +936,7 @@
 
             </div>
 
-            <div class="stat-card">
+            <div class="stat-card" id="encuesta-satisfaccion-card" style="cursor: pointer;">
 
                 <div class="icon"><i class="fas fa-poll"></i></div>
 
@@ -1821,57 +1821,8 @@
 
     <script>
 
-    // --- Interactividad del menú hamburguesa ---
-
-    const menuBtn = document.getElementById('menu-btn');
-
-    const sideMenu = document.getElementById('side-menu');
-
-    const menuOverlay = document.getElementById('menu-overlay');
-
-    
-
-    function openMenu() {
-
-        sideMenu.classList.add('open');
-
-        menuOverlay.classList.add('open');
-
-    }
-
-    
-
-    function closeMenu() {
-
-        sideMenu.classList.remove('open');
-
-        menuOverlay.classList.remove('open');
-
-    }
-
-    
-
-    menuBtn.addEventListener('click', function() {
-
-        if (sideMenu.classList.contains('open')) {
-
-            closeMenu();
-
-        } else {
-
-            openMenu();
-
-        }
-
-    });
-
-    
-
-    menuOverlay.addEventListener('click', function() {
-
-        closeMenu();
-
-    });
+    // --- Botón de regreso al inicio ---
+    // El botón ya tiene onclick="window.location.href='/'" para navegar al inicio
 
     </script>
 
@@ -3753,6 +3704,48 @@
 
         margin-right: 0.5rem;
 
+    }
+
+    /* Estilos para modales de indicadores */
+    .modal-indicadores {
+        display: none;
+        position: fixed;
+        z-index: 3000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        overflow-y: auto;
+    }
+
+    .modal-content-indicadores {
+        background-color: #fefefe;
+        margin: 2% auto;
+        padding: 20px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 1000px;
+        position: relative;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .close-modal-indicadores {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        z-index: 3001;
+    }
+
+    .close-modal-indicadores:hover,
+    .close-modal-indicadores:focus {
+        color: var(--primary-red);
+        text-decoration: none;
     }
 
     </style>
@@ -7203,6 +7196,227 @@
 
     });
 
+    </script>
+
+    <!-- Modal para Hojas de Vida de Indicadores -->
+    <div id="modalHojasVida" class="modal-indicadores" style="display:none;">
+      <div class="modal-content-indicadores" style="max-width:1000px; max-height:90vh; overflow-y:auto;">
+        <span class="close-modal-indicadores" id="closeHojasVida">&times;</span>
+        <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Hojas de Vida - Indicadores Percepción</h2>
+        
+        <!-- Indicador 1: Participación y Comunicación Ciudadana -->
+        <div style="background:#f8f9fa; padding:1.5rem; border-radius:8px; margin-bottom:2rem; border-left:4px solid var(--primary-red);">
+          <h3 style="color:var(--primary-red); margin-bottom:1rem; font-size:1.3rem;">HOJA DE VIDA- INDICADORES PERCEPCIÓN DE CONVENIO 256-2024 Y CPS 302 – 2023</h3>
+          <p style="margin-bottom:0.5rem;"><strong>Fecha:</strong> 12-06-2025</p>
+          <p style="margin-bottom:0.5rem;"><strong>Nombre del Indicador:</strong> Participación y Comunicación Ciudadana</p>
+          <p style="margin-bottom:0.5rem;"><strong>Objetivo del Indicador:</strong> Medir el nivel de percepción y/o satisfacción de los participantes frente a los mecanismos de información, inclusión y comunicación utilizados durante la ejecución del componente del Convenio y/o contrato.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Dimensión:</strong> Gestión social / Relacionamiento ciudadano / Participación y comunicación.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Tipo de Indicador:</strong> Percepción – Satisfacción</p>
+          <p style="margin-bottom:0.5rem;"><strong>Fuente de información:</strong> Encuesta de percepción del Convenio 256-2024 y el contrato 302 de 2023.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Población objetivo:</strong> Personas participantes o beneficiarias del convenio y/o contrato que fue reactivado.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Periodicidad de medición:</strong> Una vez finalizada la ejecución del componente o en los momentos clave definidos por el equipo técnico.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Instrumento de recolección:</strong> Encuesta con escala (1 a 5), donde:</p>
+          <ul style="margin-left:2rem; margin-bottom:1rem;">
+            <li>1 = Totalmente en desacuerdo</li>
+            <li>2 = En desacuerdo</li>
+            <li>3 = Ni de acuerdo ni en desacuerdo</li>
+            <li>4 = De acuerdo</li>
+            <li>5 = Totalmente de acuerdo</li>
+          </ul>
+          <p style="margin-bottom:0.5rem;"><strong>Forma de cálculo del indicador:</strong> Promedio simple de las respuestas dadas a los ítems 1.1 a 1.4.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Unidad de medida:</strong> Puntaje promedio (de 1 a 5)</p>
+          <p style="margin-bottom:0.5rem;"><strong>Meta sugerida:</strong> Promedio ≥ 4,0</p>
+          <p style="margin-bottom:0.5rem;"><strong>Uso del indicador:</strong></p>
+          <ul style="margin-left:2rem;">
+            <li>Evaluar la efectividad de la estrategia de comunicación.</li>
+            <li>Ajustar procesos de participación y relacionamiento.</li>
+            <li>Retroalimentar al operador responsables del componente.</li>
+          </ul>
+        </div>
+
+        <!-- Indicador 2: Impacto y resultados -->
+        <div style="background:#f8f9fa; padding:1.5rem; border-radius:8px; margin-bottom:2rem; border-left:4px solid var(--primary-yellow);">
+          <h3 style="color:var(--primary-red); margin-bottom:1rem; font-size:1.3rem;">HOJA DE VIDA- INDICADORES PERCEPCIÓN DE CONVENIO 256-2024 Y CPS 302 – 2023</h3>
+          <p style="margin-bottom:0.5rem;"><strong>Fecha:</strong> 12-06-2025</p>
+          <p style="margin-bottom:0.5rem;"><strong>Nombre del Indicador:</strong> Impacto y resultados.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Objetivo del Indicador:</strong> Medir el nivel de satisfacción de los participantes beneficiarios frente a los bienes y servicios recibidos por parte del Fondo de Desarrollo Local de Santa Fe.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Dimensión:</strong> Resultados/ Gestión Pública/ Impacto Social.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Tipo de Indicador:</strong> Percepción – Satisfacción</p>
+          <p style="margin-bottom:0.5rem;"><strong>Fuente de información:</strong> Encuesta de percepción del Convenio 256-2024 y el Contrato 302 de 2023.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Población objetivo:</strong> Personas participantes o beneficiarias del convenio y/o contrato reactivado.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Periodicidad de medición:</strong> Una vez finalizada la ejecución del componente o en los momentos clave definidos por el equipo técnico.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Instrumento de recolección:</strong> Encuesta con escala tipo (1 a 5), donde:</p>
+          <ul style="margin-left:2rem; margin-bottom:1rem;">
+            <li>1 = Totalmente en desacuerdo</li>
+            <li>2 = En desacuerdo</li>
+            <li>3 = Ni de acuerdo ni en desacuerdo</li>
+            <li>4 = De acuerdo</li>
+            <li>5 = Totalmente de acuerdo</li>
+          </ul>
+          <p style="margin-bottom:0.5rem;"><strong>Forma de cálculo del indicador:</strong> Promedio simple de las respuestas dadas a los ítems 2.1 a 2.6.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Unidad de medida:</strong> Puntaje promedio (de 1 a 5)</p>
+          <p style="margin-bottom:0.5rem;"><strong>Meta sugerida:</strong> Promedio ≥ 4,0</p>
+          <p style="margin-bottom:0.5rem;"><strong>Uso del indicador:</strong></p>
+          <ul style="margin-left:2rem;">
+            <li>Evaluar la efectividad del convenio y/o contrato.</li>
+            <li>Sustentar la toma de decisiones estratégicas y la distribución de recursos con base en resultados obtenidos y evidencias de impacto.</li>
+            <li>Identificar fortalezas y áreas de oportunidad para ajustar o rediseñar intervenciones futuras de forma más efectiva.</li>
+          </ul>
+        </div>
+
+        <!-- Indicador 3: Eficiencia en la ejecución del fondo de desarrollo local -->
+        <div style="background:#f8f9fa; padding:1.5rem; border-radius:8px; margin-bottom:2rem; border-left:4px solid var(--primary-red);">
+          <h3 style="color:var(--primary-red); margin-bottom:1rem; font-size:1.3rem;">HOJA DE VIDA- INDICADORES PERCEPCIÓN DE CONVENIO 256-2024 Y CPS 302 – 2023</h3>
+          <p style="margin-bottom:0.5rem;"><strong>Fecha:</strong> 12-06-2025</p>
+          <p style="margin-bottom:0.5rem;"><strong>Nombre del Indicador:</strong> Eficiencia en la ejecución del fondo de desarrollo local.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Objetivo del Indicador:</strong> Medir el nivel de satisfacción de los participantes beneficiarios frente a la oportunidad y eficiencia de recursos invertidos por el Fondo de Desarrollo Local de Santa Fe, garantizando el cumplimiento de metas, la calidad de gasto público y la generación de beneficios concretos para la ciudadanía.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Dimensión:</strong> Gestión Pública/ Impacto Social.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Tipo de Indicador:</strong> Percepción – Satisfacción</p>
+          <p style="margin-bottom:0.5rem;"><strong>Fuente de información:</strong> Encuesta de percepción del Convenio 256-2024 y el Contrato 302 de 2023.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Población objetivo:</strong> Personas participantes o beneficiarias del convenio y/o contrato reactivado.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Periodicidad de medición:</strong> Una vez finalizada la ejecución del componente o en los momentos clave definidos por el equipo técnico.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Instrumento de recolección:</strong> Encuesta con escala tipo (1 a 5), donde:</p>
+          <ul style="margin-left:2rem; margin-bottom:1rem;">
+            <li>1 = Totalmente en desacuerdo</li>
+            <li>2 = En desacuerdo</li>
+            <li>3 = Ni de acuerdo ni en desacuerdo</li>
+            <li>4 = De acuerdo</li>
+            <li>5 = Totalmente de acuerdo</li>
+          </ul>
+          <p style="margin-bottom:0.5rem;"><strong>Forma de cálculo del indicador:</strong> Promedio simple de las respuestas dadas a los ítems 3.1 a 3.3.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Unidad de medida:</strong> Puntaje promedio (de 1 a 5)</p>
+          <p style="margin-bottom:0.5rem;"><strong>Meta sugerida:</strong> Promedio ≥ 4,0</p>
+          <p style="margin-bottom:0.5rem;"><strong>Uso del indicador:</strong></p>
+          <ul style="margin-left:2rem;">
+            <li>Evaluar, desde la perspectiva de la ciudadanía, el desempeño de la Alcaldía Local en la planeación, ejecución y seguimiento de contratos y/o convenios.</li>
+          </ul>
+        </div>
+
+        <!-- Indicador 4: Magia del servicio: Confianza institucional -->
+        <div style="background:#f8f9fa; padding:1.5rem; border-radius:8px; margin-bottom:2rem; border-left:4px solid var(--primary-yellow);">
+          <h3 style="color:var(--primary-red); margin-bottom:1rem; font-size:1.3rem;">HOJA DE VIDA- INDICADORES PERCEPCIÓN DE CONVENIO 256-2024 Y CPS 302 – 2023</h3>
+          <p style="margin-bottom:0.5rem;"><strong>Fecha:</strong> 12-06-2025</p>
+          <p style="margin-bottom:0.5rem;"><strong>Nombre del Indicador:</strong> Magia del servicio: Confianza institucional.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Objetivo del Indicador:</strong> Medir el nivel de confianza, satisfacción y percepción de transparencia, liderazgo y trabajo en equipo de la ciudadanía respecto al Fondo de Desarrollo Local de Santa Fe.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Dimensión:</strong> Gestión Pública/ Impacto Social.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Tipo de Indicador:</strong> Percepción – Satisfacción</p>
+          <p style="margin-bottom:0.5rem;"><strong>Fuente de información:</strong> Encuesta de percepción del Convenio 256-2024 y el Contrato 302 de 2023.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Población objetivo:</strong> Personas participantes o beneficiarias del convenio y/o contrato reactivado.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Periodicidad de medición:</strong> Una vez finalizada la ejecución del componente o en los momentos clave definidos por el equipo técnico.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Instrumento de recolección:</strong> Encuesta con escala tipo (1 a 5), donde:</p>
+          <ul style="margin-left:2rem; margin-bottom:1rem;">
+            <li>1 = Totalmente en desacuerdo</li>
+            <li>2 = En desacuerdo</li>
+            <li>3 = Ni de acuerdo ni en desacuerdo</li>
+            <li>4 = De acuerdo</li>
+            <li>5 = Totalmente de acuerdo</li>
+          </ul>
+          <p style="margin-bottom:0.5rem;"><strong>Forma de cálculo del indicador:</strong> Promedio simple de las respuestas dadas a los ítems 4.1 a 4.5.</p>
+          <p style="margin-bottom:0.5rem;"><strong>Unidad de medida:</strong> Puntaje promedio (de 1 a 5)</p>
+          <p style="margin-bottom:0.5rem;"><strong>Meta sugerida:</strong> Promedio ≥ 4,0</p>
+          <p style="margin-bottom:0.5rem;"><strong>Uso del indicador:</strong></p>
+          <ul style="margin-left:2rem;">
+            <li>Medir el impacto relacional de la gestión pública local.</li>
+            <li>Evaluar la percepción de cumplimiento institucional.</li>
+            <li>Fomentar la participación ciudadana en futuras intervenciones.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal para Descarga de Encuestas de Satisfacción -->
+    <div id="modalEncuestaDescarga" class="modal-indicadores" style="display:none;">
+      <div class="modal-content-indicadores" style="max-width:800px; max-height:90vh; overflow-y:auto;">
+        <span class="close-modal-indicadores" id="closeEncuestaDescarga">&times;</span>
+        <h2 style="color:var(--primary-red); text-align:center; margin-bottom:1.5rem;">Instrumento de Encuesta de Satisfacción</h2>
+        
+        <div style="text-align:center; margin-bottom:2rem;">
+          <p style="font-size:1.1rem; color:#666; margin-bottom:2rem;">Seleccione el documento que desea descargar:</p>
+          
+          <!-- Botón para CPS 302-2023 -->
+          <div style="margin-bottom:2rem;">
+            <a href="/static/docs/ENCUESTA DE SATISFACCION CPS 302-2023 .pdf" 
+               download="ENCUESTA DE SATISFACCION CPS 302-2023.pdf"
+               style="display:inline-block; background:var(--primary-red); color:white; text-decoration:none; padding:1.5rem 2rem; border-radius:12px; font-size:1.2rem; font-weight:600; box-shadow:0 4px 15px rgba(228,3,46,0.3); transition:all 0.3s ease; margin:0.5rem;">
+              <i class="fas fa-file-pdf" style="margin-right:0.5rem;"></i>
+              ENCUESTA DE SATISFACCIÓN CPS 302-2023
+            </a>
+          </div>
+          
+          <!-- Botón para Convenio 256-2024 -->
+          <div>
+            <a href="/static/docs/ENCUESTA DE SATISFACCIÓN_CONVENIO 256-2024 .pdf" 
+               download="ENCUESTA DE SATISFACCIÓN_CONVENIO 256-2024.pdf"
+               style="display:inline-block; background:var(--primary-yellow); color:var(--dark-gray); text-decoration:none; padding:1.5rem 2rem; border-radius:12px; font-size:1.2rem; font-weight:600; box-shadow:0 4px 15px rgba(250,182,45,0.3); transition:all 0.3s ease; margin:0.5rem;">
+              <i class="fas fa-file-pdf" style="margin-right:0.5rem;"></i>
+              ENCUESTA DE SATISFACCIÓN CONVENIO 256-2024
+            </a>
+          </div>
+        </div>
+        
+        <!-- Información adicional -->
+        <div style="background:#f8f9fa; padding:1.5rem; border-radius:8px; margin-top:2rem; border-left:4px solid var(--primary-red);">
+          <h3 style="color:var(--primary-red); margin-bottom:1rem; font-size:1.2rem;">
+            <i class="fas fa-info-circle" style="margin-right:0.5rem;"></i>
+            Información sobre los documentos
+          </h3>
+          <ul style="margin:0; padding-left:1.5rem; color:#666;">
+            <li style="margin-bottom:0.5rem;">Los documentos están en formato PDF y se descargarán automáticamente</li>
+            <li style="margin-bottom:0.5rem;">CPS 302-2023: Encuesta para el Contrato de Prestación de Servicios 302 de 2023</li>
+            <li style="margin-bottom:0.5rem;">Convenio 256-2024: Encuesta para el Convenio Interadministrativo 256 de 2024</li>
+            <li>Ambos documentos contienen el formulario completo de evaluación de satisfacción</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- JavaScript para los modales -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal de Hojas de Vida
+        const hojasVidaCard = document.getElementById('hojas-vida-card');
+        const modalHojasVida = document.getElementById('modalHojasVida');
+        const closeHojasVida = document.getElementById('closeHojasVida');
+
+        if (hojasVidaCard && modalHojasVida && closeHojasVida) {
+            hojasVidaCard.addEventListener('click', function() {
+                modalHojasVida.style.display = 'block';
+            });
+
+            closeHojasVida.addEventListener('click', function() {
+                modalHojasVida.style.display = 'none';
+            });
+
+            modalHojasVida.addEventListener('click', function(e) {
+                if (e.target === modalHojasVida) {
+                    modalHojasVida.style.display = 'none';
+                }
+            });
+        }
+
+        // Modal de Encuesta de Satisfacción
+        const encuestaCard = document.getElementById('encuesta-satisfaccion-card');
+        const modalEncuestaDescarga = document.getElementById('modalEncuestaDescarga');
+        const closeEncuestaDescarga = document.getElementById('closeEncuestaDescarga');
+
+        if (encuestaCard && modalEncuestaDescarga && closeEncuestaDescarga) {
+            encuestaCard.addEventListener('click', function() {
+                modalEncuestaDescarga.style.display = 'block';
+            });
+
+            closeEncuestaDescarga.addEventListener('click', function() {
+                modalEncuestaDescarga.style.display = 'none';
+            });
+
+            modalEncuestaDescarga.addEventListener('click', function(e) {
+                if (e.target === modalEncuestaDescarga) {
+                    modalEncuestaDescarga.style.display = 'none';
+                }
+            });
+        }
+    });
     </script>
 
 </body>

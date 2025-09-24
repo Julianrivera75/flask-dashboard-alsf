@@ -432,9 +432,7 @@ def create_app(config_class=config.DevelopmentConfig):
     
     @app.route('/convenio-interadministrativo-302')
     def convenio_interadministrativo_302():
-        """Ruta para la página del Convenio Interadministrativo 302"""
-        if not session.get('authenticated'):
-            return redirect(url_for('login', next=request.url))
+        """Ruta para la página del Convenio Interadministrativo 302 - Acceso público"""
         try:
             logger.info("Accediendo a la página del Convenio Interadministrativo 302")
             return render_template('pages/convenio_interadministrativo_302.html')
