@@ -549,6 +549,29 @@ select.form-control {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
+/* Estilos para indicadores clickeables */
+.indicator-card.clickeable-indicator {
+    cursor: pointer;
+    position: relative;
+}
+
+.indicator-card.clickeable-indicator:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(228, 3, 46, 0.25);
+    border: 2px solid var(--primary-red);
+}
+
+.indicator-card.clickeable-indicator.active {
+    background: linear-gradient(135deg, rgba(250, 182, 45, 0.1) 0%, rgba(228, 3, 46, 0.1) 100%);
+    border: 2px solid var(--primary-red);
+    box-shadow: 0 8px 25px rgba(228, 3, 46, 0.3);
+}
+
+.indicator-card.clickeable-indicator.active .indicator-icon {
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--primary-red) 100%);
+    transform: scale(1.1);
+}
+
 .indicator-icon {
     background: linear-gradient(135deg, var(--primary-yellow) 0%, var(--primary-red) 100%);
     color: var(--white);

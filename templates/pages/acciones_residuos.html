@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos - Alcaldía Local Santa Fe</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/acciones_1000.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <!-- Botón hamburguesa flotante -->
+    <a href="/" class="menu-btn" aria-label="Retorno al inicio" title="Retorno al inicio">
+        <i class="fas fa-home"></i>
+        <span class="menu-btn-text">Inicio</span>
+    </a>
+    
+    <!-- Overlay antes del menú lateral -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+    
+    <!-- Menú lateral -->
+    <nav id="side-menu" class="side-menu">
+        <div class="side-menu-header">
+            <h3>Acciones de Alcaldías Locales</h3>
+        </div>
+        <ul id="menu-options">
+            <li><a href="/" class=""><i class="fas fa-home"></i> Inicio</a></li>
+            <li><a href="/acciones-residuos" class="active"><i class="fas fa-recycle"></i> Acciones de Residuos</a></li>
+            <li><a href="/acciones-1000/mapa"><i class="fas fa-map-marked-alt"></i> 1000 Acciones en 1 Día</a></li>
+            <li><a href="/mapa-publico"><i class="fas fa-shield-alt"></i> Santa Fe Camina Segura</a></li>
+            {% if session.authenticated %}
+                <li class="menu-section-header">
+                    <span><i class="fas fa-shield-alt"></i> Acceso Administrativo</span>
+                </li>
+                <li><a href="/formulario-reporte"><i class="fas fa-clipboard-list"></i> Nuevo Reporte</a></li>
+                <li><a href="/mapa-reportes"><i class="fas fa-map"></i> Mapa de Reportes</a></li>
+                <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
+            {% else %}
+                <li><a href="/login"><i class="fas fa-lock"></i> Acceso Administrativo</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/logos/Alcaldia_SantaFe.jpg') }}" alt="Logo Alcaldía Santa Fe" style="height: 90px; width: auto; border-radius: 0; vertical-align: middle;">
+            </div>
+            <div class="header-title">
+                <h1>Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos</h1>
+                <p>Alcaldía Local Santa Fe</p>
+            </div>
+            <div class="header-empty"></div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="/">Inicio</a> / 
+                <span>Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos</span>
+            </nav>
+
+            <!-- Encabezado de sección -->
+            <div class="section-header">
+                <h2><i class="fas fa-recycle"></i> Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos</h2>
+                <p>Visualice las acciones implementadas por las alcaldías locales para mitigar la inadecuada disposición de residuos en la localidad de Santa Fe</p>
+            </div>
+
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Indicadores principales -->
+            <div class="indicators-container">
+                <div class="indicator-card">
+                    <div class="indicator-icon">
+                        <i class="fas fa-recycle"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Acciones Registradas</h3>
+                        <div class="indicator-value">
+                            <span id="total-acciones">{{ total_acciones }}</span>
+                        </div>
+                        <div class="indicator-trend">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Total acumulado</span>
+                        </div>
+                        <p class="indicator-update">Última actualización: <span id="fecha-ultima-accion">{{ fecha_ultima_accion }}</span></p>
+                    </div>
+                </div>
+                
+                <div class="indicator-card clickeable-indicator" data-tipo="operativos" id="indicator-operativos">
+                    <div class="indicator-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Número Total de Operativos Realizados</h3>
+                        <div class="indicator-value">
+                            <span id="total-operativos">{{ total_operativos }}</span>
+                        </div>
+                        <div class="indicator-trend">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Total acumulado</span>
+                        </div>
+                        <p class="indicator-update">Haga clic para ver en el mapa</p>
+                    </div>
+                </div>
+                
+                <div class="indicator-card clickeable-indicator" data-tipo="comparendos" id="indicator-comparendos">
+                    <div class="indicator-icon">
+                        <i class="fas fa-gavel"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Número Total de Comparendos Realizados</h3>
+                        <div class="indicator-value">
+                            <span id="total-comparendos">{{ total_comparendos }}</span>
+                        </div>
+                        <div class="indicator-trend">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Total acumulado</span>
+                        </div>
+                        <p class="indicator-update">Haga clic para ver en el mapa</p>
+                    </div>
+                </div>
+                
+                <div class="indicator-card clickeable-indicator" data-tipo="sensibilizaciones" id="indicator-sensibilizaciones">
+                    <div class="indicator-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="indicator-content">
+                        <h3>Número Total de Sensibilizaciones Realizadas</h3>
+                        <div class="indicator-value">
+                            <span id="total-sensibilizaciones">{{ total_sensibilizaciones }}</span>
+                        </div>
+                        <div class="indicator-trend">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>Total acumulado</span>
+                        </div>
+                        <p class="indicator-update">Haga clic para ver en el mapa</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Título del mapa -->
+            <div class="map-title-section">
+                <h2 class="map-title">
+                    <i class="fas fa-map-marked-alt"></i>
+                    Mapa de Localidades
+                </h2>
+            </div>
+
+            <!-- Contenedor del mapa -->
+            <div class="map-container-large">
+                <div id="mapa-residuos" style="height: 600px; width: 100%; border-radius: 12px;"></div>
+            </div>
+
+            <!-- ============================================ -->
+            <!-- FORMULARIO DE REGISTRO - VERSIÓN ACTUALIZADA -->
+            <!-- Orden: Indicadores → Mapa → Formulario -->
+            <!-- ============================================ -->
+            <!-- Formulario de Registro -->
+            <div class="form-container" style="margin-top: 3rem; background: #ffffff; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div class="form-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Registrar Nueva Acción</h2>
+                    <p>Complete el formulario para registrar las acciones realizadas para mitigar la inadecuada disposición de residuos</p>
+                </div>
+                
+                <form method="POST" action="/acciones-residuos" id="form-residuos" class="residuos-form">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.localidad.label(class="form-label") }}
+                            {{ form.localidad(class="form-control" + (" is-invalid" if form.localidad.errors else "")) }}
+                            {% if form.localidad.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.localidad.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.localidad.description %}
+                                <small class="form-text text-muted">{{ form.localidad.description }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.fecha_operacion.label(class="form-label") }}
+                            {{ form.fecha_operacion(class="form-control" + (" is-invalid" if form.fecha_operacion.errors else ""), type="date") }}
+                            {% if form.fecha_operacion.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fecha_operacion.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.fecha_operacion.description %}
+                                <small class="form-text text-muted">{{ form.fecha_operacion.description }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.numero_operativos.label(class="form-label") }}
+                            {{ form.numero_operativos(class="form-control" + (" is-invalid" if form.numero_operativos.errors else ""), type="number", min="0", step="1") }}
+                            {% if form.numero_operativos.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_operativos.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.numero_operativos.description %}
+                                <small class="form-text text-muted">{{ form.numero_operativos.description }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.numero_comparendos.label(class="form-label") }}
+                            {{ form.numero_comparendos(class="form-control" + (" is-invalid" if form.numero_comparendos.errors else ""), type="number", min="0", step="1") }}
+                            {% if form.numero_comparendos.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_comparendos.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.numero_comparendos.description %}
+                                <small class="form-text text-muted">{{ form.numero_comparendos.description }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.numero_sensibilizaciones.label(class="form-label") }}
+                            {{ form.numero_sensibilizaciones(class="form-control" + (" is-invalid" if form.numero_sensibilizaciones.errors else ""), type="number", min="0", step="1") }}
+                            {% if form.numero_sensibilizaciones.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.numero_sensibilizaciones.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.numero_sensibilizaciones.description %}
+                                <small class="form-text text-muted">{{ form.numero_sensibilizaciones.description }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.usuario_registro.label(class="form-label") }}
+                            {{ form.usuario_registro(class="form-control" + (" is-invalid" if form.usuario_registro.errors else "")) }}
+                            {% if form.usuario_registro.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.usuario_registro.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.usuario_registro.description %}
+                                <small class="form-text text-muted">{{ form.usuario_registro.description }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.observaciones.label(class="form-label") }}
+                        {{ form.observaciones(class="form-control" + (" is-invalid" if form.observaciones.errors else "")) }}
+                        {% if form.observaciones.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.observaciones.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if form.observaciones.description %}
+                            <small class="form-text text-muted">{{ form.observaciones.description }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-actions">
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
+                        <button type="reset" class="btn btn-secondary btn-lg">Limpiar Formulario</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de Registros -->
+            <div class="registros-container" style="margin-top: 3rem; background: #ffffff; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 3px solid #e4032e; display: block !important; visibility: visible !important;">
+                <div class="registros-header">
+                    <h2 style="color: #e4032e; font-size: 1.8rem; margin-bottom: 0.5rem;"><i class="fas fa-table"></i> Registro de Acciones</h2>
+                    <p style="color: #333; opacity: 0.8;">Listado de todas las acciones registradas para mitigar la inadecuada disposición de residuos</p>
+                </div>
+                
+                {% if registros %}
+                {% set num_registros = registros|length %}
+                {% if num_registros > 0 %}
+                <div class="table-responsive">
+                    <table class="registros-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Localidad</th>
+                                <th>Fecha Operación</th>
+                                <th>Operativos</th>
+                                <th>Comparendos</th>
+                                <th>Sensibilizaciones</th>
+                                <th>Usuario</th>
+                                <th>Fecha Registro</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro.id }}</td>
+                                <td><strong>{{ registro.localidad }}</strong></td>
+                                <td>{{ registro.fecha_operacion.strftime('%d/%m/%Y') if registro.fecha_operacion else '-' }}</td>
+                                <td><span class="badge badge-primary">{{ registro.numero_operativos }}</span></td>
+                                <td><span class="badge badge-warning">{{ registro.numero_comparendos }}</span></td>
+                                <td><span class="badge badge-success">{{ registro.numero_sensibilizaciones }}</span></td>
+                                <td>{{ registro.usuario_registro or '-' }}</td>
+                                <td>{{ registro.fecha_registro.strftime('%d/%m/%Y %H:%M') if registro.fecha_registro else '-' }}</td>
+                                <td class="observaciones-cell">
+                                    {% if registro.observaciones %}
+                                        <span class="observaciones-text" title="{{ registro.observaciones }}">
+                                            {{ registro.observaciones[:50] }}{% if registro.observaciones|length > 50 %}...{% endif %}
+                                        </span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer">
+                    <p><i class="fas fa-info-circle"></i> Total de registros: <strong>{{ registros|length }}</strong></p>
+                </div>
+                {% else %}
+                <div class="no-registros" style="text-align: center; padding: 4rem 2rem; color: #333;">
+                    <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p style="font-size: 1.1rem; opacity: 0.8;">No hay registros aún. Use el formulario arriba para registrar la primera acción.</p>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="no-registros" style="text-align: center; padding: 4rem 2rem; color: #333;">
+                    <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p style="font-size: 1.1rem; opacity: 0.8;">No hay registros disponibles.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Alcaldía Local Santa Fe. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/residuos_form.js') }}"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Librería para cargar archivos KML -->
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
+    
+    <script>
+        // Script para el menú
+        const menuBtn = document.querySelector('.menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+
+        function openMenu() {
+            sideMenu.classList.add('open');
+            menuOverlay.classList.add('open');
+        }
+        
+        function closeMenu() {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('open');
+        }
+        
+        if (menuBtn) {
+            menuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (sideMenu.classList.contains('open')) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+        }
+        
+        if (menuOverlay) {
+            menuOverlay.addEventListener('click', function() {
+                closeMenu();
+            });
+        }
+
+        // Inicializar mapa cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando mapa de residuos...');
+            
+            // Coordenadas de Bogotá (centro aproximado)
+            const bogotaCenter = [4.7110, -74.0721];
+            
+            // Crear mapa
+            const map = L.map('mapa-residuos').setView(bogotaCenter, 11);
+            
+            // Agregar capa de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Cargar KML de localidades
+            const kmlUrl = '/static/data/mapalocalidades.kml';
+            let polygonCounter = 1; // Contador para enumerar polígonos
+            
+            // Mapeo de números a nombres de localidades (sin "Localidad de")
+            const localidadesMap = {
+                1: 'Antonio Nariño',
+                2: 'Tunjuelito',
+                3: 'Rafael Uribe Uribe',
+                4: 'Candelaria',
+                5: 'Barrios Unidos',
+                6: 'Teusaquillo',
+                7: 'Puente Aranda',
+                8: 'Los Mártires',
+                9: 'Sumapaz',
+                10: 'Usaquén',
+                11: 'Chapinero',
+                12: 'Santa Fe',
+                13: 'San Cristóbal',
+                14: 'Usme',
+                15: 'Ciudad Bolívar',
+                16: 'Bosa',
+                17: 'Kennedy',
+                18: 'Fontibón',
+                19: 'Engativá',
+                20: 'Suba'
+            };
+            
+            // Almacenar marcadores de localidades para poder actualizarlos
+            let localidadMarkers = {};
+            let kmlLayer = null;
+            let tipoActual = null; // 'operativos', 'comparendos', 'sensibilizaciones'
+            
+            // Función para actualizar marcadores con datos
+            function actualizarMarcadoresConDatos(datos, tipo) {
+                console.log('Actualizando marcadores con datos:', datos, 'Tipo:', tipo);
+                
+                // Limpiar marcadores anteriores
+                Object.values(localidadMarkers).forEach(marker => {
+                    map.removeLayer(marker);
+                });
+                localidadMarkers = {};
+                
+                // Obtener nombre del tipo
+                const tipoNombre = {
+                    'operativos': 'Operativos',
+                    'comparendos': 'Comparendos',
+                    'sensibilizaciones': 'Sensibilizaciones'
+                }[tipo] || tipo;
+                
+                // Actualizar cada marcador con los datos
+                if (kmlLayer) {
+                    let counter = 1;
+                    kmlLayer.eachLayer(function(layer) {
+                        if (layer instanceof L.Polygon || layer instanceof L.MultiPolygon) {
+                            try {
+                                // Obtener el centro del polígono
+                                const center = layer.getBounds().getCenter();
+                                
+                                // Obtener nombre de la localidad según el número
+                                const localidadNombre = localidadesMap[counter] || `Polígono ${counter}`;
+                                const total = datos[localidadNombre] || 0;
+                                
+                                // Crear o actualizar marcador con el total
+                                const iconColor = total > 0 ? '#e4032e' : '#999999';
+                                const bgColor = total > 0 ? '#ffffff' : '#f5f5f5';
+                                
+                                const marker = L.marker(center, {
+                                    icon: L.divIcon({
+                                        className: 'polygon-label',
+                                        html: `<div style="background: ${bgColor}; border: 2px solid ${iconColor}; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 14px; color: ${iconColor}; text-align: center; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                                            <div style="font-size: 12px; margin-bottom: 2px;">${localidadNombre}</div>
+                                            <div style="font-size: 18px; font-weight: 700;">${total}</div>
+                                        </div>`,
+                                        iconSize: [200, 50],
+                                        iconAnchor: [100, 25]
+                                    })
+                                }).addTo(map);
+                                
+                                // Agregar popup con información
+                                marker.bindPopup(`
+                                    <div style="text-align: center; padding: 10px;">
+                                        <h3 style="margin: 0 0 10px 0; color: #e4032e;">${localidadNombre}</h3>
+                                        <p style="margin: 5px 0; font-size: 16px;">
+                                            <strong>${tipoNombre}:</strong> <span style="font-size: 20px; color: #e4032e; font-weight: bold;">${total}</span>
+                                        </p>
+                                    </div>
+                                `);
+                                
+                                localidadMarkers[localidadNombre] = marker;
+                                counter++;
+                            } catch (error) {
+                                console.error('Error al procesar polígono:', error);
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Función para cargar datos desde la API
+            async function cargarDatosPorTipo(tipo) {
+                try {
+                    console.log('Cargando datos para tipo:', tipo);
+                    const response = await fetch(`/api/acciones-residuos/por-localidad?tipo=${tipo}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        console.log('Datos recibidos:', data.datos);
+                        actualizarMarcadoresConDatos(data.datos, tipo);
+                        tipoActual = tipo;
+                    } else {
+                        console.error('Error en la respuesta:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                }
+            }
+            
+            // Manejar clics en los indicadores clickeables
+            document.querySelectorAll('.clickeable-indicator').forEach(indicator => {
+                indicator.addEventListener('click', function() {
+                    const tipo = this.getAttribute('data-tipo');
+                    
+                    // Remover clase active de todos los indicadores
+                    document.querySelectorAll('.clickeable-indicator').forEach(ind => {
+                        ind.classList.remove('active');
+                    });
+                    
+                    // Agregar clase active al indicador clickeado
+                    this.classList.add('active');
+                    
+                    // Cargar datos para este tipo
+                    cargarDatosPorTipo(tipo);
+                });
+            });
+            
+            if (typeof omnivore !== 'undefined') {
+                console.log('Cargando KML de localidades...');
+                kmlLayer = omnivore.kml(kmlUrl)
+                    .on('ready', function() {
+                        console.log('KML de localidades cargado exitosamente');
+                        
+                        // Enumerar cada polígono (solo mostrar nombres inicialmente)
+                        this.eachLayer(function(layer) {
+                            if (layer instanceof L.Polygon || layer instanceof L.MultiPolygon) {
+                                try {
+                                    // Obtener el centro del polígono
+                                    const center = layer.getBounds().getCenter();
+                                    
+                                    // Obtener nombre de la localidad según el número
+                                    const localidadNombre = localidadesMap[polygonCounter] || `Polígono ${polygonCounter}`;
+                                    
+                                    // Crear marcador inicial con solo el nombre
+                                    const marker = L.marker(center, {
+                                        icon: L.divIcon({
+                                            className: 'polygon-label',
+                                            html: '<div style="background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-red); border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 14px; color: var(--primary-red); text-align: center; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">' + localidadNombre + '</div>',
+                                            iconSize: [200, 40],
+                                            iconAnchor: [100, 20]
+                                        })
+                                    }).addTo(map);
+                                    
+                                    // Agregar popup con información del polígono
+                                    marker.bindPopup(`<b>${localidadNombre}</b>`);
+                                    
+                                    // Guardar marcador
+                                    localidadMarkers[localidadNombre] = marker;
+                                    
+                                    // Incrementar contador
+                                    polygonCounter++;
+                                } catch (error) {
+                                    console.error('Error al procesar polígono:', error);
+                                }
+                            }
+                        });
+                        
+                        // Ajustar vista del mapa a los límites del KML
+                        try {
+                            const bounds = kmlLayer.getBounds();
+                            if (bounds.isValid()) {
+                                map.fitBounds(bounds, { padding: [20, 20] });
+                                console.log('Mapa centrado en las localidades');
+                            }
+                        } catch (error) {
+                            console.log('No se pudieron obtener los límites del KML, usando vista por defecto');
+                        }
+                    })
+                    .on('error', function(error) {
+                        console.error('Error al cargar KML:', error);
+                    });
+                kmlLayer.addTo(map);
+            } else {
+                console.error('Librería omnivore no disponible');
+            }
+        });
+    </script>
+</body>
+</html>

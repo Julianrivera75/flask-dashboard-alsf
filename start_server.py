@@ -17,17 +17,19 @@ def open_browser():
 
 if __name__ == '__main__':
     print("============================================================")
-    print("🌱 SERVIDOR DE ENTORNOS INSPIRADORES")
+    print("🌱 SERVIDOR FLASK - ALSF")
     print("============================================================")
     print("🚀 Iniciando servidor Flask...")
-    print(f"📍 URL: http://localhost:5000/entornos-inspiradores")
     print(f"📍 URL Principal: http://localhost:5000/")
+    print(f"📍 URL Residuos: http://localhost:5000/acciones-residuos")
     print("============================================================")
     print("Presiona Ctrl+C para detener el servidor")
     print("============================================================")
+    print("NOTA: Apertura automática del navegador DESHABILITADA")
+    print("============================================================")
     
-    # Iniciar el navegador en un hilo separado
-    threading.Thread(target=open_browser).start()
+    # NO abrir el navegador automáticamente
+    # threading.Thread(target=open_browser).start()
     
     # Iniciar el servidor Flask
-    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=True)

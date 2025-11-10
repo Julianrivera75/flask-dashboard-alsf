@@ -72,6 +72,19 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.environ.get('SECRET_KEY', 'tu_clave_secreta_super_segura_2024_dev')
     
+    # Forzar recarga de templates en desarrollo
+    TEMPLATES_AUTO_RELOAD = True
+    SEND_FILE_MAX_AGE_DEFAULT = 0  # Deshabilitar caché de archivos estáticos
+    
+    # Base de datos independiente para acciones de residuos
+    # En desarrollo usa SQLite, en producción usará PostgreSQL de Railway
+    RESIDUOS_DATABASE_URI = os.environ.get('RESIDUOS_DATABASE_URL', 'sqlite:///residuos.db')
+    
+    # Configuración de múltiples bases de datos usando binds
+    SQLALCHEMY_BINDS = {
+        'residuos': os.environ.get('RESIDUOS_DATABASE_URL', 'sqlite:///residuos.db')
+    }
+    
     # Configuración de CSRF - Deshabilitado para sistema simple
     WTF_CSRF_ENABLED = False
     WTF_CSRF_TIME_LIMIT = 3600  # 1 hora en segundos
@@ -87,6 +100,14 @@ class ProductionConfig(Config):
     
     # Base de datos para 1000 acciones (existente en Railway)
     ACCIONES_1000_DATABASE_URI = os.environ.get('DATABASE_URL')
+    
+    # Base de datos independiente para acciones de residuos (nueva)
+    RESIDUOS_DATABASE_URI = os.environ.get('RESIDUOS_DATABASE_URL')
+    
+    # Configuración de múltiples bases de datos usando binds
+    SQLALCHEMY_BINDS = {
+        'residuos': os.environ.get('RESIDUOS_DATABASE_URL')
+    }
     
     SECRET_KEY = os.environ.get('SECRET_KEY', 'cambiar_en_produccion_por_clave_segura')
     

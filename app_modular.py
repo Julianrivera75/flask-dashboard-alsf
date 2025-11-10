@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from flask import Flask, render_template, jsonify, request, session, redirect, url_for, send_file
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for, send_file, flash
 import os
 import logging
 from datetime import datetime
@@ -52,6 +52,11 @@ def create_app(config_class=config.DevelopmentConfig):
     
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    # Forzar recarga de templates en desarrollo (sobrescribir si es necesario)
+    if app.config.get('DEBUG', False):
+        app.config['TEMPLATES_AUTO_RELOAD'] = True
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
     
     # Configuración para sesiones (necesario para autenticación)
     app.secret_key = 'tu_clave_secreta_super_segura_2024'
@@ -90,6 +95,19 @@ def create_app(config_class=config.DevelopmentConfig):
         
         # Crear tablas por defecto
         db.create_all()
+        
+        # Inicializar base de datos de acciones de residuos (independiente)
+        try:
+            from models.acciones_residuos import AccionResiduos
+            logger.info("Inicializando base de datos de acciones de residuos...")
+            # Crear tablas de residuos - Flask-SQLAlchemy detecta automáticamente el bind_key
+            # y crea las tablas en la base de datos correcta
+            db.create_all()
+            logger.info("Base de datos de acciones de residuos inicializada correctamente")
+        except Exception as e:
+            logger.error(f"Error inicializando base de datos de residuos: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
         
         # Inicializar datos básicos de reportes si es necesario (para Railway)
         # Comentado temporalmente para evitar bucle infinito
@@ -164,6 +182,127 @@ def create_app(config_class=config.DevelopmentConfig):
         except Exception as e:
             logger.error(f"Error en ruta principal: {str(e)}")
             return render_template('error.html', error=str(e)), 500
+    
+    @app.route('/acciones-residuos', methods=['GET', 'POST'])
+    def acciones_residuos():
+        """Ruta para la página de Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos"""
+        from forms.residuos_form import AccionResiduosForm
+        from models.acciones_residuos import AccionResiduos
+        from models.user import db
+        
+        form = AccionResiduosForm()
+        
+        # Obtener estadísticas para los indicadores
+        total_acciones = 0
+        fecha_ultima_accion = None
+        total_operativos = 0
+        total_comparendos = 0
+        total_sensibilizaciones = 0
+        
+        try:
+            from sqlalchemy import func
+            
+            total_acciones = AccionResiduos.query.count()
+            if total_acciones > 0:
+                ultima_accion = AccionResiduos.query.order_by(AccionResiduos.fecha_registro.desc()).first()
+                if ultima_accion:
+                    fecha_ultima_accion = ultima_accion.fecha_registro.strftime('%d/%m/%Y %H:%M') if ultima_accion.fecha_registro else None
+                
+                # Calcular totales sumando todos los registros
+                total_operativos = db.session.query(func.sum(AccionResiduos.numero_operativos)).scalar() or 0
+                total_comparendos = db.session.query(func.sum(AccionResiduos.numero_comparendos)).scalar() or 0
+                total_sensibilizaciones = db.session.query(func.sum(AccionResiduos.numero_sensibilizaciones)).scalar() or 0
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas: {e}")
+        
+        if form.validate_on_submit():
+            try:
+                # Crear nuevo registro
+                nueva_accion = AccionResiduos(
+                    localidad=form.localidad.data,
+                    numero_operativos=form.numero_operativos.data,
+                    numero_comparendos=form.numero_comparendos.data,
+                    numero_sensibilizaciones=form.numero_sensibilizaciones.data,
+                    fecha_operacion=form.fecha_operacion.data,
+                    usuario_registro=form.usuario_registro.data or None,
+                    observaciones=form.observaciones.data or None
+                )
+                
+                db.session.add(nueva_accion)
+                db.session.commit()
+                
+                logger.info(f"Acción de residuos registrada: {nueva_accion.localidad} - {nueva_accion.fecha_operacion}")
+                
+                # Redirigir para evitar reenvío del formulario
+                return redirect(url_for('acciones_residuos', success=True))
+                
+            except Exception as e:
+                logger.error(f"Error guardando acción de residuos: {e}")
+                db.session.rollback()
+                flash('Error al guardar la acción. Por favor intente nuevamente.', 'error')
+        
+        # Verificar si hay mensaje de éxito en la URL
+        success_message = request.args.get('success')
+        if success_message:
+            flash('Acción registrada exitosamente.', 'success')
+        
+        # Obtener todos los registros para la tabla (ordenados por fecha más reciente)
+        registros = []
+        try:
+            registros = AccionResiduos.query.order_by(AccionResiduos.fecha_registro.desc()).all()
+        except Exception as e:
+            logger.error(f"Error obteniendo registros: {e}")
+        
+        return render_template('pages/acciones_residuos.html', 
+                             form=form,
+                             total_acciones=total_acciones,
+                             fecha_ultima_accion=fecha_ultima_accion or 'No hay registros',
+                             total_operativos=total_operativos,
+                             total_comparendos=total_comparendos,
+                             total_sensibilizaciones=total_sensibilizaciones,
+                             registros=registros)
+    
+    @app.route('/api/acciones-residuos/por-localidad')
+    def acciones_residuos_por_localidad():
+        """API para obtener datos agregados por localidad según el tipo de acción"""
+        from models.acciones_residuos import AccionResiduos
+        from models.user import db
+        from sqlalchemy import func
+        
+        tipo = request.args.get('tipo', 'operativos')  # operativos, comparendos, sensibilizaciones
+        
+        try:
+            # Validar tipo
+            if tipo not in ['operativos', 'comparendos', 'sensibilizaciones']:
+                return jsonify({'error': 'Tipo inválido'}), 400
+            
+            # Mapear tipo a columna
+            tipo_columnas = {
+                'operativos': AccionResiduos.numero_operativos,
+                'comparendos': AccionResiduos.numero_comparendos,
+                'sensibilizaciones': AccionResiduos.numero_sensibilizaciones
+            }
+            
+            columna = tipo_columnas[tipo]
+            
+            # Agregar por localidad
+            resultados = db.session.query(
+                AccionResiduos.localidad,
+                func.sum(columna).label('total')
+            ).group_by(AccionResiduos.localidad).all()
+            
+            # Convertir a diccionario
+            datos = {localidad: int(total) for localidad, total in resultados}
+            
+            return jsonify({
+                'success': True,
+                'tipo': tipo,
+                'datos': datos
+            })
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo datos por localidad: {e}")
+            return jsonify({'error': str(e)}), 500
     
     def init_database():
         """Función para inicializar la base de datos de manera inteligente"""
@@ -439,7 +578,6 @@ def create_app(config_class=config.DevelopmentConfig):
         except Exception as e:
             logger.error(f"Error en página del convenio: {str(e)}")
             return render_template('error.html', error=str(e)), 500
-    
     
     @app.route('/formulario-georeferenciado')
     def formulario_georeferenciado():
