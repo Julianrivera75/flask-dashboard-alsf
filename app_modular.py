@@ -202,8 +202,9 @@ def create_app(config_class=config.DevelopmentConfig):
         try:
             from sqlalchemy import func
             
-            total_acciones = AccionResiduos.query.count()
-            if total_acciones > 0:
+            # Verificar si hay registros
+            num_registros = AccionResiduos.query.count()
+            if num_registros > 0:
                 ultima_accion = AccionResiduos.query.order_by(AccionResiduos.fecha_registro.desc()).first()
                 if ultima_accion:
                     fecha_ultima_accion = ultima_accion.fecha_registro.strftime('%d/%m/%Y %H:%M') if ultima_accion.fecha_registro else None
@@ -212,6 +213,9 @@ def create_app(config_class=config.DevelopmentConfig):
                 total_operativos = db.session.query(func.sum(AccionResiduos.numero_operativos)).scalar() or 0
                 total_comparendos = db.session.query(func.sum(AccionResiduos.numero_comparendos)).scalar() or 0
                 total_sensibilizaciones = db.session.query(func.sum(AccionResiduos.numero_sensibilizaciones)).scalar() or 0
+                
+                # Total de acciones realizadas = suma de los tres tipos
+                total_acciones = total_operativos + total_comparendos + total_sensibilizaciones
         except Exception as e:
             logger.error(f"Error obteniendo estadísticas: {e}")
         
@@ -261,6 +265,38 @@ def create_app(config_class=config.DevelopmentConfig):
                              total_comparendos=total_comparendos,
                              total_sensibilizaciones=total_sensibilizaciones,
                              registros=registros)
+    
+    @app.route('/api/acciones-residuos/eliminar/<int:registro_id>', methods=['DELETE', 'POST'])
+    def eliminar_accion_residuos(registro_id):
+        """Ruta para eliminar un registro de acciones de residuos"""
+        from models.acciones_residuos import AccionResiduos
+        from models.user import db
+        
+        try:
+            registro = AccionResiduos.query.get_or_404(registro_id)
+            
+            # Guardar información para el log
+            localidad = registro.localidad
+            fecha = registro.fecha_operacion
+            
+            # Eliminar el registro
+            db.session.delete(registro)
+            db.session.commit()
+            
+            logger.info(f"Registro de residuos eliminado: ID {registro_id} - {localidad} - {fecha}")
+            
+            return jsonify({
+                'success': True,
+                'message': 'Registro eliminado exitosamente'
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Error eliminando registro de residuos {registro_id}: {e}")
+            db.session.rollback()
+            return jsonify({
+                'success': False,
+                'error': f'Error al eliminar el registro: {str(e)}'
+            }), 500
     
     @app.route('/api/acciones-residuos/por-localidad')
     def acciones_residuos_por_localidad():

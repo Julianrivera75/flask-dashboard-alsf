@@ -5,10 +5,19 @@ Usa SQLAlchemy binds para separar de las otras bases de datos
 """
 from datetime import datetime, date
 from sqlalchemy import Column, Integer, String, Date, DateTime, Text, Index
+import pytz
 
 # Importar la instancia db principal (se inicializará en app_modular.py)
 # El modelo usará __bind_key__ para apuntar a la base de datos 'residuos'
 from .user import db
+
+def get_colombia_now():
+    """Obtener la hora actual de Colombia (Bogotá)"""
+    colombia_tz = pytz.timezone('America/Bogota')
+    utc_now = datetime.utcnow()
+    colombia_time = colombia_tz.fromutc(utc_now)
+    # Retornar sin timezone para compatibilidad con SQLAlchemy
+    return colombia_time.replace(tzinfo=None)
 
 # Lista de localidades válidas de Bogotá
 LOCALIDADES_VALIDAS = [
@@ -56,15 +65,15 @@ class AccionResiduos(db.Model):
     
     # Fechas
     fecha_operacion = Column(Date, nullable=False, index=True)  # Fecha de la operación/reporte
-    fecha_registro = Column(DateTime, default=datetime.now, nullable=False)  # Fecha de registro en sistema
+    fecha_registro = Column(DateTime, default=get_colombia_now, nullable=False)  # Fecha de registro en sistema (hora de Bogotá)
     
     # Campos opcionales
     usuario_registro = Column(String(100))  # Usuario que registró
     observaciones = Column(Text)  # Notas adicionales
     
-    # Timestamps automáticos
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    # Timestamps automáticos (hora de Bogotá)
+    created_at = Column(DateTime, default=get_colombia_now, nullable=False)
+    updated_at = Column(DateTime, default=get_colombia_now, onupdate=get_colombia_now, nullable=False)
     
     # Índices compuestos para búsquedas rápidas
     __table_args__ = (

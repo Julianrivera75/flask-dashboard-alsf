@@ -22,6 +22,42 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        /* Estilos para el botón de eliminar */
+        .btn-eliminar {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-eliminar:hover {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .btn-eliminar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-eliminar i {
+            margin-right: 0.3rem;
+        }
+        
+        /* Estilos para la columna de acciones */
+        table.registros-table th:last-child,
+        table.registros-table td:last-child {
+            text-align: center;
+            min-width: 120px;
+        }
+    </style>
 </head>
 <body>
     <!-- Botón hamburguesa flotante -->
@@ -64,7 +100,6 @@
             </div>
             <div class="header-title">
                 <h1>Acciones de Alcaldías Locales para mitigar la inadecuada disposición de residuos</h1>
-                <p>Alcaldía Local Santa Fe</p>
             </div>
             <div class="header-empty"></div>
         </div>
@@ -107,7 +142,7 @@
                         <i class="fas fa-recycle"></i>
                     </div>
                     <div class="indicator-content">
-                        <h3>Acciones Registradas</h3>
+                        <h3>Total de Acciones realizadas</h3>
                         <div class="indicator-value">
                             <span id="total-acciones">{{ total_acciones }}</span>
                         </div>
@@ -188,8 +223,16 @@
             <!-- FORMULARIO DE REGISTRO - VERSIÓN ACTUALIZADA -->
             <!-- Orden: Indicadores → Mapa → Formulario -->
             <!-- ============================================ -->
-            <!-- Formulario de Registro -->
-            <div class="form-container" style="margin-top: 3rem; background: #ffffff; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <!-- Botón para desplegar formulario -->
+            <div style="margin-top: 3rem; text-align: center;">
+                <button type="button" id="btn-registrar-accion" class="btn btn-primary btn-lg" style="padding: 1rem 2rem; font-size: 1.1rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <i class="fas fa-clipboard-list"></i> Registrar Nueva Acción
+                    <i class="fas fa-chevron-down" id="icon-chevron" style="margin-left: 0.5rem; transition: transform 0.3s ease;"></i>
+                </button>
+            </div>
+            
+            <!-- Formulario de Registro (oculto por defecto) -->
+            <div class="form-container" id="form-container" style="margin-top: 2rem; background: #ffffff; padding: 3rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none; transition: all 0.3s ease;">
                 <div class="form-header">
                     <h2><i class="fas fa-clipboard-list"></i> Registrar Nueva Acción</h2>
                     <p>Complete el formulario para registrar las acciones realizadas para mitigar la inadecuada disposición de residuos</p>
@@ -339,6 +382,7 @@
                                 <th>Usuario</th>
                                 <th>Fecha Registro</th>
                                 <th>Observaciones</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -360,6 +404,16 @@
                                     {% else %}
                                         -
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm btn-eliminar" 
+                                            data-id="{{ registro.id }}"
+                                            data-localidad="{{ registro.localidad }}"
+                                            data-fecha="{{ registro.fecha_operacion.strftime('%d/%m/%Y') if registro.fecha_operacion else '-' }}"
+                                            title="Eliminar registro">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                    </button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -436,8 +490,119 @@
             });
         }
 
-        // Inicializar mapa cuando el DOM esté listo
+        // Inicializar mapa y botón desplegable cuando el DOM esté listo
         document.addEventListener('DOMContentLoaded', function() {
+            // Script para el botón desplegable del formulario
+            const btnRegistrar = document.getElementById('btn-registrar-accion');
+            const formContainer = document.getElementById('form-container');
+            const iconChevron = document.getElementById('icon-chevron');
+            const formResiduos = document.getElementById('form-residuos');
+            
+            // Verificar si hay errores en el formulario para mostrarlo automáticamente
+            const hasErrors = formResiduos && formResiduos.querySelector('.is-invalid');
+            const hasFlashMessages = document.querySelector('.flash-messages');
+            
+            if (hasErrors || hasFlashMessages) {
+                // Mostrar formulario automáticamente si hay errores
+                if (formContainer) {
+                    formContainer.style.display = 'block';
+                    if (iconChevron) {
+                        iconChevron.style.transform = 'rotate(180deg)';
+                    }
+                    // Scroll al formulario
+                    setTimeout(() => {
+                        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            }
+            
+            if (btnRegistrar && formContainer) {
+                btnRegistrar.addEventListener('click', function() {
+                    const isVisible = formContainer.style.display !== 'none';
+                    
+                    if (isVisible) {
+                        // Ocultar formulario
+                        formContainer.style.display = 'none';
+                        if (iconChevron) {
+                            iconChevron.style.transform = 'rotate(0deg)';
+                        }
+                    } else {
+                        // Mostrar formulario
+                        formContainer.style.display = 'block';
+                        if (iconChevron) {
+                            iconChevron.style.transform = 'rotate(180deg)';
+                        }
+                        // Scroll suave al formulario
+                        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            }
+            
+            // Manejar eliminación de registros
+            document.querySelectorAll('.btn-eliminar').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const registroId = this.getAttribute('data-id');
+                    const localidad = this.getAttribute('data-localidad');
+                    const fecha = this.getAttribute('data-fecha');
+                    
+                    // Contraseña requerida para eliminar
+                    const PASSWORD_REQUIRED = '4116213';
+                    
+                    // Pedir contraseña
+                    const password = prompt(`Para eliminar este registro, ingrese la contraseña de administrador:\n\nLocalidad: ${localidad}\nFecha: ${fecha}\n\nEsta acción no se puede deshacer.`);
+                    
+                    // Validar contraseña
+                    if (password === null) {
+                        // Usuario canceló
+                        return;
+                    }
+                    
+                    if (password !== PASSWORD_REQUIRED) {
+                        alert('Contraseña incorrecta. No se puede eliminar el registro.');
+                        return;
+                    }
+                    
+                    // Confirmar eliminación después de validar contraseña
+                    if (!confirm(`¿Está seguro de que desea eliminar el registro?\n\nLocalidad: ${localidad}\nFecha: ${fecha}\n\nEsta acción no se puede deshacer.`)) {
+                        return;
+                    }
+                    
+                    // Deshabilitar botón durante la eliminación
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+                    
+                    // Realizar petición de eliminación
+                    fetch(`/api/acciones-residuos/eliminar/${registroId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Mostrar mensaje de éxito
+                            alert('Registro eliminado exitosamente.');
+                            // Recargar la página para actualizar la tabla y los indicadores
+                            window.location.reload();
+                        } else {
+                            // Mostrar error
+                            alert('Error al eliminar el registro: ' + (data.error || 'Error desconocido'));
+                            // Restaurar botón
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-trash-alt"></i> Eliminar';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar el registro. Por favor, intente nuevamente.');
+                        // Restaurar botón
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-trash-alt"></i> Eliminar';
+                    });
+                });
+            });
+            
             console.log('Inicializando mapa de residuos...');
             
             // Coordenadas de Bogotá (centro aproximado)
