@@ -2254,38 +2254,24 @@
 
         
 
-        // Eliminar duplicados basándose en la combinación de UPZ y otros campos únicos
-
+        // Eliminar duplicados basándose en el ID único (Columna A)
         const uniqueData = [];
-
         const seen = new Set();
-
         
-
         data.forEach(row => {
-
-            // Crear una clave única basada en UPZ y otros campos relevantes
-
-            const upz = row[6] || ''; // Columna G - UPZ
-
-            const timestamp = row[1] || ''; // Columna B - Timestamp
-
-            const uniqueKey = `${upz}_${timestamp}`;
-
+            // Usar el ID como clave única para no eliminar registros válidos con la misma fecha y UPZ
+            const id = row[0]; // Columna A - ID
+            const uniqueKey = id;
             
-
-            if (!seen.has(uniqueKey)) {
-
+            if (uniqueKey && !seen.has(uniqueKey)) {
                 seen.add(uniqueKey);
-
                 uniqueData.push(row);
-
+            } else if (!uniqueKey) {
+                // Si no tiene ID, lo agregamos de todas formas
+                uniqueData.push(row);
             } else {
-
-                console.log(`Duplicado eliminado: UPZ ${upz}, Timestamp ${timestamp}`);
-
+                console.log(`Duplicado eliminado: ID ${id}`);
             }
-
         });
 
         
@@ -2828,38 +2814,24 @@
 
         
 
-        // Eliminar duplicados basándose en la combinación de UPZ y otros campos únicos
-
+        // Eliminar duplicados basándose en el ID único (Columna A)
         const uniqueData = [];
-
         const seen = new Set();
-
         
-
         data.forEach(row => {
-
-            // Crear una clave única basada en UPZ y otros campos relevantes
-
-            const upz = row[6] || ''; // Columna G - UPZ
-
-            const timestamp = row[1] || ''; // Columna B - Timestamp
-
-            const uniqueKey = `${upz}_${timestamp}`;
-
+            // Usar el ID como clave única para no eliminar registros válidos con la misma fecha y UPZ
+            const id = row[0]; // Columna A - ID
+            const uniqueKey = id;
             
-
-            if (!seen.has(uniqueKey)) {
-
+            if (uniqueKey && !seen.has(uniqueKey)) {
                 seen.add(uniqueKey);
-
                 uniqueData.push(row);
-
+            } else if (!uniqueKey) {
+                // Si no tiene ID, lo agregamos de todas formas
+                uniqueData.push(row);
             } else {
-
-                console.log(`Duplicado eliminado BD2: UPZ ${upz}, Timestamp ${timestamp}`);
-
+                console.log(`Duplicado eliminado BD2: ID ${id}`);
             }
-
         });
 
         
